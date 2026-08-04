@@ -1,0 +1,10 @@
+name: Test Collection
+description: Test
+entity_id: g_IElpdRiVtx_B4tfzAvC
+slug: test_collection
+created_at: '2026-08-04T08:14:20.394927Z'
+serdes/meta:
+- id: g_IElpdRiVtx_B4tfzAvC
+  label: test_collection
+  model: Collection
+is_remote_synced: true
