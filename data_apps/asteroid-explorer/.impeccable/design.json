@@ -1,0 +1,498 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-23T16:12:01+00:00",
+  "title": "Design System: Asteroid Explorer",
+  "extensions": {
+    "colorMeta": {
+      "observer-ink": {
+        "role": "primary",
+        "displayName": "Observer's Blue-Black Ink",
+        "canonical": "#1f3a8a",
+        "oklch": "oklch(37.9% 0.137 266)",
+        "tonalRamp": [
+          "#040044",
+          "#071766",
+          "#1f3a8a",
+          "#3c5bae",
+          "#5b7ed4",
+          "#7ca2fb",
+          "#9fc6ff",
+          "#c3ecff"
+        ]
+      },
+      "selection-red": {
+        "role": "secondary",
+        "displayName": "Circling Red",
+        "canonical": "#c8321e",
+        "oklch": "oklch(54.9% 0.190 31)",
+        "tonalRamp": [
+          "#3b0000",
+          "#620000",
+          "#890000",
+          "#b02210",
+          "#d94c38",
+          "#ff725b",
+          "#ff977e",
+          "#ffbda2"
+        ]
+      },
+      "plate-glass": {
+        "role": "neutral",
+        "displayName": "Backlit Glass",
+        "canonical": "#e9ebe6",
+        "oklch": "oklch(93.7% 0.007 124)",
+        "tonalRamp": [
+          "#0a0c09",
+          "#242622",
+          "#41433f",
+          "#60625e",
+          "#81837f",
+          "#a4a6a1",
+          "#c8cac5",
+          "#edefea"
+        ]
+      },
+      "plate-glass-edge": {
+        "role": "neutral",
+        "displayName": "Glass Falloff",
+        "canonical": "#cdd3cc",
+        "oklch": "oklch(86.0% 0.012 141)",
+        "tonalRamp": [
+          "#090c08",
+          "#222721",
+          "#3f443e",
+          "#5e635d",
+          "#7f847e",
+          "#a1a7a0",
+          "#c5cbc4",
+          "#eaf1e9"
+        ]
+      },
+      "plate-glass-core": {
+        "role": "neutral",
+        "displayName": "Glass Core",
+        "canonical": "#f4f5f1",
+        "oklch": "oklch(96.8% 0.005 118)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#252522",
+          "#42423f",
+          "#61625e",
+          "#82837f",
+          "#a4a5a2",
+          "#c9cac6",
+          "#eeefeb"
+        ]
+      },
+      "speck": {
+        "role": "neutral",
+        "displayName": "Speck",
+        "canonical": "#16181a",
+        "oklch": "oklch(20.8% 0.005 248)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232527",
+          "#404245",
+          "#5f6164",
+          "#808385",
+          "#a3a5a8",
+          "#c7c9cc",
+          "#eceff2"
+        ]
+      },
+      "sun-burn": {
+        "role": "neutral",
+        "displayName": "Sun Burn",
+        "canonical": "#0f1112",
+        "oklch": "oklch(17.6% 0.004 229)",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#232527",
+          "#404244",
+          "#5f6263",
+          "#808384",
+          "#a3a5a7",
+          "#c7cacb",
+          "#eceff0"
+        ]
+      },
+      "pencil-graphite": {
+        "role": "neutral",
+        "displayName": "Pencil Graphite",
+        "canonical": "#8a908c",
+        "oklch": "oklch(64.7% 0.009 157)",
+        "tonalRamp": [
+          "#080c0a",
+          "#222623",
+          "#3e4340",
+          "#5d635f",
+          "#7e8480",
+          "#a1a7a3",
+          "#c5cbc7",
+          "#eaf0ec"
+        ]
+      },
+      "pencil-graphite-dark": {
+        "role": "neutral",
+        "displayName": "Dark Graphite",
+        "canonical": "#4a4f4c",
+        "oklch": "oklch(42.2% 0.008 160)",
+        "tonalRamp": [
+          "#080c0a",
+          "#222624",
+          "#3e4340",
+          "#5d6360",
+          "#7e8481",
+          "#a1a7a3",
+          "#c5cbc7",
+          "#eaf0ec"
+        ]
+      },
+      "label-wash": {
+        "role": "neutral",
+        "displayName": "Label Wash",
+        "canonical": "rgba(233, 235, 230, 0.82)",
+        "oklch": "oklch(93.7% 0.007 124)",
+        "tonalRamp": [
+          "#0a0c09",
+          "#242622",
+          "#41433f",
+          "#60625e",
+          "#81837f",
+          "#a4a6a1",
+          "#c8cac5",
+          "#edefea"
+        ]
+      },
+      "sleeve-stock": {
+        "role": "neutral",
+        "displayName": "Sleeve Stock",
+        "canonical": "#f6f3ea",
+        "oklch": "oklch(96.4% 0.012 92)",
+        "tonalRamp": [
+          "#0d0b06",
+          "#27251e",
+          "#44423b",
+          "#646159",
+          "#85827a",
+          "#a8a59c",
+          "#ccc9c0",
+          "#f1eee5"
+        ]
+      },
+      "sleeve-stock-edge": {
+        "role": "neutral",
+        "displayName": "Stock Edge",
+        "canonical": "#e4ded0",
+        "oklch": "oklch(90.2% 0.020 88)",
+        "tonalRamp": [
+          "#0f0b03",
+          "#29251a",
+          "#464236",
+          "#666155",
+          "#878275",
+          "#aaa597",
+          "#cfc9bb",
+          "#f4eee0"
+        ]
+      },
+      "sleeve-rule": {
+        "role": "neutral",
+        "displayName": "Sleeve Rule",
+        "canonical": "#d3ccbb",
+        "oklch": "oklch(84.6% 0.024 88)",
+        "tonalRamp": [
+          "#0f0a02",
+          "#2a2417",
+          "#474133",
+          "#676152",
+          "#888272",
+          "#aba594",
+          "#d0c9b8",
+          "#f5eedd"
+        ]
+      },
+      "field-paper": {
+        "role": "neutral",
+        "displayName": "Field Paper",
+        "canonical": "#fffdf7",
+        "oklch": "oklch(99.4% 0.008 91)",
+        "tonalRamp": [
+          "#0c0b07",
+          "#262521",
+          "#43423d",
+          "#63615c",
+          "#84827d",
+          "#a7a59f",
+          "#cbc9c3",
+          "#f0eee8"
+        ]
+      },
+      "sleeve-text": {
+        "role": "neutral",
+        "displayName": "Sleeve Text",
+        "canonical": "#23262a",
+        "oklch": "oklch(26.7% 0.009 256)",
+        "tonalRamp": [
+          "#090b0f",
+          "#222529",
+          "#3f4247",
+          "#5e6166",
+          "#7f8388",
+          "#a1a5aa",
+          "#c5c9cf",
+          "#ebeff4"
+        ]
+      },
+      "sleeve-text-soft": {
+        "role": "neutral",
+        "displayName": "Soft Text",
+        "canonical": "#565b61",
+        "oklch": "oklch(46.9% 0.012 253)",
+        "tonalRamp": [
+          "#080b10",
+          "#21252b",
+          "#3e4248",
+          "#5d6268",
+          "#7e8389",
+          "#a0a6ac",
+          "#c4cad1",
+          "#e9eff6"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Plate Hand",
+        "purpose": "The plate title only, lettered in ink on the glass. 30px under 860px."
+      },
+      "headline": {
+        "displayName": "Odometer",
+        "purpose": "The live distance numeral in a sleeve, with rolling digits."
+      },
+      "title": {
+        "displayName": "Sleeve Name",
+        "purpose": "The asteroid's name at the head of its sleeve."
+      },
+      "title-section": {
+        "displayName": "Typed Heading",
+        "purpose": "Sleeve section headings and the search prompt."
+      },
+      "body": {
+        "displayName": "Plain Words",
+        "purpose": "Plain-language facts in sleeves. The plate caption uses 14.5px/1.55."
+      },
+      "body-soft": {
+        "displayName": "Caveat",
+        "purpose": "Caveats, sources and how-to-read lines in soft text."
+      },
+      "label-stamp": {
+        "displayName": "Date Stamp",
+        "purpose": "The plate's date stamp under the title."
+      },
+      "label": {
+        "displayName": "Typed Label",
+        "purpose": "Rail buttons, chips, the sleeve's typed header line and planet names."
+      },
+      "label-axis": {
+        "displayName": "Axis",
+        "purpose": "Rail year labels and the mark letters over ticks."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sleeve-lift",
+        "value": "0 1px 2px rgba(40, 36, 28, 0.10), 0 10px 24px -12px rgba(40, 36, 28, 0.35)",
+        "purpose": "The only elevation: plate sleeves and the search card. No border alongside."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-paper",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Shared easing for sleeve entry and odometer digits."
+      },
+      {
+        "name": "sleeve-in",
+        "value": "520ms ease-paper; from translateX(28px) blur(3px) opacity 0",
+        "purpose": "A sleeve slides onto the stack. Turned off under prefers-reduced-motion."
+      },
+      {
+        "name": "odometer-roll",
+        "value": "420ms ease-paper",
+        "purpose": "Distance digits roll as the plate date changes."
+      },
+      {
+        "name": "blink-interval",
+        "value": "520ms",
+        "purpose": "BLINK alternates plate A and plate B (+30 days)."
+      },
+      {
+        "name": "camera-frame",
+        "value": "1100ms ease-out-quart",
+        "purpose": "Camera eases out to frame every circled orbit when the selection grows."
+      },
+      {
+        "name": "needle",
+        "value": "left 60ms linear",
+        "purpose": "The plate-date needle on the rail follows scrubbing."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "stack",
+        "value": "860px",
+        "purpose": "At or below this width, the plate becomes a 64vh block and the rail and sleeves stack below it."
+      }
+    ],
+    "lineForms": [
+      {
+        "name": "selected-orbit",
+        "value": "solid ink, 2.2px",
+        "purpose": "Orbit of a circled asteroid."
+      },
+      {
+        "name": "sight-line",
+        "value": "dashed ink, 1.2px",
+        "purpose": "Earth to a circled asteroid."
+      },
+      {
+        "name": "blink-trail",
+        "value": "dashed ink, 3.2px",
+        "purpose": "How far a circled asteroid moves between blink plates."
+      },
+      {
+        "name": "planet-orbit",
+        "value": "dashed graphite at 0.7 opacity (Earth in ink)",
+        "purpose": "Context pencil."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Rail Button",
+      "kind": "button",
+      "refersTo": "rail-button",
+      "description": "Typed uppercase switch on the time rail (BLINK, TODAY).",
+      "html": "<button class=\"ds-rail-btn\" aria-pressed=\"false\">TODAY</button>",
+      "css": ".ds-rail-btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid #8a908c;border-radius:3px;background:rgba(246,243,234,.9);color:#1f3a8a;font-family:\"Courier Prime\",\"Courier New\",monospace;font-size:12px;letter-spacing:.06em;cursor:pointer}.ds-rail-btn:hover{border-color:#1f3a8a}.ds-rail-btn:focus-visible{outline:2px solid #1f3a8a;outline-offset:2px}"
+    },
+    {
+      "name": "Rail Button (pressed)",
+      "kind": "button",
+      "refersTo": "rail-button-pressed",
+      "description": "Toggled rail control: running time or BLINK on.",
+      "html": "<button class=\"ds-rail-btn-on\" aria-pressed=\"true\">BLINK</button>",
+      "css": ".ds-rail-btn-on{display:inline-flex;align-items:center;height:30px;padding:0 12px;border:1px solid #1f3a8a;border-radius:3px;background:#1f3a8a;color:#f6f3ea;font-family:\"Courier Prime\",\"Courier New\",monospace;font-size:12px;letter-spacing:.06em;cursor:pointer}.ds-rail-btn-on:focus-visible{outline:2px solid #1f3a8a;outline-offset:2px}"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "search-input",
+      "description": "Look up any near-Earth asteroid by name or designation.",
+      "html": "<label class=\"ds-search\"><span>Look up any near-Earth asteroid</span><input placeholder=\"Name or designation\"></label>",
+      "css": ".ds-search{display:grid;gap:6px;padding:14px 16px 16px;background:#f6f3ea;border-radius:4px;box-shadow:0 1px 2px rgba(40,36,28,.10),0 10px 24px -12px rgba(40,36,28,.35)}.ds-search span{font-family:\"Courier Prime\",\"Courier New\",monospace;font-size:13px;font-weight:700;color:#1f3a8a}.ds-search input{height:38px;padding:0 12px;border:1px solid #d3ccbb;border-radius:3px;background:#fffdf7;color:#23262a;caret-color:#1f3a8a;font-family:\"Atkinson Hyperlegible\",\"Segoe UI\",system-ui,sans-serif;font-size:15px}.ds-search input::placeholder{color:#565b61}.ds-search input:focus-visible{outline:2px solid #1f3a8a;outline-offset:2px}"
+    },
+    {
+      "name": "Suggestion Chip",
+      "kind": "chip",
+      "refersTo": "suggestion-chip",
+      "description": "Dashed, not-yet-chosen suggestion that fills the search.",
+      "html": "<button class=\"ds-chip\">Apophis</button>",
+      "css": ".ds-chip{padding:4px 10px;border:1px dashed #8a908c;border-radius:3px;background:transparent;color:#1f3a8a;font-family:\"Courier Prime\",\"Courier New\",monospace;font-size:12px;cursor:pointer}.ds-chip:hover{background:#e4ded0}.ds-chip:focus-visible{outline:2px solid #1f3a8a;outline-offset:2px}"
+    },
+    {
+      "name": "Plate Sleeve",
+      "kind": "card",
+      "refersTo": "plate-sleeve",
+      "description": "Card-stock envelope for one circled asteroid: typed label, red mark, odometer distance, ruled sections.",
+      "html": "<article class=\"ds-sleeve\"><div class=\"ds-sleeve-label\"><span>Plate 23 Sept 2026 · mark <b>A</b></span><span>No. 99942</span></div><header class=\"ds-sleeve-head\"><span class=\"ds-mark\">A</span><div><h2>99942 Apophis</h2><div class=\"ds-sub\"><span>2004 MN4 · </span>Potentially hazardous asteroid</div></div></header><p class=\"ds-dist\"><strong>627.1</strong> × the Moon's distance from Earth</p><section><h3>How big</h3><p>340 m across, about the size of the Eiffel Tower.</p></section></article>",
+      "css": ".ds-sleeve{display:grid;gap:14px;width:360px;padding:22px 20px 20px;background:#f6f3ea;border-radius:4px;box-shadow:0 1px 2px rgba(40,36,28,.10),0 10px 24px -12px rgba(40,36,28,.35);color:#23262a;font-family:\"Atkinson Hyperlegible\",\"Segoe UI\",system-ui,sans-serif;}.ds-sleeve-label{display:flex;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid #d3ccbb;font-family:\"Courier Prime\",\"Courier New\",monospace;font-size:12px;color:#565b61}.ds-sleeve-label b{color:#c8321e}.ds-sleeve-head{display:flex;gap:12px;align-items:flex-start}.ds-mark{flex:none;width:30px;height:30px;border-radius:50%;border:1.8px solid #c8321e;display:grid;place-items:center;font-family:\"Courier Prime\",\"Courier New\",monospace;font-weight:700;color:#c8321e}.ds-sleeve h2{margin:0;font-family:\"Courier Prime\",\"Courier New\",monospace;font-size:20px;font-weight:700;letter-spacing:-.01em}.ds-sub{font-size:13.5px;color:#565b61}.ds-sub span{font-family:\"Courier Prime\",\"Courier New\",monospace;color:#1f3a8a}.ds-dist{margin:0;color:#1f3a8a;font-size:15px}.ds-dist strong{font-family:\"Courier Prime\",\"Courier New\",monospace;font-size:34px;font-variant-numeric:tabular-nums;margin-right:8px}.ds-sleeve section{display:grid;gap:6px;padding-top:14px;border-top:1px solid #d3ccbb}.ds-sleeve h3{margin:0;font-family:\"Courier Prime\",\"Courier New\",monospace;font-size:14px;font-weight:700;color:#1f3a8a}.ds-sleeve section p{margin:0;font-size:15.5px;line-height:1.45}"
+    },
+    {
+      "name": "Selection Mark",
+      "kind": "custom",
+      "refersTo": "selection-mark",
+      "description": "Red ring, mark letter and inked name around a circled speck on the plate.",
+      "html": "<div class=\"ds-selmark\"><span class=\"ds-speck\"></span><svg width=\"44\" height=\"44\" viewBox=\"-22 -22 44 44\"><circle r=\"15\" fill=\"none\" stroke=\"#c8321e\" stroke-width=\"1.8\"/></svg><b>A</b><i>99942 Apophis (2004 MN4)</i></div>",
+      "css": ".ds-selmark{position:relative;width:260px;height:70px;background:#e9ebe6;font-family:\"Courier Prime\",\"Courier New\",monospace;}.ds-selmark svg{position:absolute;left:18px;top:13px}.ds-speck{position:absolute;left:38px;top:33px;width:4px;height:4px;border-radius:50%;background:#16181a}.ds-selmark b{position:absolute;left:59px;top:9px;font-size:13px;color:#c8321e}.ds-selmark i{position:absolute;left:59px;top:45px;font-style:normal;font-size:12px;color:#1f3a8a;background:rgba(233,235,230,.82);padding:0 3px;white-space:nowrap}"
+    },
+    {
+      "name": "Time Rail",
+      "kind": "custom",
+      "refersTo": "time-rail",
+      "description": "Calibrated graphite hairline; ink ticks for close passes (taller = closer, dashed = past), red mark letters, ink needle for the plate date.",
+      "html": "<div class=\"ds-rail\"><div class=\"ds-rail-line\"></div><span class=\"ds-tick\" style=\"left:30%;height:18px\"><b>A</b></span><span class=\"ds-tick ds-past\" style=\"left:12%;height:10px\"><b>B</b></span><span class=\"ds-needle\" style=\"left:48%\"></span><span class=\"ds-yr\" style=\"left:20%\">2020</span><span class=\"ds-yr\" style=\"left:60%\">2040</span></div>",
+      "css": ".ds-rail{position:relative;width:420px;height:58px;background:#e9ebe6;font-family:\"Courier Prime\",\"Courier New\",monospace;}.ds-rail-line{position:absolute;left:0;right:0;bottom:16px;height:1px;background:#4a4f4c}.ds-tick{position:absolute;bottom:17px;border-left:1.5px solid #1f3a8a}.ds-tick.ds-past{border-left-style:dashed}.ds-tick b{position:absolute;bottom:100%;left:-4px;font-size:10px;color:#c8321e}.ds-needle{position:absolute;bottom:12px;width:2px;height:46px;background:#1f3a8a}.ds-yr{position:absolute;bottom:0;transform:translateX(-50%);font-size:10px;color:#4a4f4c}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Discovery Plate",
+    "overview": "Asteroids were found by comparing two glass photographic plates of the same patch of sky, and looking for the dots that had moved. The app is that observatory light box, running live. The whole screen is a pale backlit negative: asteroids print as dark specks, the Sun as a dark burned disc, and planet orbits as graphite pencil. An observer has worked on this plate in two inks: blue-black for annotations and red for circling a find. The data sits in plate sleeves, off-white card-stock envelopes with typed labels, stacked at the plate's right edge.\n\nThe world deliberately turns down the usual glowing-dark-space viewer with a data sidebar. Depth comes from paper and light, not from glow. The plate is dense (about 2,549 specks), and everything else is sparse and legible, so the page reads like a working astronomer's desk rather than a dashboard. BLINK is the signature move. It swaps the plate between two dates 30 days apart, so the asteroids jump while the planets barely move.",
+    "keyCharacteristics": [
+      "A light-box negative: pale milky glass with a soft vignette, dark objects, no glow anywhere.",
+      "Two inks. Blue-black annotates and red circles. Graphite pencil carries context.",
+      "Three voices: the observer's handwriting on the glass, typed labels for every measurement and heading, and hyperlegible prose for explanations.",
+      "Card-stock sleeves are the only raised surfaces.",
+      "Solid means present and chosen. Dashed means past, reference, or provisional."
+    ],
+    "rules": [
+      {
+        "name": "The Red Ink Rule",
+        "body": "Red marks a selection and does nothing else. Warnings, danger, errors, emphasis, hover and pressed states never use it. If red appears somewhere nothing is circled, it is a bug.",
+        "section": "colors"
+      },
+      {
+        "name": "The Negative Rule",
+        "body": "Objects print dark on pale glass. No light-on-dark, no bloom, no glow halos. Brightness means empty glass.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Inks Rule",
+        "body": "Anything the observer wrote uses blue-black ink, and anything the sky or the instrument supplies uses graphite. New annotation colors don't get added. A new meaning goes into line form (solid, dashed, dotted) or type voice instead.",
+        "section": "colors"
+      },
+      {
+        "name": "The Typed Record Rule",
+        "body": "Numbers, designations, dates, headings and control labels are typed in Courier Prime. Sentences that explain something are in Atkinson. The hand appears once, in the plate title.",
+        "section": "typography"
+      },
+      {
+        "name": "The Inlined Face Rule",
+        "body": "Every face ships inside the bundle as an `@font-face` rule with a base64 `data:` URL, injected through a `<style>` element. The Metabase data-app sandbox blocks network fetches and the FontFace API, so a font that isn't inlined falls back to the system face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Declared-Once Rule",
+        "body": "A raised surface gets the sleeve shadow or nothing. Never add a border on top of it, stack a second shadow, or invent an in-between elevation step.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Specks-Only Rule",
+        "body": "Unselected asteroids get a speck and nothing else. Their orbits are never drawn, because 2,549 dashed ellipses would bury the plate. An asteroid's orbit is drawn only after it's circled, in solid ink (2.2px).",
+        "section": "shapes"
+      },
+      {
+        "name": "The Past-Is-Dashed Rule",
+        "body": "On any mark that exists in both a solid and a dashed form, dashed means already happened, only a reference, or not the real thing yet. Don't use dashing as decoration.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** keep red for selection marks alone: rings, mark letters, and the mark on sleeve labels and rail ticks.",
+      "**Do** print new sky objects dark on the glass, as grain sprites or ink lines, and put a label wash behind any text written on the plate.",
+      "**Do** type every measurement, designation, date and heading in Courier Prime, and write explanations in Atkinson Hyperlegible.",
+      "**Do** tell present from past or reference by line form, solid versus dashed, and not by adding colors.",
+      "**Do** raise card stock only with the sleeve lift, and keep corners at 4px (cards), 3px (controls) or 2px (rail).",
+      "**Do** inline any new font as an `@font-face` data URL, and mount any new canvas inside a shadow root."
+    ],
+    "donts": [
+      "**Don't** draw orbits for unselected asteroids. The population is specks only.",
+      "**Don't** use red for danger, warnings, errors or emphasis. Honest risk wording is plain ink prose.",
+      "**Don't** add glow, bloom, light-on-dark space backgrounds or neon accents. The plate is a negative.",
+      "**Don't** give a raised surface a border as well as its shadow, or add a second elevation level.",
+      "**Don't** use the handwritten face anywhere but the plate title.",
+      "**Don't** load fonts or assets from the network, or register them through the FontFace API. The sandbox blocks both."
+    ]
+  }
+}

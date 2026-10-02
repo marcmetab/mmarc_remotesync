@@ -1,0 +1,204 @@
+/* Race Replay HUD: a tilted 3D circuit with broadcast panels over it. */
+.hud {
+  --hud-font: "Barlow Condensed", "Titillium Web", system-ui, sans-serif;
+  --hud-panel: rgba(8, 10, 14, 0.85);
+  --hud-line: #1A202B;
+  --hud-muted: #6B7487;
+  --hud-dim: #98A1B3;
+  --hud-soft: #C9CFDB;
+  position: relative;
+  height: clamp(600px, calc(100vh - 230px), 960px);
+  overflow: hidden;
+  border: 1px solid #212936;
+  border-radius: 12px;
+  background: radial-gradient(ellipse 110% 60% at 50% 4%, #18233A 0%, #0B0F17 48%, #06080C 100%);
+  color: #FFFFFF;
+  font-family: var(--hud-font);
+  font-style: italic;
+  font-weight: 700;
+  user-select: none;
+}
+.hud, .hud * { box-sizing: border-box; }
+.hud button { font-family: var(--hud-font); font-style: italic; font-weight: 700; }
+.hud button:focus-visible, .hud [role="slider"]:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
+.hud h2 { margin: 0; font-family: var(--hud-font); }
+
+.hud-world { position: absolute; inset: 0; }
+.hud-world-stage { position: absolute; inset: 0; touch-action: none; }
+.hud-world-stage.is-chase { cursor: grab; }
+.hud-world-stage.is-chase.is-orbiting { cursor: grabbing; }
+.hud-world-svg { position: absolute; left: 0; top: 0; display: block; }
+.hud-world-labels { position: absolute; inset: 0; pointer-events: none; }
+.hud-car { cursor: pointer; }
+.hud-world-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--hud-dim); font-size: 18px; letter-spacing: 1.4px; text-transform: uppercase; }
+.hud-car { cursor: pointer; }
+
+.hud-gate-label { position: absolute; transform: translate(-50%, -100%); font-size: 13px; letter-spacing: 1px; }
+.hud-car-num { position: absolute; transform: translate(-50%, -100%); font-size: 12px; color: #C3CAD6; text-shadow: 0 0 4px #06080C; }
+.hud-tag {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 6px));
+  display: flex;
+  align-items: stretch;
+  height: 20px;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+.hud-tag-pos { padding: 0 5px; display: flex; align-items: center; background: #FFFFFF; color: #06080C; font-size: 14px; font-weight: 800; }
+.hud-tag-name { padding: 0 7px; display: flex; align-items: center; gap: 6px; background: rgba(8, 10, 14, 0.92); border-left: 3px solid; font-size: 14px; letter-spacing: 0.6px; }
+.hud-tag-name span { font-weight: 600; }
+
+.hud-caption { font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: var(--hud-muted); text-transform: uppercase; }
+.hud-value { font-size: 22px; letter-spacing: 0.5px; }
+.hud-cell { display: flex; flex-direction: column; padding: 6px 10px; background: var(--hud-panel); }
+
+/* Race order */
+.hud-order { position: absolute; left: 18px; top: 18px; width: 214px; display: flex; flex-direction: column; max-height: calc(100% - 290px); }
+.hud-order-head { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 6px; }
+.hud-order-head .hud-caption { font-size: 14px; letter-spacing: 1.6px; color: var(--hud-dim); }
+.hud-chip-btn { border: 1px solid #2A3240; background: rgba(8, 10, 14, 0.7); color: var(--hud-soft); border-radius: 4px; padding: 2px 8px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+.hud-order-rows { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; scrollbar-width: none; padding-right: 6px; }
+.hud-order-row {
+  position: relative;
+  height: 25px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px 0 8px;
+  border: 0;
+  background: transparent;
+  color: #FFFFFF;
+  cursor: pointer;
+  text-align: left;
+}
+.hud-order-row::before { content: ""; position: absolute; inset: 0; transform: skewX(-14deg); background: rgba(8, 10, 14, 0.82); border-left: 4px solid var(--hud-team); }
+.hud-order-row:hover::before { background: rgba(30, 36, 48, 0.92); }
+.hud-order-row.is-followed::before { background: #FFFFFF; }
+.hud-order-row.is-appended { margin-top: 8px; }
+.hud-order-row > span { position: relative; }
+.hud-order-pos { width: 20px; text-align: right; font-size: 17px; font-weight: 800; color: var(--hud-dim); }
+.hud-order-abbr { font-size: 17px; letter-spacing: 0.8px; }
+.hud-order-tyre { width: 7px; height: 7px; border-radius: 50%; }
+.hud-order-gap { margin-left: auto; font-size: 15px; font-weight: 600; color: var(--hud-soft); white-space: nowrap; }
+.hud-order-gap.is-pit { color: #F59E0B; }
+.hud-order-row.is-followed .hud-order-pos,
+.hud-order-row.is-followed .hud-order-abbr,
+.hud-order-row.is-followed .hud-order-gap { color: #06080C; }
+
+/* Lap counter and track status */
+.hud-lap { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+.hud-lap-count { display: flex; align-items: baseline; gap: 8px; padding: 2px 22px 4px; background: linear-gradient(90deg, transparent, rgba(8, 10, 14, 0.85) 20%, rgba(8, 10, 14, 0.85) 80%, transparent); }
+.hud-lap-word { font-size: 18px; letter-spacing: 2px; color: var(--hud-dim); }
+.hud-lap-num { font-size: 48px; font-weight: 800; line-height: 1; }
+.hud-lap-total { font-size: 22px; color: var(--hud-muted); }
+.hud-lap-bar { width: 180px; height: 3px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+.hud-lap-bar > div { height: 100%; background: #E10600; }
+.hud-status { display: flex; align-items: center; padding: 4px 14px; transform: skewX(-12deg); border: 1px solid; }
+.hud-status span { transform: skewX(12deg); font-size: 14px; font-weight: 800; letter-spacing: 1.6px; white-space: nowrap; }
+
+/* Followed car */
+.hud-focus { position: absolute; right: 18px; top: 18px; width: 264px; display: flex; flex-direction: column; gap: 8px; }
+.hud-focus-id { display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 10px; border-left: 4px solid; }
+.hud-focus-pos { font-size: 40px; font-weight: 800; line-height: 1; }
+.hud-focus-name { display: flex; flex-direction: column; min-width: 0; }
+.hud-focus-name strong { font-size: 20px; letter-spacing: 1px; line-height: 1.05; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud-focus-name span { font-size: 14px; font-weight: 600; letter-spacing: 0.6px; color: var(--hud-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud-focus-laps { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.hud-focus-sectors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.hud-sector { gap: 4px; padding: 6px 8px; }
+.hud-sector-bar { height: 4px; }
+.hud-sector-value { font-size: 16px; }
+.hud-focus-fastest { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: linear-gradient(90deg, rgba(177, 75, 244, 0.3), rgba(8, 10, 14, 0.85)); }
+.hud-focus-fastest .hud-caption { color: #D8B4FE; }
+.hud-focus-fastest > span:last-child { font-size: 18px; color: #C084FC; }
+
+/* Weather */
+.hud-weather { position: absolute; left: 18px; bottom: 18px; width: 214px; padding: 12px; background: var(--hud-panel); border-top: 2px solid #22D3EE; display: flex; flex-direction: column; gap: 10px; }
+.hud-weather-wind { display: flex; align-items: center; gap: 12px; }
+.hud-compass { position: relative; width: 84px; height: 84px; flex-shrink: 0; border-radius: 50%; border: 1px solid #2A3240; background: radial-gradient(circle, #0E141E, #080A0E); font-size: 11px; color: var(--hud-muted); }
+.hud-compass > span { position: absolute; }
+.hud-compass .n { left: 50%; top: 3px; transform: translateX(-50%); }
+.hud-compass .e { right: 5px; top: 50%; transform: translateY(-50%); }
+.hud-compass .s { left: 50%; bottom: 3px; transform: translateX(-50%); }
+.hud-compass .w { left: 5px; top: 50%; transform: translateY(-50%); }
+.hud-compass-arrow { position: absolute; inset: 14px; display: flex; justify-content: center; }
+.hud-compass-arrow span { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 26px solid #22D3EE; }
+.hud-weather-windval { display: flex; flex-direction: column; }
+.hud-weather-big { font-size: 30px; font-weight: 800; line-height: 1; }
+.hud-weather-big small, .hud-dash-speed small { font-size: 15px; color: var(--hud-dim); }
+.hud-weather-cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.hud-weather-cells .hud-cell { padding: 0; background: none; }
+.hud-weather-cells .hud-caption { font-size: 11px; letter-spacing: 1.2px; }
+.hud-weather-cells .hud-value { font-size: 19px; }
+.hud-rain { padding: 4px 8px; background: #10141B; font-size: 13px; letter-spacing: 1.2px; color: var(--hud-muted); }
+.hud-rain.is-wet { background: rgba(59, 130, 246, 0.2); color: #93C5FD; }
+
+/* Dash */
+.hud-dash { position: absolute; right: 18px; bottom: 18px; width: 300px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 14px 14px; background: radial-gradient(ellipse at 50% 60%, rgba(20, 26, 38, 0.92), rgba(8, 10, 14, 0.9)); }
+.hud-leds { display: flex; gap: 4px; }
+.hud-leds span { width: 12px; height: 12px; border-radius: 50%; transition: background 80ms linear; }
+.hud-dash-main { display: flex; align-items: center; gap: 14px; }
+.hud-dash-bar { width: 12px; height: 118px; background: #161B25; display: flex; flex-direction: column; justify-content: flex-end; }
+.hud-dash-bar > div { transition: height 80ms linear; }
+.hud-dash-gauge { position: relative; width: 176px; height: 150px; }
+.hud-dash-gauge svg { position: absolute; left: 0; top: 0; width: 176px; height: 176px; }
+.hud-dash-readout { position: absolute; left: 0; right: 0; top: 22px; display: flex; flex-direction: column; align-items: center; }
+.hud-dash-gear { font-size: 76px; font-weight: 800; line-height: 0.9; }
+.hud-dash-speed { font-size: 26px; line-height: 1; }
+.hud-dash-speed small { font-size: 13px; letter-spacing: 1px; }
+.hud-dash-chips { display: flex; gap: 6px; width: 100%; }
+.hud-dash-chips span { flex: 1; text-align: center; padding: 3px 0; font-size: 13px; font-weight: 800; letter-spacing: 1.2px; background: #161B25; color: var(--hud-muted); white-space: nowrap; }
+.hud-dash-chips span:first-child { font-weight: 700; color: var(--hud-dim); }
+.hud-dash-chips .is-drs { background: #22C55E; color: #06080C; }
+.hud-dash-chips .is-brake { background: #E8002D; color: #FFFFFF; }
+
+/* Camera + transport */
+.hud-transport { position: absolute; left: 252px; right: 338px; bottom: 18px; display: flex; flex-direction: column; gap: 8px; }
+.hud-cams { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.hud-seg { display: flex; gap: 2px; padding: 2px; background: var(--hud-panel); border: 1px solid #212936; }
+.hud-seg button { border: 0; cursor: pointer; padding: 5px 14px; font-size: 13px; letter-spacing: 1.4px; background: transparent; color: var(--hud-dim); white-space: nowrap; }
+.hud-seg button[aria-pressed="true"] { background: #FFFFFF; color: #06080C; }
+.hud-hint { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--hud-muted); text-transform: uppercase; }
+.hud-controls { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--hud-panel); border: 1px solid var(--hud-line); }
+.hud-play { width: 34px; height: 30px; flex-shrink: 0; border: 0; transform: skewX(-12deg); background: #E10600; color: #FFFFFF; font-size: 12px; cursor: pointer; }
+.hud-strip { flex: 1; min-width: 0; height: 30px; display: flex; align-items: center; gap: 2px; cursor: pointer; touch-action: none; }
+.hud-strip-cell { flex: 1; min-width: 0; transform: skewX(-14deg); }
+.hud-strip-cell.is-played { height: 16px; }
+.hud-strip-cell.is-current { height: 22px; }
+.hud-strip-cell.is-future { height: 12px; }
+.hud-clock { width: 108px; flex-shrink: 0; text-align: right; font-size: 14px; letter-spacing: 1px; color: var(--hud-dim); white-space: nowrap; }
+.hud-speeds { display: flex; gap: 2px; flex-shrink: 0; }
+.hud-speeds button { border: 0; cursor: pointer; padding: 3px 7px; font-size: 13px; background: transparent; color: var(--hud-dim); }
+.hud-speeds button[aria-pressed="true"] { background: #2A3240; color: #FFFFFF; }
+
+.hud-sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 1180px) {
+  .hud-clock { display: none; }
+  .hud-hint { display: none; }
+}
+
+/* Narrow screens: the circuit on top, panels stacked below it. */
+@media (max-width: 1080px) {
+  .hud { height: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 10px 12px; }
+  .hud-world { position: relative; inset: auto; grid-column: 1 / -1; height: 460px; margin: 0 -10px; }
+  .hud-order, .hud-lap, .hud-focus, .hud-weather, .hud-dash, .hud-transport { position: static; transform: none; width: auto; max-height: none; }
+  .hud-lap { grid-column: 1 / -1; grid-row: 1; margin-top: 10px; pointer-events: auto; }
+  .hud-world { grid-row: 2; }
+  .hud-transport { grid-column: 1 / -1; grid-row: 3; }
+  .hud-clock { display: inline; }
+  .hud-order-rows { overflow: visible; }
+}
+@media (max-width: 640px) {
+  .hud { grid-template-columns: 1fr; }
+  .hud-world { height: 380px; }
+  .hud-lap-num { font-size: 38px; }
+  .hud-clock { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-leds span, .hud-dash-bar > div { transition: none; }
+}

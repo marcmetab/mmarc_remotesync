@@ -1,0 +1,7 @@
+version: 1
+
+name: Asteroid Explorer
+
+description: 3D orbits of near-Earth asteroids with impact risk, close approaches and per-object detail.
+
+path: ./dist/index.js

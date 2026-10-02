@@ -1,0 +1,115 @@
+/* Onboard view: a heading-up map of the lap with broadcast readouts over it. */
+.ob-stage {
+  --ob-font: "Barlow Condensed", "Titillium Web", system-ui, sans-serif;
+  --ob-panel: rgba(8, 10, 14, 0.85);
+  position: relative;
+  height: clamp(560px, calc(100vh - 230px), 900px);
+  overflow: hidden;
+  border: 1px solid #212936;
+  border-radius: 12px;
+  background: #0b0f16;
+  color: #FFFFFF;
+  font-family: var(--ob-font);
+  font-style: italic;
+  font-weight: 700;
+  user-select: none;
+  container-type: size;
+}
+.ob-stage *, .ob-stage *::before, .ob-stage *::after { box-sizing: border-box; }
+.ob-stage button { font-family: var(--ob-font); font-style: italic; font-weight: 700; }
+.ob-stage button:focus-visible, .ob-stage [role="slider"]:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
+.ob-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ob-empty { display: grid; place-items: center; padding: 24px; text-align: center; color: #98A1B3; font-size: 18px; }
+
+.ob-caption { font-size: 12px; letter-spacing: 1.4px; color: #6B7487; text-transform: uppercase; }
+
+.ob-id { position: absolute; left: 24px; top: 22px; display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 10px; border-left: 4px solid; }
+.ob-id-pos { font-size: 34px; font-weight: 800; line-height: 1; }
+.ob-id div { display: flex; flex-direction: column; }
+.ob-id strong { font-size: 20px; font-weight: 800; letter-spacing: 1px; line-height: 1.05; white-space: nowrap; }
+.ob-id div span { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: #C9CFDB; white-space: nowrap; }
+
+.ob-clock { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ob-clock-label { font-size: 12px; letter-spacing: 2px; color: #E9D5FF; padding: 1px 10px; background: rgba(8, 10, 14, 0.7); }
+.ob-clock-time { font-size: 44px; font-weight: 800; line-height: 0.95; min-width: 190px; text-align: center; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7); font-variant-numeric: tabular-nums; }
+.ob-sectors { display: flex; gap: 3px; }
+.ob-sector { width: 84px; display: flex; flex-direction: column; gap: 3px; padding: 4px 7px; background: rgba(8, 10, 14, 0.82); }
+.ob-sector-bar { height: 3px; background: #1E2430; display: flex; }
+.ob-sector-bar i { display: block; height: 100%; }
+.ob-sector-row { display: flex; justify-content: space-between; font-size: 14px; }
+.ob-sector-row span:first-child { color: #6B7487; }
+
+.ob-map { position: absolute; right: 24px; top: 22px; width: 230px; display: flex; flex-direction: column; gap: 3px; }
+.ob-map-head { display: flex; justify-content: space-between; padding: 5px 10px; background: var(--ob-panel); font-size: 12px; letter-spacing: 1.4px; color: #98A1B3; }
+.ob-map svg { display: block; width: 100%; height: auto; padding: 6px; background: rgba(8, 10, 14, 0.8); }
+
+/* Map furniture under the overview map: north arrow, scale, speed key and orientation. */
+.ob-legend { position: absolute; right: 24px; top: 188px; width: 230px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 10px; background: var(--ob-panel); white-space: nowrap; }
+.ob-north { position: relative; width: 26px; height: 26px; border-radius: 50%; border: 1px solid #3A4454; display: grid; place-items: center; transition: transform 120ms linear; }
+.ob-north span { font-size: 12px; color: #E8EAF0; line-height: 1; }
+.ob-north::before { content: ""; position: absolute; top: -6px; left: 50%; margin-left: -4px; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 6px solid #E8002D; }
+.ob-scale { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; font-size: 12px; color: #C9CFDB; }
+.ob-scale i { display: block; height: 5px; border: 1.5px solid #C9CFDB; border-top: 0; }
+.ob-speedkey { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #98A1B3; }
+.ob-speedkey i { display: block; width: 90px; height: 5px; border-radius: 3px; }
+.ob-seg { display: flex; gap: 2px; padding: 2px; border: 1px solid #212936; }
+.ob-seg button { border: 0; cursor: pointer; padding: 3px 9px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; background: transparent; color: #98A1B3; }
+.ob-seg button[aria-pressed="true"] { background: #FFFFFF; color: #06080C; }
+.ob-all { border: 1px solid #2A3240; background: transparent; color: #C9CFDB; cursor: pointer; padding: 3px 9px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+.ob-all[aria-pressed="true"] { border-color: #C9CFDB; }
+
+.ob-controls { position: absolute; left: 24px; bottom: 24px; width: 232px; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: var(--ob-panel); }
+.ob-controls-row { display: flex; align-items: center; gap: 8px; }
+.ob-play { width: 30px; height: 26px; border: 0; transform: skewX(-12deg); background: #E10600; color: #FFFFFF; font-size: 11px; cursor: pointer; }
+.ob-speeds { display: flex; gap: 2px; }
+.ob-speeds button, .ob-sound { border: 0; cursor: pointer; padding: 2px 6px; font-size: 13px; background: transparent; color: #98A1B3; }
+.ob-speeds button[aria-pressed="true"] { background: #FFFFFF; color: #06080C; }
+.ob-sound[aria-pressed="true"] { color: #FFFFFF; }
+.ob-dist { margin-left: auto; font-size: 13px; font-weight: 600; letter-spacing: 1px; color: #98A1B3; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ob-scrub { position: relative; height: 40px; cursor: crosshair; touch-action: none; }
+.ob-scrub svg { position: absolute; inset: 0; width: 100%; height: 40px; }
+
+/* The steering wheel, bottom centre: its body sits on the stage's bottom edge. */
+.ob-wheel {
+  --ww: min(620px, 46cqw, 86cqh);
+  position: absolute;
+  left: 50%;
+  /* A little more of the rim sits below the edge; the screen stays fully visible. */
+  bottom: calc(var(--ww) * -0.34);
+  width: var(--ww);
+  height: var(--ww);
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter: drop-shadow(0 -8px 22px rgba(0, 0, 0, 0.55));
+}
+
+.ob-steer { position: absolute; right: 24px; bottom: 24px; width: 200px; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: var(--ob-panel); }
+.ob-steer-val { font-size: 30px; font-weight: 800; line-height: 1; }
+.ob-steer-bar { position: relative; height: 4px; background: #1E2430; }
+.ob-steer-bar i { position: absolute; top: -3px; width: 3px; height: 10px; margin-left: -1.5px; }
+.ob-steer-bar b { position: absolute; left: 50%; top: -2px; width: 1px; height: 8px; background: #6B7487; }
+
+@media (max-width: 1180px) {
+  .ob-speedkey { display: none; }
+}
+@media (max-width: 900px) {
+  .ob-stage { height: clamp(520px, 80vh, 720px); }
+  .ob-map, .ob-steer { display: none; }
+  .ob-id { left: 12px; top: 12px; padding: 6px 10px 6px 8px; }
+  .ob-id-pos { font-size: 26px; }
+  .ob-id strong { font-size: 16px; }
+  .ob-clock { top: 12px; right: 12px; left: auto; transform: none; align-items: flex-end; }
+  .ob-clock-time { font-size: 30px; min-width: 0; }
+  .ob-sector { width: 64px; }
+  .ob-legend { top: 66px; left: 12px; right: auto; width: auto; flex-wrap: nowrap; gap: 10px; padding: 6px 8px; }
+  .ob-controls { top: 116px; bottom: auto; left: 12px; width: min(232px, calc(100% - 24px)); }
+  .ob-wheel { --ww: min(440px, 100cqw, 62cqh); }
+  /* Small screens: just the lap clock. */
+  .ob-sectors, .ob-clock-label { display: none; }
+}
+@media (max-width: 560px) {
+  .ob-scale, .ob-speedkey { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ob-north { transition: none; }
+}
