@@ -1,0 +1,31 @@
+/*
+ * The small dropdown (SelectMenu.tsx): "Revenue: Today ▾". Scoped to .pd-app. The button is the segmented
+ * control's look (base.css) with one raised option, so it sits beside a Segmented as its sibling; its menu is
+ * the region menu's (region.css): the panels' surface with a border, no shadow, 44px items, the current one
+ * checked. Stacking: backdrop 30, menu 31 (the tab bar is 20). No animation: it simply appears.
+ */
+
+.pd-app .pd-select { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.pd-app .pd-select-label { color: var(--pd-ink-soft); font-size: 13.5px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+/* The menu's containing block. No z-index: the menu stacks with the page. */
+.pd-app .pd-select-anchor { position: relative; display: flex; }
+
+/* A 44px tap target: the track, and in it the raised option with the current choice and a chevron that turns up while open. */
+.pd-app .pd-select-button { display: flex; align-items: center; min-height: 44px; padding: 4px; border: 0; border-radius: 14px; background: var(--pd-segment); color: var(--pd-ink); font-size: 13.5px; font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-select-button > span { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px 0 14px; border-radius: 10px; background: var(--pd-raised); box-shadow: var(--pd-shadow-segment); white-space: nowrap; }
+.pd-app .pd-select-button svg { color: var(--pd-ink-soft); }
+.pd-app .pd-select-button[aria-expanded="true"] svg { transform: rotate(180deg); }
+.pd-app .pd-select-button:focus-visible { outline: none; }
+.pd-app .pd-select-button:focus-visible > span { outline: 2px solid var(--pd-terracotta); outline-offset: -2px; }
+
+/* ── The menu ────────────────────────────────────────────── */
+/* A click anywhere else closes it. */
+.pd-app .pd-select-backdrop { position: fixed; inset: 0; z-index: 30; display: block; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: default; }
+/* 6px under the raised option (the button's 4px of track, then 2px), at its left edge unless that leaves the window. */
+.pd-app .pd-select-menu { position: absolute; z-index: 31; top: calc(100% + 2px); left: calc(0px - var(--pd-select-shift, 0px)); display: flex; flex-direction: column; min-width: max(100%, 180px); max-width: calc(100vw - 32px); padding: 6px; border: 1px solid var(--pd-border); border-radius: var(--pd-r-inset); background: var(--pd-surface); color: var(--pd-ink); }
+.pd-app .pd-select-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--pd-ink); font-size: 14px; font-weight: 600; font-variant-numeric: lining-nums tabular-nums; text-align: left; white-space: nowrap; }
+.pd-app .pd-select-item:is(:hover, :focus-visible) { background: var(--pd-stone); }
+/* Its ring inside the row: the rows touch, and one reaching out would sit on its neighbour. */
+.pd-app .pd-select-item:focus-visible { outline-offset: -2px; }
+.pd-app .pd-select-item[aria-checked="true"] { font-weight: 700; }
+.pd-app .pd-select-item > svg { color: var(--pd-pumpkin-icon); }

@@ -1,0 +1,184 @@
+/*
+ * Data flow (DataFlowPage.tsx): the metro map, and the same route as a vertical line in a narrow panel. Scoped to
+ * .pd-app, classes pd-flow-*. Every colour is a token, so dark mode follows.
+ *
+ *   lines      Budapest pumpkin · Express plum with cream dashes (a railway) · London olive · Metabase rose
+ *   zones      blush · olive-soft · rose at 12% on the page
+ *   stations   a page-coloured badge ringed in its line's colour, the mark in ink; the terminus rings the mascot
+ *   switch     the panel is a size container: under 860px of it the map hides and the vertical line shows
+ */
+
+.pd-app .pd-flow { container-type: inline-size; }
+.pd-app .pd-flow-list { display: none; }
+@container (max-width: 859.98px) {
+  .pd-app .pd-flow-map { display: none; }
+  .pd-app .pd-flow-list { display: flex; }
+}
+
+/* ── Panel head: the date and Pause ── */
+.pd-app .pd-flow-pause { display: flex; align-items: center; height: 44px; margin: -6px -4px -6px 0; padding: 0; border: 0; border-radius: var(--pd-r-pill); background: transparent; color: var(--pd-ink); font: inherit; cursor: pointer; }
+.pd-app .pd-flow-pause > span { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: var(--pd-r-pill); background: var(--pd-stone); font-size: 13.5px; font-weight: 600; }
+.pd-app .pd-flow-pause:hover > span { background: var(--pd-segment); }
+.pd-app .pd-flow-pause:focus-visible { outline: none; }
+.pd-app .pd-flow-pause:focus-visible > span { outline: 2px solid var(--pd-terracotta); outline-offset: 2px; }
+
+/* ── The map: a 1100×560 drawing, layers stacked, buttons over them in % ── */
+.pd-app .pd-flow-map { position: relative; width: 100%; aspect-ratio: 1100 / 560; }
+.pd-app .pd-flow-map > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.pd-app .pd-flow-map > svg.is-over { pointer-events: none; }
+
+.pd-app .pd-flow-zone.is-budapest { fill: var(--pd-blush); }
+.pd-app .pd-flow-zone.is-london { fill: var(--pd-olive-soft); }
+.pd-app .pd-flow-zone.is-metabase { fill: color-mix(in srgb, var(--pd-rose) 12%, var(--pd-page)); }
+
+.pd-app .pd-flow-line { fill: none; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+.pd-app .pd-flow-line.is-spur { stroke-width: 6; }
+.pd-app .pd-flow-line.is-budapest { stroke: var(--pd-pumpkin); }
+.pd-app .pd-flow-line.is-express { stroke: var(--pd-plum); }
+.pd-app .pd-flow-line.is-london { stroke: var(--pd-olive); }
+.pd-app .pd-flow-line.is-metabase { stroke: var(--pd-rose); }
+.pd-app .pd-flow-dashes { fill: none; stroke: var(--pd-cream); stroke-width: 3; stroke-dasharray: 8 9; stroke-linecap: round; stroke-linejoin: round; }
+
+.pd-app .pd-flow-badge { fill: var(--pd-page); stroke-width: 5; }
+.pd-app .pd-flow-badge.is-small { stroke-width: 4; }
+.pd-app .pd-flow-badge.is-end { stroke-width: 6; }
+.pd-app .pd-flow-badge.is-budapest { stroke: var(--pd-pumpkin); }
+.pd-app .pd-flow-badge.is-london { stroke: var(--pd-olive); }
+.pd-app .pd-flow-badge.is-metabase { stroke: var(--pd-rose); }
+.pd-app .pd-flow-glyph { color: var(--pd-ink); }
+.pd-app .pd-flow-hole { fill: var(--pd-page); }
+.pd-app .pd-flow-change { fill: var(--pd-page); stroke: var(--pd-ink); stroke-width: 4; }
+
+/* The picked station's glow, in its line's colour. */
+.pd-app .pd-flow-halo { opacity: .22; }
+.pd-app .pd-flow-halo.is-budapest { fill: var(--pd-pumpkin); }
+.pd-app .pd-flow-halo.is-express { fill: var(--pd-plum); }
+.pd-app .pd-flow-halo.is-london { fill: var(--pd-olive); }
+.pd-app .pd-flow-halo.is-metabase { fill: var(--pd-rose); }
+
+/* A sale: the brand pumpkin with a dark rim (it reads on every zone and on the dark page). */
+.pd-app .pd-flow-pk-side { fill: var(--pd-pumpkin-deep); stroke: #331b2b; stroke-width: 1.8; }
+.pd-app .pd-flow-pk-front { fill: var(--pd-pumpkin-light); stroke: #331b2b; stroke-width: 1.4; }
+.pd-app .pd-flow-pk-stem { fill: none; stroke: var(--pd-leaf); stroke-width: 2.2; stroke-linecap: round; }
+.pd-app .pd-flow-pulse { fill: none; stroke: var(--pd-pumpkin); stroke-width: 3; }
+
+/* A place's chip: on the map, placed in %; in the vertical line, in its row. */
+.pd-app .pd-flow-zonechip { position: absolute; display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border-radius: var(--pd-r-pill); font-size: 12px; font-weight: 700; line-height: 1; white-space: nowrap; pointer-events: none; }
+.pd-app .pd-flow-zonechip.is-inline { position: static; align-self: center; }
+.pd-app .pd-flow-zonechip.is-budapest { background: var(--pd-terracotta); color: var(--pd-page); }
+.pd-app .pd-flow-zonechip.is-london { background: var(--pd-olive); color: var(--pd-page); }
+.pd-app .pd-flow-zonechip.is-metabase, .pd-app .pd-flow-zonechip.is-express { background: var(--pd-plum); color: var(--pd-cream); }
+
+/* A station's button: its name (a pill when picked) and one line under it. */
+.pd-app .pd-flow-stop { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; margin: 0; padding: 0; border: 0; border-radius: var(--pd-r-inset); background: transparent; color: var(--pd-ink); font: inherit; cursor: pointer; }
+.pd-app .pd-flow-stop.is-above, .pd-app .pd-flow-stop.is-below { align-items: center; justify-content: flex-start; text-align: center; }
+.pd-app .pd-flow-stop.is-right { align-items: flex-start; justify-content: center; text-align: left; }
+.pd-app .pd-flow-stop > img { display: block; width: 37.143%; height: auto; margin-bottom: 4px; }
+.pd-app .pd-flow-stop:focus-visible, .pd-app .pd-flow-express:focus-visible { outline: 2px solid var(--pd-terracotta); outline-offset: 2px; }
+.pd-app .pd-flow-name { display: inline-block; padding: 1px 8px; border-radius: var(--pd-r-pill); font-size: 14px; line-height: 18px; font-weight: 700; white-space: nowrap; }
+.pd-app .pd-flow-sub { display: block; padding: 0 8px; font-size: 12.5px; line-height: 16px; color: var(--pd-muted); white-space: nowrap; }
+.pd-app .pd-flow-stop:hover .pd-flow-name { background: var(--pd-hover); }
+.pd-app .pd-flow-stop[aria-pressed="true"] .pd-flow-name { background: var(--pd-plum); color: var(--pd-cream); }
+.pd-app .pd-flow-express { position: absolute; height: 26px; margin: 0; padding: 0 10px; border: 0; border-radius: var(--pd-r-pill); background: var(--pd-plum); color: var(--pd-cream); font: inherit; font-size: 12.5px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.pd-app .pd-flow-express[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--pd-page), 0 0 0 5px var(--pd-plum); }
+
+/* The card in the middle of the map: the key, or the picked station. */
+.pd-app .pd-flow-card { position: absolute; left: 5.455%; top: 46.786%; width: 58.182%; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid var(--pd-hairline); border-radius: var(--pd-r-panel); background: var(--pd-page); }
+.pd-app .pd-flow-card-title { margin: 0; font-size: 15px; font-weight: 700; line-height: 20px; color: var(--pd-ink); }
+.pd-app .pd-flow-card-title.is-station { margin-top: -4px; font-size: 18px; line-height: 24px; }
+.pd-app .pd-flow-card p { margin: 0; font-size: 14px; line-height: 20px; color: var(--pd-ink-soft); text-wrap: pretty; }
+.pd-app .pd-flow-card-line { display: flex; align-items: center; gap: 8px; padding-right: 40px; font-size: 12.5px; line-height: 16px; font-weight: 700; color: var(--pd-muted); }
+.pd-app .pd-flow-card-line > i { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.pd-app .pd-flow-card-line.is-budapest > i { background: var(--pd-pumpkin); }
+.pd-app .pd-flow-card-line.is-express > i { background: var(--pd-plum); }
+.pd-app .pd-flow-card-line.is-london > i { background: var(--pd-olive); }
+.pd-app .pd-flow-card-line.is-metabase > i { background: var(--pd-rose); }
+.pd-app .pd-flow-fact { font-size: 13px; line-height: 18px; font-weight: 700; }
+.pd-app .pd-flow-fact.is-budapest { color: var(--pd-terracotta); }
+.pd-app .pd-flow-fact.is-london { color: var(--pd-olive-ink); }
+.pd-app .pd-flow-fact.is-express, .pd-app .pd-flow-fact.is-metabase { color: var(--pd-plum); }
+.pd-app .pd-flow-close { position: absolute; top: 4px; right: 4px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--pd-ink-soft); cursor: pointer; }
+.pd-app .pd-flow-close > span { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: var(--pd-stone); }
+.pd-app .pd-flow-close:hover > span { background: var(--pd-segment); }
+.pd-app .pd-flow-close:focus-visible { outline: none; }
+.pd-app .pd-flow-close:focus-visible > span { outline: 2px solid var(--pd-terracotta); outline-offset: 2px; }
+
+.pd-app .pd-flow-key { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; margin: 0; padding: 0; list-style: none; font-size: 13.5px; line-height: 18px; color: var(--pd-ink-soft); }
+.pd-app .pd-flow-key > li { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pd-app .pd-flow-key b { font-weight: 700; color: var(--pd-ink); }
+.pd-app .pd-flow-swatch { flex: none; box-sizing: border-box; width: 28px; height: 8px; border-radius: 4px; }
+.pd-app .pd-flow-swatch.is-budapest { background: var(--pd-pumpkin); }
+.pd-app .pd-flow-swatch.is-express { background: repeating-linear-gradient(90deg, var(--pd-plum) 0 4px, var(--pd-cream) 4px 7px, var(--pd-plum) 7px 10px); }
+.pd-app .pd-flow-swatch.is-london { background: var(--pd-olive); }
+.pd-app .pd-flow-swatch.is-metabase { background: var(--pd-rose); }
+.pd-app .pd-flow-swatch.is-change { height: 14px; border: 3px solid var(--pd-ink); border-radius: 7px; background: var(--pd-page); }
+.pd-app .pd-flow-swatch-pk { flex: none; width: 28px; height: 22px; overflow: visible; }
+
+/* ── The vertical line: one row per station, the rail on the left ── */
+.pd-app .pd-flow-list { flex-direction: column; }
+.pd-app .pd-flow-block { padding: 0 6px; border-radius: 14px; }
+.pd-app .pd-flow-block.is-budapest { background: var(--pd-blush); }
+.pd-app .pd-flow-block.is-london { background: var(--pd-olive-soft); }
+.pd-app .pd-flow-block.is-metabase { background: color-mix(in srgb, var(--pd-rose) 12%, var(--pd-page)); }
+.pd-app .pd-flow-between { padding: 0 6px; }
+.pd-app .pd-flow-zonerow, .pd-app .pd-flow-changerow { display: flex; align-items: stretch; min-height: 44px; }
+.pd-app .pd-flow-changerow { min-height: 56px; }
+
+.pd-app .pd-flow-row { display: flex; align-items: stretch; width: 100%; min-height: 64px; margin: 0; padding: 0; border: 0; border-radius: 12px; background: transparent; color: var(--pd-ink); font: inherit; text-align: left; cursor: pointer; }
+.pd-app .pd-flow-row[aria-expanded="true"] { background: color-mix(in srgb, var(--pd-page) 78%, transparent); }
+.pd-app .pd-flow-row:focus-visible { outline: 2px solid var(--pd-terracotta); outline-offset: -2px; }
+.pd-app .pd-flow-rail { position: relative; flex: none; width: 52px; }
+.pd-app .pd-flow-row.is-spur .pd-flow-rail { width: 84px; }
+.pd-app .pd-flow-bar { position: absolute; left: 18px; top: 0; bottom: 0; width: 8px; }
+.pd-app .pd-flow-bar.is-start { top: 32px; }
+.pd-app .pd-flow-bar.is-end { bottom: auto; height: 32px; }
+.pd-app .pd-flow-bar.is-stub-top { bottom: auto; height: 12px; }
+.pd-app .pd-flow-bar.is-stub-bottom { top: auto; height: 12px; }
+.pd-app .pd-flow-bar.is-budapest { background: var(--pd-pumpkin); }
+.pd-app .pd-flow-bar.is-express { background: var(--pd-plum); }
+.pd-app .pd-flow-bar.is-express::after { content: ""; position: absolute; left: 3px; top: 0; bottom: 0; width: 2px; background: repeating-linear-gradient(180deg, var(--pd-cream) 0 6px, transparent 6px 12px); }
+.pd-app .pd-flow-bar.is-london { background: var(--pd-olive); }
+.pd-app .pd-flow-bar.is-metabase { background: var(--pd-rose); }
+.pd-app .pd-flow-branch { position: absolute; left: 24px; top: 29.5px; width: 34px; height: 5px; border-radius: 2.5px; background: var(--pd-pumpkin); }
+.pd-app .pd-flow-capsule { position: absolute; left: 8px; top: 4px; bottom: 4px; width: 28px; box-sizing: border-box; border: 3.5px solid var(--pd-ink); border-radius: 14px; background: var(--pd-page); }
+.pd-app .pd-flow-dot { position: absolute; left: 2px; top: 12px; width: 40px; height: 40px; overflow: visible; }
+.pd-app .pd-flow-dot .pd-flow-badge { stroke-width: 6; }
+.pd-app .pd-flow-dot.is-small { left: 53px; top: 17px; width: 30px; height: 30px; }
+.pd-app .pd-flow-dot.is-small .pd-flow-badge { stroke-width: 7; }
+.pd-app .pd-flow-terminus { position: absolute; left: -3px; top: 7px; width: 50px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 4px solid var(--pd-rose); border-radius: 50%; background: var(--pd-page); }
+.pd-app .pd-flow-terminus > img { display: block; width: 36px; height: 36px; }
+.pd-app .pd-flow-row-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; padding: 12px 4px 12px 6px; }
+.pd-app .pd-flow-changerow > .pd-flow-row-text { justify-content: center; padding-top: 6px; padding-bottom: 6px; }
+.pd-app .pd-flow-row-text > b { font-size: 15px; line-height: 20px; font-weight: 700; }
+.pd-app .pd-flow-row-text > span:not(.pd-flow-zonechip) { font-size: 13px; line-height: 18px; color: var(--pd-muted); }
+.pd-app .pd-flow-row-text > .pd-flow-more { margin-top: 6px; font-size: 13.5px; line-height: 19px; color: var(--pd-ink-soft); text-wrap: pretty; }
+.pd-app .pd-flow-chev { flex: none; align-self: flex-start; display: flex; margin: 24px 8px 0 0; color: var(--pd-faint); transition: transform .2s ease; }
+.pd-app .pd-flow-row[aria-expanded="true"] .pd-flow-chev { transform: rotate(180deg); }
+.pd-app .pd-flow-zonerow > .pd-flow-zonechip { margin-left: 6px; }
+.pd-app .pd-flow-row-text > .pd-flow-zonechip { align-self: flex-start; margin-top: 8px; }
+
+/* A pumpkin running down each stretch, all in step like a conveyor. Paused with the page's Pause. */
+.pd-app .pd-flow-ball { position: absolute; left: 13px; top: -9px; width: 18px; height: 18px; animation: pd-flow-fall 1.6s linear infinite; }
+.pd-app .pd-flow-ball > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.pd-app .pd-flow-ball.is-start { animation-name: pd-flow-start; }
+.pd-app .pd-flow-ball.is-end { animation-name: pd-flow-end; }
+.pd-app .pd-flow-ball.is-fast { animation-duration: .8s; }
+.pd-app .pd-flow.is-paused .pd-flow-ball { animation-play-state: paused; }
+/* The badges cover a pumpkin as it passes their station. */
+.pd-app .pd-flow-rail > .pd-flow-dot, .pd-app .pd-flow-rail > .pd-flow-terminus { z-index: 1; }
+@keyframes pd-flow-fall { from { top: -9px; } to { top: calc(100% - 9px); } }
+@keyframes pd-flow-start { from { top: 23px; } to { top: calc(100% - 9px); } }
+@keyframes pd-flow-end { from { top: -9px; } to { top: 23px; } }
+@media (prefers-reduced-motion: reduce) {
+  .pd-app .pd-flow-ball { display: none; }
+}
+
+/* ── Stats: a sticker tile beside each figure; four across, two by two when the column is narrow ── */
+.pd-app .pd-flow-stats { container-type: inline-size; }
+.pd-app .pd-flow-stats > div { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+@container (max-width: 879.98px) {
+  .pd-app .pd-flow-stats > div { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+}
+.pd-app .pd-stat.pd-flow-stat { display: flex; align-items: center; gap: 14px; }
+.pd-app .pd-flow-stat > span { min-width: 0; }
+.pd-app .pd-flow-tile { flex: none; display: block; }

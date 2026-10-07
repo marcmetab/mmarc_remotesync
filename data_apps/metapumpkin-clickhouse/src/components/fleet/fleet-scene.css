@@ -1,0 +1,122 @@
+/*
+ * The Harvest & fleet scene (fleet/FleetScene.tsx), the art at the top of the Fleet page's stage card.
+ * Scoped to .pd-app, named pd-fleet-scene-* (the scene, its layers, labels and late tag), pd-fleet-sprite (a
+ * moving part's box) and the moving parts' own names (pd-fleet-rays, -clouds, -birds, -hop, -load, -lift, -sign,
+ * -smoke, -drive). The art keeps its own colours, a light illustration in both themes; in dark it takes the
+ * banners' treatment (--pd-banner-filter on the art, --pd-banner-dusk over it), under the labels, which take the
+ * theme tokens and stay undimmed.
+ * Size: a box at the art's ratio (1200:320), as wide as its parent. The scene is an inline-size container, so the
+ * motion moves in cqw (100cqw = the art's 1200 units: 1 unit = .08333cqw) and the labels shrink, then shorten,
+ * as it narrows. On phones the card holds it at 750px (200px tall) and scrolls it sideways (fleet.css).
+ * Motion only where it is welcome (prefers-reduced-motion: no-preference): calm, transform and opacity only, every
+ * moving part its own small layer (an HTML box around an <svg>), so the compositor runs it and the art is never
+ * repainted for it. Without motion each part holds a still pose: the trucks wait along the road.
+ */
+
+/*
+ * Clip, not hidden: hidden would make the scene a scroll container, which takes the zone snap points below from
+ * the phone's sideways scroller (fleet.css), so the scroll never rests on a zone. hidden first for older browsers.
+ */
+.pd-app .pd-fleet-scene { container: pd-fleet-scene / inline-size; position: relative; width: 100%; aspect-ratio: 1200 / 320; overflow: hidden; overflow: clip; }
+.pd-app .pd-fleet-scene-art { position: absolute; inset: 0; filter: var(--pd-banner-filter); }
+.pd-app .pd-fleet-scene-layer { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.pd-app .pd-fleet-sprite { position: absolute; }
+.pd-app .pd-fleet-sprite > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+/* Dark: the dusk over the art (none in light); the labels and the tag sit above it. */
+.pd-app .pd-fleet-scene::after { content: ""; position: absolute; inset: 0; z-index: 1; background: var(--pd-banner-dusk); pointer-events: none; }
+
+/* ── Place labels: a pill with the zone's colour dot (the same colour as its column's first bar part) ── */
+.pd-app .pd-fleet-scene-place { position: absolute; z-index: 2; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: var(--pd-r-pill); background: var(--pd-banner-chip); color: var(--pd-ink); font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; }
+.pd-app .pd-fleet-scene-place > i { width: 8px; height: 8px; flex: none; border-radius: 50%; }
+.pd-app .pd-fleet-scene-place.is-picking > i { background: var(--pd-leaf); }
+.pd-app .pd-fleet-scene-place.is-hubs > i { background: var(--pd-pumpkin); }
+.pd-app .pd-fleet-scene-place.is-road > i { background: var(--pd-candle); }
+.pd-app .pd-fleet-scene-place.is-unload > i { background: var(--pd-terracotta); }
+.pd-app .pd-fleet-scene-place.is-workshop > i { background: var(--pd-plum-hill); }
+.pd-app .pd-fleet-scene-short { display: none; }
+/* Narrower than 900px (a tablet, a phone's 750px scene): smaller pills, so "Customer delivery" and "Fleet workshop" keep apart. */
+@container pd-fleet-scene (max-width: 899.98px) {
+  .pd-app .pd-fleet-scene-place { gap: 6px; padding: 4px 10px; font-size: 12px; line-height: 17px; }
+  .pd-app .pd-fleet-scene-place > i { width: 7px; height: 7px; }
+}
+/* Narrower than 750px (a card beside the sidebar at 900–1000px): one word each. */
+@container pd-fleet-scene (max-width: 749.98px) {
+  .pd-app .pd-fleet-scene-full { display: none; }
+  .pd-app .pd-fleet-scene-short { display: inline; }
+}
+
+/* ── The late tag: over the market truck while a van is late unloading. Its foot is the anchor (left, top). ── */
+.pd-app .pd-fleet-scene-late { position: absolute; z-index: 2; transform: translate(-50%, -100%); padding: 1px 9px 2px; border-radius: var(--pd-r-pill); background: var(--pd-severe); color: var(--pd-on-severe); font-size: 12px; font-weight: 700; line-height: 16px; white-space: nowrap; }
+.pd-app .pd-fleet-scene-late::after { content: ""; position: absolute; left: 50%; bottom: -5px; margin-left: -5px; border: 5px solid transparent; border-bottom: 0; border-top-color: var(--pd-severe); }
+
+/* Where a phone's sideways scroll rests: each zone centred (the scroll box is in fleet.css). */
+.pd-app .pd-fleet-scene-snap { position: absolute; top: 0; height: 1px; scroll-snap-align: center; pointer-events: none; }
+
+/*
+ * A part the data does not have stays mounted and fades out (FleetScene's is-off), so a change in the counts fades
+ * a truck in or out where it is instead of popping one in mid-road (a new sprite would start mid-loop).
+ */
+.pd-app .pd-fleet-fade { transition: opacity .6s ease; }
+.pd-app .pd-fleet-fade.is-off { opacity: 0; }
+
+/* ── Still poses (and the reduced-motion scene): the trucks wait along the road ── */
+/* Sprites sit at the road's left end; these move each one to its place (loaded at 70, 610, 905; empty at 480, 1080). */
+.pd-app .pd-fleet-drive.is-out.is-1 { transform: translateX(5.8333cqw); }
+.pd-app .pd-fleet-drive.is-out.is-2 { transform: translateX(50.8333cqw); }
+.pd-app .pd-fleet-drive.is-out.is-3 { transform: translateX(75.4167cqw); }
+.pd-app .pd-fleet-drive.is-back.is-1 { transform: translateX(40cqw); }
+.pd-app .pd-fleet-drive.is-back.is-2 { transform: translateX(90cqw); }
+
+/* ── Motion ──────────────────────────────────────────────── */
+/* The artboard's choreography and timings. Every loop starts and ends on the same pose, or out of sight. */
+@media (prefers-reduced-motion: no-preference) {
+  .pd-app .pd-fleet-rays { animation: pd-fleet-spin 60s linear infinite; }
+  .pd-app .pd-fleet-clouds { animation: pd-fleet-drift 24s ease-in-out infinite; }
+  .pd-app .pd-fleet-birds { animation: pd-fleet-birds 26s linear infinite; }
+  .pd-app .pd-fleet-hop { animation: pd-fleet-hop 3.4s ease-in-out infinite both; }
+  .pd-app .pd-fleet-load { animation: pd-fleet-load 3.8s ease-in-out infinite both; }
+  .pd-app .pd-fleet-lift:not(.is-idle) { animation: pd-fleet-lift 5s ease-in-out infinite; }
+  .pd-app .pd-fleet-sign { animation: pd-fleet-sway 3.6s ease-in-out infinite; }
+  .pd-app .pd-fleet-smoke { animation: pd-fleet-smoke 3.2s ease-out infinite; }
+  /* Loaded trucks out every 6s (18s across); empty ones back, 22s across, out of step with them. */
+  .pd-app .pd-fleet-drive.is-out { animation: pd-fleet-drive-out 18s linear infinite; }
+  .pd-app .pd-fleet-drive.is-out.is-2 { animation-delay: -6s; }
+  .pd-app .pd-fleet-drive.is-out.is-3 { animation-delay: -12s; }
+  .pd-app .pd-fleet-drive.is-back { animation: pd-fleet-drive-back 22s linear infinite -3s; }
+  .pd-app .pd-fleet-drive.is-back.is-2 { animation-delay: -14s; }
+  .pd-app .pd-fleet-scene-late { animation: pd-fleet-bob 1.6s ease-in-out infinite; }
+}
+
+@keyframes pd-fleet-spin { to { transform: rotate(360deg); } }
+@keyframes pd-fleet-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(1.5cqw); } }
+/* Across the sky and fading at both ends, so the flock never jumps back in view. */
+@keyframes pd-fleet-birds {
+  0% { transform: translate(-3.3333cqw, 0); opacity: 0; }
+  6% { opacity: 1; }
+  50% { transform: translate(13.3333cqw, -.8333cqw); }
+  94% { opacity: 1; }
+  100% { transform: translate(30cqw, 0); opacity: 0; }
+}
+/* From the row into the big crate (28 units left, 32 up). */
+@keyframes pd-fleet-hop {
+  0%, 50% { transform: translate(0, 0); opacity: 0; }
+  56% { opacity: 1; }
+  72% { transform: translate(-1.1667cqw, -2.5cqw); }
+  88% { transform: translate(-2.1667cqw, -2.8333cqw); opacity: 1; }
+  100% { transform: translate(-2.3333cqw, -2.6667cqw); opacity: 0; }
+}
+/* From the barn door to the parked truck (70 units left). */
+@keyframes pd-fleet-load {
+  0% { transform: translate(0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  70% { transform: translate(-5.3333cqw, .5cqw); opacity: 1; }
+  85%, 100% { transform: translate(-5.8333cqw, .5cqw); opacity: 0; }
+}
+@keyframes pd-fleet-lift { 0%, 30% { transform: translateY(0); } 55%, 80% { transform: translateY(-1cqw); } 100% { transform: translateY(0); } }
+@keyframes pd-fleet-sway { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+/* Fading in at the chimney too, so the puff never pops back at full strength. */
+@keyframes pd-fleet-smoke { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translate(.6667cqw, -2.1667cqw); opacity: 0; } }
+/* -120 to 1300 units: in from beyond the left edge, out beyond the right; the empty trucks the other way. */
+@keyframes pd-fleet-drive-out { from { transform: translateX(-10cqw); } to { transform: translateX(108.3333cqw); } }
+@keyframes pd-fleet-drive-back { from { transform: translateX(110cqw); } to { transform: translateX(-10cqw); } }
+@keyframes pd-fleet-bob { 0%, 100% { transform: translate(-50%, -100%); } 50% { transform: translate(-50%, calc(-100% - 4px)); } }

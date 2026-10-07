@@ -1,0 +1,233 @@
+/*
+ * Harvest & fleet (FleetPage.tsx)
+ * The harvest stages card (the scene, components/fleet/fleet-scene.css, over five stage columns), the filter row,
+ * the hub cards (header, harvest line, city tiles, the open city's van list) and the rail. The "All vans" yard is
+ * components/fleet/van-yard.css. Shared pieces (panels, chips, row links, meter) come from styles/base.css.
+ * The stage columns follow the card's own width (a container): from 960px five columns lined up with the scene's
+ * zones; narrower, three over two; under 568px (a phone) one compact row per stage. On phones the scene
+ * keeps 750px (200px tall) and scrolls sideways in its box.
+ */
+
+/*
+ * Page colours with no shared token, in both themes (same selectors as styles/tokens.css):
+ * the quiet part of a stage bar (idle vans, vans on their way back, service due later): between faint and border,
+ * softer than a mark, firmer than the track. The city tile washes, olive-grey when every van is on time and peach when one is late.
+ * In dark they are deep washes between stone and olive-soft / blush, under the same light ink.
+ * And two of the delay causes in "On time, 7 days": storm and late departure. In light they are plum (dark)
+ * and rose (mid). In dark plum turns a light rose-plum, next to rose (L* 77 and 65, both pink), so the storm
+ * becomes a pale cloud grey-plum (L* 88, low chroma) and late departure keeps rose: they differ in lightness
+ * and in colourfulness, and stay clear of traffic (candle), breakdown (severe) and ventilation (meadow).
+ */
+.pd-app, .pd-app [data-theme="light"] { --pd-fleet-quiet: color-mix(in srgb, var(--pd-faint) 55%, var(--pd-border)); --pd-fleet-tile: #f4f1e8; --pd-fleet-tile-late: #fdf1e8; --pd-fleet-storm: var(--pd-plum); --pd-fleet-departure: var(--pd-rose); }
+.pd-app[data-theme="dark"], .pd-app [data-theme="dark"] { --pd-fleet-quiet: color-mix(in srgb, var(--pd-faint) 55%, var(--pd-border)); --pd-fleet-tile: #2a271e; --pd-fleet-tile-late: #35211f; --pd-fleet-storm: #e8dae2; --pd-fleet-departure: var(--pd-rose); }
+
+/* ── Harvest stages: the scene over five stage columns ───── */
+/* The card replaces the page banner: the banner's radius, a hairline, a surface in dark like a panel. */
+.pd-app .pd-fleet-stages { container: pd-fleet-stages / inline-size; overflow: hidden; border: 1px solid var(--pd-hairline); border-radius: var(--pd-r-banner); }
+.pd-app:where([data-theme="dark"]) .pd-fleet-stages { background: var(--pd-surface); }
+.pd-app .pd-fleet-stages-art { position: relative; overflow: hidden; }
+/* A picked stage scrolls its zone into view on a phone (FleetPage), gently where motion is welcome. */
+@media (prefers-reduced-motion: no-preference) { .pd-app .pd-fleet-stages-art { scroll-behavior: smooth; } }
+
+/*
+ * The columns take the widths of the scene's zones (fields 255, hub 305, road 220, market 230, workshop 190 of
+ * 1200). The 1px gaps over a hairline ground draw the rules between them, in every layout.
+ */
+.pd-app .pd-fleet-stages-cols { display: grid; grid-template-columns: minmax(0, 255fr) minmax(0, 305fr) minmax(0, 220fr) minmax(0, 230fr) minmax(0, 190fr); gap: 1px; border-top: 1px solid var(--pd-hairline); background: var(--pd-hairline); }
+.pd-app .pd-fleet-stage { position: relative; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 16px 16px 15px; border: 0; background: var(--pd-surface); color: var(--pd-ink); text-align: left; transition: background-color .2s ease; }
+.pd-app .pd-fleet-stage:hover { background: color-mix(in srgb, var(--pd-selected) 55%, var(--pd-surface)); }
+/* Pressed: the house toggle's fill and ring (.pd-pill, .pd-stat), the ring inset so it keeps inside the 1px rules. */
+.pd-app .pd-fleet-stage[aria-pressed="true"] { background: var(--pd-selected); box-shadow: inset 0 0 0 1px var(--pd-selected-ring); }
+/* Inside the card's clip. */
+.pd-app .pd-fleet-stage:focus-visible { outline-offset: -3px; }
+/* The pressed column points up at its zone: a small notch in its colour across the rule, over the scene's verge. */
+.pd-app .pd-fleet-stage[aria-pressed="true"]::before { content: ""; position: absolute; z-index: 1; left: 50%; top: -7px; width: 12px; height: 12px; margin-left: -6px; transform: rotate(45deg); border-top: 1px solid var(--pd-selected-ring); border-left: 1px solid var(--pd-selected-ring); background: var(--pd-selected); }
+
+.pd-app .pd-fleet-stage-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 22px; }
+.pd-app .pd-fleet-stage-head > svg { color: var(--pd-muted); }
+.pd-app .pd-fleet-stage-name { display: flex; align-items: center; gap: 7px; min-width: 0; color: var(--pd-ink-soft); }
+.pd-app .pd-fleet-stage-name > span { overflow: hidden; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; text-overflow: ellipsis; }
+.pd-app .pd-fleet-stage-value { display: flex; align-items: baseline; gap: 7px; margin-top: 4px; }
+.pd-app .pd-fleet-stage-value > .pd-num { font-size: 40px; line-height: 1; }
+.pd-app .pd-fleet-stage-unit { font-size: 15px; color: var(--pd-ink-soft); }
+/* Detail and status wrap rather than cut a number off ("14 retur…"): a column a little too narrow grows a line. */
+.pd-app .pd-fleet-stage-detail { min-height: 20px; font-size: 13px; line-height: 20px; color: var(--pd-ink-soft); text-wrap: pretty; font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-fleet-stage-detail strong { font-weight: 600; color: var(--pd-ink); }
+/* Bar and status keep to the column's foot, so a row of columns lines them up when a detail wraps. */
+.pd-app .pd-fleet-stage-bar { display: block; margin-top: auto; padding-top: 8px; }
+.pd-app .pd-fleet-stage-status { min-height: 18px; font-size: 12.5px; font-weight: 500; line-height: 18px; color: var(--pd-muted); text-wrap: pretty; font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-fleet-stage-status.is-alert { font-weight: 700; color: var(--pd-terracotta); }
+.pd-app .pd-fleet-stage :is(.pd-fleet-stage-detail, .pd-fleet-stage-status) > .pd-skeleton { width: 72%; height: 10px; margin-top: 5px; }
+.pd-app .pd-fleet-stage-status > .pd-skeleton { width: 46%; margin-top: 4px; }
+
+/*
+ * Where a column gets tight, the head drops its icon first: "On the road" with its late badge needs about 170px.
+ * A card of 960 to 1100px (five zone columns, the road's ~180px) also drops "Express" before the workshop's fleet numbers.
+ */
+@container pd-fleet-stages (max-width: 1099.98px) {
+  .pd-app .pd-fleet-stage-name > svg, .pd-app .pd-fleet-stage-prefix { display: none; }
+}
+/* A card narrower than 960px: the zones' widths no longer hold a column, so three over two, and no notch. */
+@container pd-fleet-stages (max-width: 959.98px) {
+  .pd-app .pd-fleet-stages-cols { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .pd-app .pd-fleet-stage { grid-column: span 2; }
+  .pd-app .pd-fleet-stage:nth-child(n + 4) { grid-column: span 3; }
+  .pd-app .pd-fleet-stage[aria-pressed="true"]::before { display: none; }
+  .pd-app .pd-fleet-stage-value > .pd-num { font-size: 34px; }
+  .pd-app .pd-fleet-stage-name > svg, .pd-app .pd-fleet-stage-prefix { display: revert; }
+}
+/* Three over two at 568–640px: the road's column is ~185px again. */
+@container pd-fleet-stages (max-width: 639.98px) {
+  .pd-app .pd-fleet-stage-name > svg { display: none; }
+}
+/*
+ * A phone's card (under 568px, the 600px breakpoint less the gutters): one row per stage, like a settings list.
+ * The stage's icon in a stone tile, its name over the detail and status lines, the numeral and unit at the right,
+ * then the chevron (none where vans are late: the status line says so instead of the badge). The head's two wrappers dissolve so their parts sit in the row's grid; the
+ * thin bar goes (the detail line says the same).
+ */
+@container pd-fleet-stages (max-width: 567.98px) {
+  .pd-app .pd-fleet-stages-cols { grid-template-columns: minmax(0, 1fr); }
+  .pd-app .pd-fleet-stage:nth-child(n) { grid-column: auto; }
+  .pd-app .pd-fleet-stage { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto 14px; grid-template-areas: "icon name value tail" "icon detail value tail" "icon status value tail"; align-items: center; gap: 0 12px; padding: 11px 14px; }
+  .pd-app .pd-fleet-stage-head, .pd-app .pd-fleet-stage-name { display: contents; }
+  .pd-app .pd-fleet-stage-name > svg { grid-area: icon; display: block; width: 38px; height: 38px; padding: 10px; border-radius: 11px; background: var(--pd-stone); color: var(--pd-ink-soft); }
+  .pd-app .pd-fleet-stage[aria-pressed="true"] .pd-fleet-stage-name > svg { background: var(--pd-blush-deep); color: var(--pd-pumpkin-icon); }
+  .pd-app .pd-fleet-stage-name > span { grid-area: name; font-size: 15px; font-weight: 700; line-height: 20px; letter-spacing: 0; text-transform: none; color: var(--pd-ink); }
+  .pd-app .pd-fleet-stage-head > svg { grid-area: tail; }
+  /* The late badge would crowd the row: its status line already says "2 running late" in terracotta. */
+  .pd-app .pd-fleet-stage-head > .pd-tag { display: none; }
+  .pd-app .pd-fleet-stage-value { grid-area: value; align-items: baseline; gap: 4px; margin: 0; }
+  .pd-app .pd-fleet-stage-value > .pd-num { font-size: 24px; }
+  .pd-app .pd-fleet-stage-unit { font-size: 13px; }
+  .pd-app .pd-fleet-stage-detail { grid-area: detail; min-height: 0; line-height: 18px; }
+  .pd-app .pd-fleet-stage-status { grid-area: status; min-height: 0; font-size: 12px; line-height: 17px; }
+  .pd-app .pd-fleet-stage-bar { display: none; }
+}
+/* A 320px phone: no room for the late badge beside the name; the status line under says it in terracotta. */
+@container pd-fleet-stages (max-width: 339.98px) {
+  .pd-app .pd-fleet-stage-head > .pd-tag { display: none; }
+}
+
+/* ── Filter row: the view (By hub · All vans), "Late only", the active stage, the legend ── */
+.pd-app .pd-fleet-filters { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 14px; margin: -8px 0; }
+.pd-app .pd-fleet-filters > div:first-child { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; }
+/* The view switch stands a little apart from the filters after it: 12px to the pill, as on the board. */
+.pd-app .pd-fleet-filters .pd-segmented { margin-right: 6px; }
+/* The mockup's pills are 34px plus their border; the shared .pd-pill is 34px in all. */
+.pd-app .pd-fleet-filters .pd-pill > span { height: 36px; }
+.pd-app .pd-fleet-legend { gap: 6px 14px; color: var(--pd-muted); }
+.pd-app .pd-fleet-legend > span { gap: 6px; }
+
+/* ── Columns: hub cards and the rail, 14px apart ─────────── */
+.pd-app .pd-fleet-col { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Hub card ────────────────────────────────────────────── */
+.pd-app .pd-fleet-hub { padding: 16px 18px; }
+.pd-app .pd-fleet-hub-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; }
+.pd-app .pd-fleet-hub-id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pd-app .pd-fleet-hub-id > div { min-width: 0; }
+.pd-app .pd-fleet-disc { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex: none; border-radius: 50%; background: var(--pd-plum); }
+.pd-app .pd-fleet-where { font-size: 13px; line-height: 1.35; color: var(--pd-muted); }
+.pd-app .pd-fleet-hub-count { font-size: 13.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pd-app .pd-fleet-hub-wave { font-size: 13px; color: var(--pd-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Harvest line and fact chips. A hub-side stage (Picking, At hubs, Workshop) lights its chip. */
+.pd-app .pd-fleet-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.pd-app .pd-fleet-harvest { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; margin-left: -9px; padding: 1px 10px 1px 8px; border: 1px solid transparent; border-radius: var(--pd-r-pill); font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-fleet-harvest > svg { color: var(--pd-leaf); }
+.pd-app .pd-fleet-fact { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border: 1px solid var(--pd-stone); border-radius: var(--pd-r-pill); background: var(--pd-stone); color: var(--pd-ink-soft); font-size: 12px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pd-app :is(.pd-fleet-harvest, .pd-fleet-fact).is-on { border-color: var(--pd-selected-ring); background: var(--pd-selected); }
+
+/* City tiles: one dot per van. Olive wash = all on time, peach wash = someone late, stone = no van. */
+.pd-app .pd-fleet-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(124px, 100%), 1fr)); gap: 6px; }
+.pd-app .pd-fleet-tile { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-height: 84px; padding: 10px 9px; border: 2px solid transparent; border-radius: var(--pd-r-inset); background: var(--pd-fleet-tile); text-align: left; }
+.pd-app .pd-fleet-tile.is-late { background: var(--pd-fleet-tile-late); }
+.pd-app .pd-fleet-tile.is-empty { background: var(--pd-stone); }
+.pd-app .pd-fleet-tile:hover { border-color: var(--pd-border); }
+.pd-app .pd-fleet-tile[aria-expanded="true"] { border-color: var(--pd-pumpkin-deep); background: var(--pd-cream); }
+.pd-app .pd-fleet-tile-name { font-size: 13.5px; font-weight: 700; line-height: 1.2; color: var(--pd-ink); }
+.pd-app .pd-fleet-dots { display: flex; flex-wrap: wrap; gap: 5px; min-height: 11px; }
+.pd-app .pd-fleet-dots > i { width: 11px; height: 11px; border-radius: 50%; background: var(--pd-leaf); }
+.pd-app .pd-fleet-dots > i.is-late { background: var(--pd-pumpkin-deep); }
+.pd-app .pd-fleet-dots > i.is-dim { opacity: .25; }
+.pd-app .pd-fleet-tile-note { margin-top: auto; font-size: 12px; font-weight: 600; color: var(--pd-olive); }
+.pd-app .pd-fleet-tile.is-late .pd-fleet-tile-note { color: var(--pd-terracotta); }
+.pd-app .pd-fleet-tile.is-empty .pd-fleet-tile-note { color: var(--pd-muted); }
+
+/* The open city's vans. The last row's padding stands in for the card's bottom padding. */
+.pd-app .pd-fleet-open { display: flex; flex-direction: column; margin-bottom: -10px; }
+.pd-app .pd-fleet-open-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; font-size: 14px; }
+.pd-app .pd-fleet-open-head > strong { min-width: 0; font-weight: 700; }
+.pd-app .pd-fleet-close { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-right: -14px; flex: none; padding: 0; border: 0; border-radius: var(--pd-r-control); background: transparent; color: var(--pd-ink-soft); }
+.pd-app .pd-fleet-close:hover { background: var(--pd-stone); color: var(--pd-ink); }
+
+/* A van row: who · where it is on the way · what it carries and how late */
+.pd-app .pd-fleet-van { gap: 12px; }
+.pd-app .pd-fleet-van > .pd-rowlink-body { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.pd-app .pd-fleet-van-who { flex: 0 0 128px; display: flex; flex-direction: column; line-height: 1.35; }
+.pd-app .pd-fleet-van-who > strong { font-size: 14px; font-weight: 700; }
+.pd-app .pd-fleet-van-who > span { font-size: 12.5px; color: var(--pd-muted); }
+.pd-app .pd-fleet-van-trip { flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.pd-app .pd-fleet-van-line { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 10px; line-height: 1.35; }
+.pd-app .pd-fleet-van-line > span:first-child { font-size: 13.5px; font-weight: 600; }
+.pd-app .pd-fleet-van-line > span:last-child { font-size: 12.5px; color: var(--pd-ink-soft); font-variant-numeric: tabular-nums; }
+.pd-app .pd-fleet-van-line strong { font-weight: 700; color: var(--pd-ink); }
+/* Progress hub → store: a 6px track, the fill, and a knob ringed in the page color. */
+.pd-app .pd-fleet-progress { position: relative; display: block; height: 12px; margin-right: 8px; color: var(--pd-leaf); }
+.pd-app .pd-fleet-progress.is-late { color: var(--pd-pumpkin-deep); }
+.pd-app .pd-fleet-progress::before { content: ""; position: absolute; left: 0; right: -8px; top: 3px; height: 6px; border-radius: 3px; background: var(--pd-track); }
+.pd-app .pd-fleet-progress > i { position: absolute; left: 0; top: 3px; height: 6px; border-radius: 3px; background: currentColor; }
+.pd-app .pd-fleet-progress > b { position: absolute; top: -2px; width: 16px; height: 16px; margin-left: -8px; border: 2px solid var(--pd-page); border-radius: 50%; background: currentColor; }
+/* margin-left:auto keeps this block at the right edge when it wraps under the other two. */
+.pd-app .pd-fleet-van-state { flex: 0 1 222px; min-width: 0; margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; }
+.pd-app .pd-fleet-van-load { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px 10px; }
+.pd-app .pd-fleet-van-units { font-size: 13px; color: var(--pd-ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pd-app .pd-fleet-van-chip { flex: 0 0 120px; display: flex; justify-content: flex-end; }
+.pd-app .pd-fleet-cause { font-size: 12.5px; line-height: 1.35; color: var(--pd-muted); }
+
+/* ── Rail ────────────────────────────────────────────────── */
+/* Title and count sit on one baseline, as in the mockup (the shared head centers them). */
+.pd-app .pd-fleet-col > .pd-panel > .pd-panel-head { align-items: baseline; }
+.pd-app .pd-fleet-count { font-weight: 600; }
+.pd-app .pd-fleet-name { display: block; min-width: 0; font-size: 14px; line-height: 1.35; }
+.pd-app .pd-fleet-name > strong { font-weight: 700; }
+.pd-app .pd-fleet-sub { display: block; font-size: 12.5px; color: var(--pd-muted); }
+.pd-app .pd-fleet-late { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.pd-app .pd-fleet-why { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+
+/* On time, 7 days */
+.pd-app .pd-fleet-ontime { padding-bottom: 8px; }
+.pd-app .pd-fleet-scope { font-size: 12px; }
+.pd-app .pd-fleet-rate { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-fleet-rate > .pd-num { font-size: 28px; line-height: 1; }
+.pd-app .pd-fleet-late-total { margin-top: 4px; }
+.pd-app .pd-fleet-ontime .pd-keyrow > strong { font-weight: 600; }
+.pd-app .pd-fleet-key-share { min-width: 40px; text-align: right; color: var(--pd-muted); font-variant-numeric: tabular-nums; }
+.pd-app .pd-fleet-ontime .pd-keyrow > .pd-fleet-key-value { min-width: 22px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ── Under 600px: phone ──────────────────────────────────── */
+@media (max-width: 599.98px) {
+  /* The scene keeps a readable height (750px wide, 200px tall) and scrolls sideways in its box, resting on a zone. */
+  .pd-app .pd-fleet-stages { border-radius: 16px; }
+  .pd-app .pd-fleet-stages-art { overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .pd-app .pd-fleet-stages-art::-webkit-scrollbar { display: none; }
+  .pd-app .pd-fleet-stages-art > .pd-fleet-scene { min-width: 750px; }
+  .pd-app .pd-fleet-hub { padding: 14px; }
+  /* The harvest line wraps here: a pill would bulge. */
+  .pd-app .pd-fleet-harvest { border-radius: var(--pd-r-inset); }
+  /* A fact chip longer than the card (a long workshop list) wraps inside it rather than running off the edge. */
+  .pd-app .pd-fleet-fact { max-width: 100%; height: auto; min-height: 24px; padding: 3px 10px; border-radius: var(--pd-r-inset); white-space: normal; }
+  /*
+   * A van row in three lines: name and status chip · store, times and progress · load and cause.
+   * The two wrappers of the right-hand block dissolve so their parts can sit in the row's own grid.
+   */
+  .pd-app .pd-fleet-van > .pd-rowlink-body { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px 5px; }
+  .pd-app .pd-fleet-van-state, .pd-app .pd-fleet-van-load { display: contents; }
+  .pd-app .pd-fleet-van-who { grid-area: 1 / 1 / auto / 3; }
+  .pd-app .pd-fleet-van-chip { grid-area: 1 / 3; }
+  .pd-app .pd-fleet-van-trip { grid-area: 2 / 1 / auto / -1; }
+  .pd-app .pd-fleet-van-units { grid-area: 3 / 1; }
+  .pd-app .pd-fleet-cause { grid-area: 3 / 2 / auto / -1; text-align: left; }
+  .pd-app .pd-fleet-van .pd-fleet-cause::before { content: "· "; }
+}

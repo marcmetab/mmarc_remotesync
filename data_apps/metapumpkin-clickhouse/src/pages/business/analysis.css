@@ -1,0 +1,143 @@
+/*
+ * Business page: the analysis panels (Plan to actual, Season, Stock at risk). Scoped to .pd-app and named
+ * pd-business-bridge-*, pd-business-curve-*, pd-business-stock-*. Panels, rows, chart frame, keyrows and
+ * legends come from styles/base.css. The waterfall and the curve sit in size containers, so their layout
+ * follows the panel's width. The containers wrap only the chart, never a <Define> label (its card renders in
+ * the page's definition layer, but the preview ties it to its label with CSS anchor positioning).
+ */
+
+/* ── Colours per theme ───────────────────────────────────── */
+/*
+ * Besides the shared tokens and the page's own (business.css: --pd-business-plum-block for Plan and Actual):
+ *   --pd-business-stock-other   shrink and harvest gap in Stock at risk: segment in light; border in dark, where
+ *                               segment would match the track
+ *   --pd-business-short-stripe  the stripes of a shortfall: severe in light, terracotta in dark (on its peach wash)
+ */
+.pd-app, .pd-app [data-theme="light"] { --pd-business-stock-other: var(--pd-segment); --pd-business-short-stripe: var(--pd-severe); }
+.pd-app[data-theme="dark"], .pd-app [data-theme="dark"] { --pd-business-stock-other: var(--pd-border); --pd-business-short-stripe: var(--pd-terracotta); }
+
+/* ── Plan to actual: a waterfall on rows ─────────────────── */
+.pd-app .pd-business-bridge-body { container: pd-business-bridge / inline-size; display: flex; flex-direction: column; gap: 10px; }
+.pd-app .pd-business-bridge-list, .pd-app .pd-business-bridge-axis { --pd-bridge-label: 136px; --pd-bridge-amount: 72px; }
+.pd-app .pd-business-bridge-list { margin: 0; padding: 0; list-style: none; border-bottom: 1px solid var(--pd-hairline); }
+/* A step is one row: label and track, the amount, then the chevron (or its empty slot). Same grid as RowLink. */
+.pd-app .pd-business-bridge-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto 16px; align-items: center; gap: 10px; min-height: 47px; padding: var(--pd-row-pad, 0px) 0; border-top: 1px solid var(--pd-hairline); color: var(--pd-ink); }
+.pd-app .pd-business-bridge-list > li:first-child > .pd-business-bridge-row { border-top: 0; }
+.pd-app .pd-business-bridge-row > .pd-rowlink-body { align-self: stretch; }
+.pd-app .pd-business-bridge-step { display: grid; grid-template-columns: var(--pd-bridge-label) minmax(0, 1fr); align-items: center; gap: 12px; height: 100%; min-height: 46px; }
+.pd-app .pd-business-bridge-label { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pd-app .pd-business-bridge-list > .is-total .pd-business-bridge-label { font-weight: 700; }
+.pd-app .pd-business-bridge-track { position: relative; align-self: stretch; min-height: 22px; }
+.pd-app .pd-business-bridge-amount { min-width: var(--pd-bridge-amount); font-size: 14px; font-weight: 700; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-bridge-list > :not(.is-total) .pd-business-bridge-amount { font-weight: 600; color: var(--pd-ink-soft); }
+
+/* Bars float from the running total. Tiny moves keep 2px so they still show. */
+.pd-app .pd-business-bridge-bar { position: absolute; top: 50%; height: 16px; min-width: 2px; transform: translateY(-50%); border-radius: 3px; background: var(--pd-plum); }
+.pd-app .pd-business-bridge-bar.is-total { height: 20px; border-radius: 0 4px 4px 0; background: var(--pd-business-plum-block); }
+.pd-app .pd-business-bridge-bar.is-up { background: var(--pd-olive); }
+.pd-app .pd-business-bridge-bar.is-down { background: var(--pd-pumpkin); }
+.pd-app .pd-business-bridge-bar.is-zero { border-radius: 1px; background: var(--pd-faint); }
+/* The axis does not start at zero: a slanted cut across the total bars says so. */
+.pd-app .pd-business-bridge-break { position: absolute; top: -3px; bottom: -3px; left: 10px; width: 5px; transform: skewX(-24deg); background: var(--pd-page); }
+/* The plan, carried down every row as a dashed line. */
+.pd-app .pd-business-bridge-guide { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1.5px dashed var(--pd-plum); opacity: .35; }
+.pd-app .pd-business-bridge-row:hover .pd-business-bridge-label { color: var(--pd-ink); }
+
+/* The value axis under the rows: the same columns as the track. */
+.pd-app .pd-business-bridge-axis { padding: 0 calc(var(--pd-bridge-amount) + 36px) 0 calc(var(--pd-bridge-label) + 12px); }
+.pd-app .pd-business-bridge-ticks { position: relative; display: block; height: 18px; font-size: 12px; line-height: 18px; color: var(--pd-muted); font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-bridge-ticks > span { position: absolute; top: 0; display: flex; align-items: center; gap: 4px; transform: translateX(-50%); white-space: nowrap; }
+.pd-app .pd-business-bridge-ticks > span::before { content: ""; position: absolute; left: 50%; top: -5px; width: 1px; height: 4px; background: var(--pd-grid); }
+.pd-app .pd-business-bridge-ticks > .is-first { transform: none; }
+.pd-app .pd-business-bridge-ticks > .is-first::before { left: 0; }
+.pd-app .pd-business-bridge-ticks > .is-last { transform: translateX(-100%); }
+.pd-app .pd-business-bridge-ticks > .is-last::before { left: auto; right: 0; }
+/* The broken-axis mark next to the first value. */
+.pd-app .pd-business-bridge-zig { width: 9px; height: 10px; flex: none; background: linear-gradient(115deg, transparent 0 34%, var(--pd-muted) 34% 44%, transparent 44% 56%, var(--pd-muted) 56% 66%, transparent 66%); }
+
+/* Narrow panel: the label sits above its bar, so the track gets the width. */
+@container pd-business-bridge (max-width: 540px) {
+  .pd-app .pd-business-bridge-row { --pd-row-pad: 6px; }
+  .pd-app .pd-business-bridge-step { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .pd-app .pd-business-bridge-track { min-height: 20px; }
+  .pd-app .pd-business-bridge-axis { padding-left: 0; }
+  .pd-app .pd-business-bridge-ticks > :nth-child(even):not(.is-last) { display: none; }
+}
+
+/* ── Season: cumulative curve ────────────────────────────── */
+.pd-app .pd-business-curve-body { container: pd-business-curve / inline-size; flex: 1 1 auto; display: flex; flex-direction: column; margin-top: 4px; --pd-curve-h: 280px; }
+.pd-app .pd-business-curve-readout { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; font-size: 13px; color: var(--pd-ink-soft); font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-curve-readout > span { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 5px; }
+.pd-app .pd-business-curve-readout strong { font-weight: 700; color: var(--pd-ink); }
+/* The key marks double as the legend: each one is drawn like its line. */
+.pd-app .pd-business-curve-key { align-self: center; width: 16px; height: 0; margin-right: 2px; border-top: 2.5px solid var(--pd-olive); }
+/* Landing: the dashed projection over its range band. The first background layer paints on top, so the dashes come first. */
+.pd-app .pd-business-curve-key.is-landing { height: 10px; border: 0; background: repeating-linear-gradient(90deg, var(--pd-olive) 0 4px, transparent 4px 7px) center / 100% 2px no-repeat, linear-gradient(var(--pd-olive-wash), var(--pd-olive-wash)) center / 100% 10px no-repeat; }
+.pd-app .pd-business-curve-key.is-plan { border-top-color: var(--pd-plum); border-top-width: 2px; }
+.pd-app .pd-business-curve-key.is-ly { border-top: 2px dashed var(--pd-rose); }
+
+/* The plot fills what the panel has left (it sits beside a taller rail), and never gets shorter than --pd-curve-h. */
+.pd-app .pd-business-curve-chart { flex: 1 1 auto; grid-template-rows: minmax(var(--pd-curve-h), 1fr) auto; }
+.pd-app .pd-business-curve-chart :is(.pd-chart-axis, .pd-chart-plot) { height: auto; }
+.pd-app .pd-business-curve-chart .pd-chart-axis { min-width: 40px; }
+.pd-app .pd-business-curve-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pd-app .pd-business-curve-svg path { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.pd-app .pd-business-curve-svg .is-band { fill: var(--pd-olive-wash); stroke: none; opacity: .9; }
+.pd-app .pd-business-curve-svg .is-ly { stroke: var(--pd-rose); stroke-dasharray: 5 4; stroke-linecap: butt; }
+.pd-app .pd-business-curve-svg .is-plan { stroke: var(--pd-plum); }
+.pd-app .pd-business-curve-svg .is-actual { stroke: var(--pd-olive); stroke-width: 2.75; }
+.pd-app .pd-business-curve-svg .is-landing { stroke: var(--pd-olive); stroke-dasharray: 4 4; stroke-linecap: butt; }
+.pd-app .pd-business-curve-dot { position: absolute; width: 9px; height: 9px; transform: translate(-50%, 50%); border-radius: 50%; background: var(--pd-olive); box-shadow: 0 0 0 2px var(--pd-page); }
+
+/* Today and Halloween: a line down the plot, with its word or pumpkin at the top on the side away from the other. */
+.pd-app .pd-business-curve-mark { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px solid var(--pd-ink-soft); }
+.pd-app .pd-business-curve-mark.is-halloween { border-left: 1.5px dashed var(--pd-pumpkin); }
+.pd-app .pd-business-curve-mark > * { position: absolute; top: -2px; left: 5px; }
+.pd-app .pd-business-curve-mark.is-flip > * { left: auto; right: 5px; }
+.pd-app .pd-business-curve-mark > span { font-size: 12px; font-weight: 600; line-height: 1; color: var(--pd-ink-soft); white-space: nowrap; }
+
+.pd-app .pd-business-curve-x { position: relative; flex: 1 1 auto; height: 18px; }
+.pd-app .pd-business-curve-x > span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.pd-app .pd-business-curve-x > .is-first { transform: none; }
+.pd-app .pd-business-curve-x > .is-last { transform: translateX(-100%); }
+
+@container pd-business-curve (max-width: 540px) {
+  .pd-app .pd-business-curve-chart { --pd-curve-h: 220px; }
+  /* Too close to Nov 15 on a phone: the pumpkin marks Halloween. */
+  .pd-app .pd-business-curve-x > .is-halloween { display: none; }
+}
+
+/* ── Stock at risk ───────────────────────────────────────── */
+.pd-app .pd-business-stock-top { display: flex; flex-direction: column; gap: 4px; }
+.pd-app .pd-business-stock-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-business-stock-head > .pd-num { font-size: 28px; line-height: 1; }
+.pd-app .pd-business-stock-head.is-short > .pd-num { color: var(--pd-terracotta); }
+.pd-app .pd-business-stock-sub { font-size: 13px; color: var(--pd-ink-soft); font-variant-numeric: tabular-nums; }
+
+/* Supply and demand: two bars on one scale */
+.pd-app .pd-business-stock-flow { display: flex; flex-direction: column; gap: 14px; }
+.pd-app .pd-business-stock-bar { display: flex; flex-direction: column; gap: 7px; }
+.pd-app .pd-business-stock-bar-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; color: var(--pd-muted); }
+.pd-app .pd-business-stock-bar-head > strong { font-weight: 700; color: var(--pd-ink); font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-stock-track { position: relative; display: block; height: 12px; border-radius: 3px; background: var(--pd-track); }
+.pd-app .pd-business-stock-track > span { position: absolute; top: 0; bottom: 0; box-shadow: 1px 0 0 var(--pd-page); }
+.pd-app .pd-business-stock-track > span:first-child { border-radius: 3px 0 0 3px; }
+/* What is left: hatched candle on amber. Short: hatched terracotta. */
+/* Hatched: what is still to come or projected. The harvest in a neutral, what is left (the risk) in pumpkin, a shortfall in terracotta. */
+.pd-app .pd-business-stock-hatch.is-harvest { background: repeating-linear-gradient(135deg, var(--pd-faint) 0 2px, var(--pd-track) 2px 5px); }
+.pd-app .pd-business-stock-hatch.is-left { background: repeating-linear-gradient(135deg, var(--pd-pumpkin) 0 2px, var(--pd-blush) 2px 5px); }
+.pd-app .pd-business-stock-hatch.is-short { background: repeating-linear-gradient(135deg, var(--pd-business-short-stripe) 0 2px, var(--pd-peach) 2px 5px); }
+.pd-app i.pd-business-stock-hatch { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 3px; }
+.pd-app .pd-business-stock-flow .pd-legend { gap: 4px 12px; font-variant-numeric: tabular-nums; }
+
+/* Per variety */
+.pd-app .pd-business-stock-varieties > .pd-keyrow > span:nth-child(2) { font-weight: 600; }
+.pd-app .pd-business-stock-varieties > .pd-keyrow > strong { font-weight: 700; font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-stock-short { grid-column: 3 / 5; justify-self: end; display: flex; }
+.pd-app .pd-business-stock-note { min-width: 88px; text-align: right; color: var(--pd-muted); font-variant-numeric: tabular-nums; }
+
+/* Markdowns and the season end */
+.pd-app .pd-business-stock-foot { margin-top: -6px; }
+.pd-app .pd-business-stock-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; padding: 9px 0; border-top: 1px solid var(--pd-hairline); font-size: 14px; }
+.pd-app .pd-business-stock-row > span { font-weight: 600; }
+.pd-app .pd-business-stock-row > strong { font-weight: 700; font-variant-numeric: tabular-nums; }

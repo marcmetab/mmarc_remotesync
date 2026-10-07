@@ -1,0 +1,41 @@
+/*
+ * Business, the three tiles under the hero (Tiles.tsx): label, number, one thin split bar and its key.
+ * Scoped to .pd-app, named pd-business-*; the numeral style (pd-business-figure-num) is glance.css's, shared
+ * with the hero; the card grid (pd-cards), swatches and skeletons come from styles/base.css, the label's
+ * definition button from components/define.css.
+ */
+
+/* Three across from the phone breakpoint up, never two and one (pd-cards' auto-fit would); one column on phones. */
+.pd-app .pd-cards.pd-business-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* A quiet frame; its border darkens while hovered or while its definition is open (the tile opens it). */
+.pd-app .pd-business-tile { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 20px 24px; border: 1px solid var(--pd-hairline); border-radius: var(--pd-r-panel); background: transparent; transition: border-color .16s ease; }
+.pd-app:where([data-theme="dark"]) .pd-business-tile { background: var(--pd-page); }
+.pd-app .pd-business-tile:has(.pd-define-trigger.is-open) { border-color: var(--pd-border); }
+@media (hover: hover) {
+  .pd-app .pd-business-tile:hover { border-color: var(--pd-border); }
+}
+
+.pd-app .pd-business-tile-label { align-self: flex-start; font-size: 14px; line-height: 1.3; color: var(--pd-muted); }
+.pd-app .pd-business-tile-num { font-size: 34px; }
+.pd-app .pd-skeleton.pd-business-tile-skeleton { width: 120px; height: 28px; margin: 3px 0; border-radius: 8px; }
+
+/* The split bar: parts 2px apart; the rounded, clipped track rounds only its outer ends. */
+.pd-app .pd-business-split { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
+.pd-app .pd-business-split-bar { display: flex; gap: 2px; height: 6px; overflow: hidden; border-radius: 999px; }
+.pd-app .pd-business-split-bar > span { flex: 1 1 0%; min-width: 0; }
+.pd-app .pd-business-split > .pd-skeleton.pd-business-split-skeleton { width: 100%; height: 6px; border-radius: 999px; }
+.pd-app .pd-business-split-key { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; line-height: 1.4; color: var(--pd-muted); font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-split-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.pd-app .pd-business-split-item > .pd-swatch { width: 8px; height: 8px; border-radius: 2px; }
+
+/* While refreshing the numbers dim; the label stays crisp. */
+.pd-app .pd-business-tiles.is-busy .pd-business-tile > :not(.pd-business-tile-label) { opacity: .55; transition: opacity .2s ease; }
+
+/* ── Phone: the tiles stack, a little tighter ───────────── */
+@media (max-width: 599.98px) {
+  .pd-app .pd-cards.pd-business-tiles { grid-template-columns: minmax(0, 1fr); }
+  .pd-app .pd-business-tile { padding: 16px 18px; }
+  .pd-app .pd-business-tile-num { font-size: 30px; }
+  .pd-app .pd-skeleton.pd-business-tile-skeleton { height: 24px; }
+}

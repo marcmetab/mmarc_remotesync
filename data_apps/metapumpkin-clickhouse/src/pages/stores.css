@@ -1,0 +1,119 @@
+/*
+ * Stores page: counters, the sort control, the revenue period and the key, country rows of city cards (a small
+ * table of stores each) and the store hover card. Shared pieces (Stat, Segmented, Meter, Icon) are in base.css,
+ * the revenue period's dropdown in components/select.css. Colours are tokens (styles/tokens.css), so the page
+ * follows the theme.
+ */
+
+/* ── Counters ────────────────────────────────────────────── */
+/* Three cards across down to 600px; on a phone one strip of three, the cards' notes in short. */
+.pd-app .pd-stores-counters { --pd-card-min: 170px; }
+/* A counter that is taller than its text (its neighbour's note wrapped) keeps the text at the top. */
+.pd-app .pd-stores-counters > .pd-stat { display: flex; flex-direction: column; align-items: flex-start; }
+.pd-app .pd-stores-counters .pd-stat-note { font-size: 12.5px; }
+
+/* ── Sort, revenue period and key ────────────────────────── */
+/* The sort and "Revenue: Today ▾" side by side on the left, the key on the right (under them when it does not fit). */
+.pd-app .pd-stores-sort { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
+.pd-app .pd-stores-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; min-width: 0; }
+.pd-app .pd-stores-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 13px; color: var(--pd-muted); }
+.pd-app .pd-stores-key > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+/* Figures: the Business numeral (Hanken 600, lining and tabular), for this page. */
+.pd-app .pd-stores-num { font-weight: 600; font-variant-numeric: lining-nums tabular-nums; letter-spacing: -0.01em; color: var(--pd-ink); white-space: nowrap; }
+/* A revenue still loading (Yesterday or 30 days before the daily rows arrive): a short bar about a figure's size. */
+.pd-app .pd-skeleton.pd-stores-skel { flex: none; align-self: center; width: 44px; height: 11px; }
+.pd-app .pd-stores-row > .pd-skeleton.pd-stores-skel { justify-self: end; }
+.pd-app .pd-stores-card-head > .pd-skeleton.pd-stores-skel { width: 56px; height: 14px; }
+.pd-app .pd-stores-group-head > .pd-skeleton.pd-stores-skel { width: 64px; height: 13px; }
+.pd-app .pd-stores-peek-facts dd > .pd-skeleton.pd-stores-skel { margin-left: auto; }
+
+/* ── Country rows ────────────────────────────────────────── */
+/* The hover card's frame (StoresPage places the card in its coordinates). */
+.pd-app .pd-stores-body { position: relative; }
+.pd-app .pd-stores-groups { container: pd-stores / inline-size; display: flex; flex-direction: column; gap: 32px; }
+.pd-app .pd-stores-group { display: flex; flex-direction: column; gap: 14px; }
+.pd-app .pd-stores-group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.pd-app .pd-stores-group-head > h2 { font-size: 19px; font-weight: 700; line-height: 1.25; color: var(--pd-ink); }
+.pd-app .pd-stores-group-rev { font-size: 15px; }
+.pd-app .pd-stores-group-meta { font-size: 13px; color: var(--pd-muted); }
+/* Equal columns, the cards top-aligned: one on phones, two on tablets, three where a row of stores has room (each card 300px+). */
+.pd-app .pd-stores-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
+@container pd-stores (min-width: 560px) { .pd-app .pd-stores-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container pd-stores (min-width: 960px) { .pd-app .pd-stores-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* ── City card: the city and its 7-day revenue, a row per store, the next van when none is on the way ── */
+.pd-app .pd-stores-card { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 14px 10px 12px; border: 1px solid var(--pd-hairline); border-radius: 14px; }
+/* Dark: a lifted surface like the panels (tokens.css, "Surfaces"). */
+.pd-app:where([data-theme="dark"]) .pd-stores-card { background: var(--pd-page); }
+.pd-app .pd-stores-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 0 8px 6px; }
+.pd-app .pd-stores-city { min-width: 0; font-size: 16px; font-weight: 700; line-height: 1.3; }
+.pd-app .pd-stores-city > a { color: var(--pd-ink); text-decoration: none; }
+.pd-app .pd-stores-city > a:hover { color: var(--pd-terracotta); }
+.pd-app .pd-stores-city > a > span { font-size: 12px; font-weight: 600; color: var(--pd-muted); }
+.pd-app .pd-stores-city-rev { font-size: 17px; }
+
+/* A store row is one link: pumpkin · name (shrinks first) · van · revenue. The fixed revenue column lines the vans up. */
+.pd-app .pd-stores-rows { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.pd-app .pd-stores-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto 56px; align-items: center; gap: 10px; min-height: 40px; padding: 0 8px; border-radius: 8px; color: var(--pd-ink-soft); font-size: 13.5px; text-decoration: none; transition: background-color .16s ease; }
+.pd-app .pd-stores-row:hover, .pd-app .pd-stores-row.is-open { background: var(--pd-stone); color: var(--pd-ink-soft); }
+.pd-app .pd-stores-row > .pd-pk { justify-self: center; }
+.pd-app .pd-stores-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pd-app .pd-stores-row > .pd-stores-num { text-align: right; }
+.pd-app .pd-stores-van { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pd-app .pd-stores-van.is-late { color: var(--pd-terracotta); }
+.pd-app .pd-stores-van > b { font-weight: 700; }
+
+/* The city's next planned delivery when no van is on the way: on its store's row, quieter than a van on the way. */
+.pd-app .pd-stores-van.is-planned { color: var(--pd-muted); }
+
+/* The viewer's clock in brackets ("(12:10 CET)") wraps as one piece. */
+.pd-app .pd-stores-yours { white-space: nowrap; }
+
+/* ── Hover card ──────────────────────────────────────────── */
+/* Floats over the cards beside its row; the soft shadow (scrim token) lifts it off the card under it. */
+.pd-app .pd-stores-peek { position: absolute; z-index: 25; top: 0; left: 0; display: flex; flex-direction: column; gap: 12px; width: 300px; max-width: calc(100vw - 16px); padding: 18px 20px 16px; border: 1px solid var(--pd-border); border-radius: var(--pd-r-panel); background: var(--pd-surface); box-shadow: 0 24px 48px -24px var(--pd-scrim); color: var(--pd-ink); font-size: 14px; line-height: 1.4; }
+.pd-app .pd-stores-peek-head { display: flex; align-items: center; gap: 12px; }
+.pd-app .pd-stores-peek-head > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pd-app .pd-stores-peek-head strong { font-size: 17px; font-weight: 700; line-height: 1.25; }
+.pd-app .pd-stores-peek-head span { font-size: 13px; color: var(--pd-muted); }
+.pd-app .pd-stores-peek-note { padding: 8px 12px; border-radius: var(--pd-r-control); font-size: 13.5px; font-weight: 600; }
+.pd-app .pd-stores-peek-note.is-out { background: var(--pd-blush); color: var(--pd-terracotta-deep); }
+.pd-app .pd-stores-peek-note.is-low { background: var(--pd-amber); color: var(--pd-amber-ink); }
+.pd-app .pd-stores-peek-facts { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 9px 16px; }
+.pd-app .pd-stores-peek-facts > div { display: contents; }
+.pd-app .pd-stores-peek-facts dt { color: var(--pd-ink-soft); }
+.pd-app .pd-stores-peek-facts dd { text-align: right; }
+.pd-app .pd-stores-peek-stock { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.pd-app .pd-stores-peek-bar { width: 72px; }
+.pd-app .pd-stores-peek-van { display: flex; flex-direction: column; gap: 3px; padding-top: 12px; border-top: 1px solid var(--pd-hairline); font-variant-numeric: tabular-nums; }
+/* The icon stays level with the first line when "Next van tomorrow 07:10 (12:10 CET)" wraps. */
+.pd-app .pd-stores-peek-van-main { display: flex; align-items: flex-start; gap: 7px; font-weight: 600; }
+.pd-app .pd-stores-peek-van-main > svg { flex: none; margin-top: 2px; }
+.pd-app .pd-stores-peek-late { font-size: 13px; font-weight: 600; color: var(--pd-terracotta); }
+
+/* ── Phone ───────────────────────────────────────────────── */
+@media (max-width: 599.98px) {
+  /* The three counters in one bordered strip, hairlines between; a pressed filter keeps its ring inside its third. */
+  .pd-app .pd-stores-counters { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 1px solid var(--pd-hairline); border-radius: var(--pd-r-panel); overflow: hidden; }
+  .pd-app .pd-stores-counters > .pd-stat.is-card { padding: 12px 12px 13px; border: 0; border-radius: 0; }
+  .pd-app .pd-stores-counters > .pd-stat + .pd-stat { border-left: 1px solid var(--pd-hairline); }
+  .pd-app .pd-stores-counters > .pd-stat[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--pd-selected-ring); }
+  .pd-app .pd-stores-counters .pd-stat-label { font-size: 12.5px; }
+  .pd-app .pd-stores-counters .pd-stat-note { font-size: 12px; }
+  .pd-app .pd-stores-groups { gap: 28px; }
+  /* The sort (short labels) and "Today ▾" on one line, the dropdown's word "Revenue" kept for screen readers only; the key under them. */
+  .pd-app .pd-stores-sort { flex-direction: column; align-items: stretch; gap: 12px; }
+  .pd-app .pd-stores-controls { flex-wrap: nowrap; gap: 8px; }
+  .pd-app .pd-stores-controls > .pd-segmented { flex: 1 1 auto; min-width: 0; }
+  .pd-app .pd-stores-controls > .pd-select { flex: none; }
+  .pd-app .pd-stores-controls .pd-select-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .pd-app .pd-stores-sort .pd-segmented { display: flex; }
+  .pd-app .pd-stores-sort .pd-segmented > button { flex: 1 1 0; min-width: 0; }
+  .pd-app .pd-stores-sort .pd-segmented > button > span { justify-content: center; width: 100%; padding: 0 4px; }
+  /* Touch targets: the city link fills a 44px head, store rows are 44px tall. */
+  .pd-app .pd-stores-card { padding-top: 4px; }
+  .pd-app .pd-stores-card-head { align-items: center; min-height: 44px; padding-bottom: 0; }
+  .pd-app .pd-stores-city > a { display: block; overflow: hidden; line-height: 44px; text-overflow: ellipsis; white-space: nowrap; }
+  .pd-app .pd-stores-row { gap: 8px; min-height: 44px; }
+}

@@ -1,0 +1,118 @@
+/*
+ * Truck page (/fleet/truck/:truckId)
+ * Only what this page adds to styles/base.css: the band's grid (its look is components/drill-band.css), the
+ * two columns, a trip's steps, the service meter key, fault insets and the cargo temperature band. The season
+ * chart and the Trips list have their own sheets in ./truck/ (season.css, trips.css).
+ */
+
+/*
+ * Page colours with no shared token, in both themes (same selectors as styles/tokens.css): the steps' line ahead
+ * (dashed) and behind (soft olive), the safe part of the cargo temperature band, the service meter's bar, and the
+ * live pulse (an "r, g, b" triple for rgba()). In dark the lines and the band are dimmer than the marks beside
+ * them, as in light, and the long meter bar takes the muted plum-hill instead of the light rose-plum, which reads
+ * pink at that size.
+ */
+.pd-app, .pd-app [data-theme="light"] {
+  --pd-truck-line-next: #d6c9c1; --pd-truck-line-done: #aab37c; --pd-truck-band: #c3ca94;
+  --pd-truck-bar: var(--pd-plum); --pd-truck-pulse: 226, 104, 28;
+}
+.pd-app[data-theme="dark"], .pd-app [data-theme="dark"] {
+  --pd-truck-line-next: #63505a; --pd-truck-line-done: #7d8a45; --pd-truck-band: #7b8a42;
+  --pd-truck-bar: var(--pd-plum-hill); --pd-truck-pulse: 240, 130, 58;
+}
+
+/* Trips, and the rail of 340px beside them (health, readings); under 960px of content the rail goes below. */
+.pd-app .pd-truck-cols { container: pd-truck-cols / inline-size; }
+.pd-app .pd-truck-split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; gap: 20px; }
+.pd-app .pd-truck-main { min-width: 0; }
+@container pd-truck-cols (max-width: 959.98px) { .pd-app .pd-truck-split { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 899.98px) { .pd-app .pd-truck-split { gap: 16px; } }
+/* Panels that end in rows or a pill keep less air at the bottom. */
+.pd-app .pd-panel.pd-truck-health { padding-bottom: 12px; }
+/* A 23px numeral under its label: km to service. */
+.pd-app .pd-truck-num { margin-top: 4px; font-size: 23px; }
+.pd-app .pd-truck-num.is-alert { color: var(--pd-terracotta); }
+
+/* ── The band (TruckBand: DrillBand's look) ──────────────── */
+/*
+ * Four period figures (trips, on time, pumpkins delivered, km driven), the hairline, then right now. Under 900px
+ * the period's figures go two by two over three shared rows each (drill-band.css's subgrid), right now below.
+ */
+.pd-app .pd-truck-drill .pd-drill-band {
+  grid-template-columns: auto auto auto auto 1px minmax(0, 1fr);
+  grid-template-areas: "ph ph ph ph . nh" "trips ontime units km rule van";
+}
+.pd-app .pd-truck-drill .pd-drill-fig.is-trips { grid-area: trips; }
+.pd-app .pd-truck-drill .pd-drill-fig.is-ontime { grid-area: ontime; }
+.pd-app .pd-truck-drill .pd-drill-fig.is-units { grid-area: units; }
+.pd-app .pd-truck-drill .pd-drill-fig.is-km { grid-area: km; }
+.pd-app .pd-truck-drill .pd-drill-error { grid-column: trips-start / km-end; grid-row: trips-start / trips-end; }
+/* Right now's mark: a dot in the van's state colour (inline). */
+.pd-app .pd-truck-now-dot { width: 10px; height: 10px; flex: none; border-radius: 50%; }
+@container pd-drill (max-width: 899.98px) {
+  .pd-app .pd-truck-drill .pd-drill-band {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "ph ph" "trips ontime" "trips ontime" "trips ontime" "units km" "units km" "units km" "rule rule" "nh nh" "van van" "van van" "van van";
+  }
+  .pd-app .pd-truck-drill :is(.is-units, .is-km) > .pd-drill-fig-label { margin-top: 14px; }
+  .pd-app .pd-truck-drill .pd-drill-error { grid-column: 1 / -1; grid-row: trips-start / km-end; }
+}
+
+/* ── A trip's steps (TripList: the live timeline, or built from the trip's times) ── */
+.pd-app .pd-truck-steps { display: flex; flex-direction: column; margin: 0; padding: 2px 0 0; list-style: none; }
+.pd-app .pd-truck-step { display: grid; grid-template-columns: 76px 22px minmax(0, 1fr); column-gap: 12px; padding-bottom: 14px; }
+.pd-app .pd-truck-step:last-child { padding-bottom: 0; }
+.pd-app .pd-truck-step-time { text-align: right; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--pd-muted); font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; }
+.pd-app .pd-truck-step:is(.is-done, .is-late) .pd-truck-step-time { color: var(--pd-ink-soft); }
+.pd-app .pd-truck-step.is-now .pd-truck-step-time { color: var(--pd-ink); font-weight: 700; }
+/* The same time on the viewer's clock, under the hub's. */
+.pd-app .pd-truck-step-time > small { display: block; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--pd-muted); }
+.pd-app .pd-truck-step-rail { position: relative; display: flex; justify-content: center; align-items: flex-start; }
+/* The line to the next step's dot: dashed while that step is still ahead, solid olive once it has started. */
+.pd-app .pd-truck-step-rail::before { content: ""; position: absolute; left: 10px; top: 10px; bottom: -24px; border-left: 2px dashed var(--pd-truck-line-next); }
+.pd-app .pd-truck-step.is-solid .pd-truck-step-rail::before { border-left: 2px solid var(--pd-truck-line-done); }
+.pd-app .pd-truck-step:last-child .pd-truck-step-rail::before { display: none; }
+.pd-app .pd-truck-step-dot { position: relative; display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-top: 2px; border: 2px solid var(--pd-faint); border-radius: 50%; background: var(--pd-page); }
+.pd-app .pd-truck-step:is(.is-done, .is-late) .pd-truck-step-dot { width: 20px; height: 20px; margin-top: 0; border: 0; background: var(--pd-olive); color: var(--pd-on-olive); }
+/* Arrived late: the check on deep pumpkin. */
+.pd-app .pd-truck-step.is-late .pd-truck-step-dot { background: var(--pd-pumpkin-deep); color: var(--pd-on-severe); }
+.pd-app .pd-truck-step.is-now .pd-truck-step-dot { width: 20px; height: 20px; margin-top: 0; border: 4px solid var(--pd-pumpkin); }
+/* The live row: a soft pulse round the ring, so "now" reads as now. */
+.pd-app .pd-truck-step.is-live .pd-truck-step-dot { animation: pd-truck-live 2s ease-out infinite; }
+@keyframes pd-truck-live { 0% { box-shadow: 0 0 0 0 rgba(var(--pd-truck-pulse), .45); } 70%, 100% { box-shadow: 0 0 0 8px rgba(var(--pd-truck-pulse), 0); } }
+@media (prefers-reduced-motion: reduce) { .pd-app .pd-truck-step.is-live .pd-truck-step-dot { animation: none; } }
+.pd-app .pd-truck-step-text { min-width: 0; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--pd-muted); }
+.pd-app .pd-truck-step:is(.is-done, .is-late) .pd-truck-step-text { color: var(--pd-ink); font-weight: 600; }
+.pd-app .pd-truck-step.is-now .pd-truck-step-text { color: var(--pd-ink); font-weight: 700; }
+.pd-app .pd-truck-step-text > small { display: block; margin-top: 2px; font-size: 13px; line-height: 18px; font-weight: 400; color: var(--pd-muted); font-variant-numeric: lining-nums tabular-nums; }
+/* Why it came late, under the late chip. */
+.pd-app .pd-truck-step-cause { display: block; margin-top: 6px; color: var(--pd-terracotta); text-wrap: pretty; }
+.pd-app .pd-truck-step-cause > strong { font-weight: 600; }
+
+/* ── Vehicle health ──────────────────────────────────────── */
+.pd-app .pd-truck-service { display: flex; flex-direction: column; gap: 7px; }
+.pd-app .pd-truck-service-key { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 14px; font-size: 13px; color: var(--pd-ink-soft); font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-truck-service-key > span:last-child { display: flex; align-items: center; gap: 7px; }
+.pd-app .pd-truck-service-key i { width: 2px; height: 11px; border-radius: 1px; background: var(--pd-ink); }
+.pd-app .pd-truck-faults { display: flex; flex-direction: column; gap: 8px; }
+.pd-app .pd-truck-faults > .pd-pill { align-self: flex-start; }
+.pd-app .pd-truck-faults > .pd-state.is-empty { padding: 2px 0 8px; }
+.pd-app .pd-notice.pd-truck-fault { padding: 10px 12px; font-size: 14px; }
+.pd-app .pd-truck-fault strong { display: block; font-size: 14px; font-weight: 600; }
+.pd-app .pd-truck-fault strong + span { font-size: 13px; color: var(--pd-ink-soft); font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-truck-fault.is-ok:last-child { margin-bottom: 8px; }
+
+/* ── Readings ────────────────────────────────────────────── */
+.pd-app .pd-truck-readings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 12px; }
+.pd-app .pd-truck-readings .pd-stat-note { font-size: 12.5px; }
+/* Cargo temperature on a 5–20 °C track: the olive part is the safe band, the dot is the reading. */
+.pd-app .pd-truck-band { position: relative; display: block; height: 8px; margin-top: 8px; border-radius: 4px; background: var(--pd-track); }
+.pd-app .pd-truck-band + .pd-stat-note { margin-top: 7px; }
+.pd-app .pd-truck-band > i { position: absolute; top: 0; bottom: 0; background: var(--pd-truck-band); }
+.pd-app .pd-truck-band > b { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 2px solid var(--pd-page); border-radius: 50%; background: var(--pd-ink); }
+
+/* ── Under 600px: phone ──────────────────────────────────── */
+@media (max-width: 599.98px) {
+  .pd-app .pd-truck-step { grid-template-columns: 64px 22px minmax(0, 1fr); column-gap: 10px; }
+  .pd-app .pd-truck-readings { gap: 10px; }
+}

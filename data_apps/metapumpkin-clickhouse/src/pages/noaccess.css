@@ -1,0 +1,6 @@
+/* NoAccessPage: the MetaPumpkin, a serif line and two quiet ones, centred in the panel. */
+.pd-app .pd-noaccess { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 48px 24px 56px; }
+.pd-app .pd-noaccess img { display: block; margin-bottom: 10px; }
+.pd-app .pd-noaccess h1 { margin: 0; font-family: var(--pd-serif); font-weight: 400; font-size: 26px; line-height: 1.15; color: var(--pd-ink); }
+.pd-app .pd-noaccess p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--pd-ink-soft); }
+.pd-app .pd-noaccess .pd-noaccess-note { max-width: 420px; font-size: 13px; color: var(--pd-muted); }

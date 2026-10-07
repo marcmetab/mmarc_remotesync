@@ -1,0 +1,56 @@
+/*
+ * The City and Store period charts' shared pieces (ChartTip.tsx). Scoped to .pd-app.
+ *
+ * The tooltip: a small card over a chart column, its heading and rows of swatch, label and
+ * figure. It lives inside the chart's positioned plot (ChartFrame's .pd-chart-plot), above
+ * the bars and gridlines (z-index 3, under the tab bar's 20), and ignores the pointer so the columns keep their
+ * hover. Without the layout effect's measurements (the first paint, the static preview) CSS places it: centred
+ * on the column (--pd-tip-at), just above its bar (--pd-tip-top), kept inside the plot's width. The surface and
+ * border are the region menu's; the soft lift is the one shadow token the app has, as on the approved design.
+ */
+.pd-app .pd-tip {
+  --pd-tip-w: 178px;
+  position: absolute; z-index: 3;
+  left: clamp(0px, calc(var(--pd-tip-at, 50%) - var(--pd-tip-w) / 2), calc(100% - var(--pd-tip-w)));
+  bottom: calc(var(--pd-tip-top, 0%) + 10px);
+  display: grid; grid-template-columns: auto auto; gap: 6px 16px;
+  box-sizing: border-box; width: var(--pd-tip-w); max-width: 100%; padding: 12px 14px;
+  border: 1px solid var(--pd-border); border-radius: var(--pd-r-inset); background: var(--pd-surface); box-shadow: var(--pd-shadow-segment);
+  color: var(--pd-ink-soft); font-size: 13.5px; line-height: 1.35; text-align: left;
+  pointer-events: none;
+}
+.pd-app .pd-tip-head { grid-column: 1 / -1; font-weight: 700; color: var(--pd-ink); white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+/* A row is the grid's two cells: the label at the left, the figure at the right. */
+.pd-app .pd-tip-row { display: contents; }
+.pd-app .pd-tip-label { display: inline-flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; }
+.pd-app .pd-tip-label > .pd-swatch { width: 9px; height: 9px; border-radius: 2px; }
+.pd-app .pd-tip-value { font-family: var(--pd-sans); font-weight: 600; color: var(--pd-ink); text-align: right; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; letter-spacing: 0; }
+
+/*
+ * The labels under the columns (periodAxis): one per column, centred under it; the running hour and today in ink.
+ * They answer to the chart panel's width (the page names it `container: pd-period-chart / inline-size`).
+ */
+.pd-app .pd-period-x { flex: 1 1 0; min-width: 0; display: flex; justify-content: center; font-size: 12.5px; white-space: nowrap; }
+.pd-app .pd-period-x:is(.is-now, .is-today) { color: var(--pd-ink); font-weight: 600; }
+.pd-app .pd-period-x-short { display: none; }
+/* Thirty days: a date every seventh column is wider than its column, so flex centres it; "Today" ends at the plot's edge. */
+.pd-app .pd-period-x.is-today.is-dense { justify-content: flex-end; }
+/* Narrower: every second hour (none beside the running one, whose label is long). */
+@container pd-period-chart (max-width: 899.98px) {
+  .pd-app .pd-period-x.is-hour:not(.is-m2):not(.is-now),
+  .pd-app .pd-period-x.is-by-now { visibility: hidden; }
+}
+/* Phones: every third hour instead, short ("09", "now"); a day's name over its date; "Today" ends at the plot's edge. */
+@container pd-period-chart (max-width: 519.98px) {
+  .pd-app .pd-period-x.is-hour.is-m3:not(.is-by-now) { visibility: visible; }
+  .pd-app .pd-period-x.is-hour.is-m2:not(.is-m3):not(.is-now) { visibility: hidden; }
+  .pd-app .pd-period-x { font-size: 12px; }
+  .pd-app .pd-period-x-full { display: none; }
+  .pd-app .pd-period-x-short { display: inline; }
+  .pd-app .pd-period-x-day { display: flex; flex-direction: column; align-items: center; line-height: 1.3; }
+  .pd-app .pd-period-x.is-today { justify-content: flex-end; }
+}
+/* The narrowest phones: on 30 days the date a week before today would touch "Today". */
+@container pd-period-chart (max-width: 339.98px) {
+  .pd-app .pd-period-x.is-by-today { visibility: hidden; }
+}

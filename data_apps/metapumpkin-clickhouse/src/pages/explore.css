@@ -1,0 +1,67 @@
+/*
+ * Explore (ExplorePage.tsx): the "Start from" pills and the question's card. Pills come from styles/base.css.
+ * The card is a panel surface in the app's theme (the page in light, a step above it in dark), the same
+ * colour as the Metabase question's background (theme.ts sdkThemeFor), which follows the switch too
+ * (explore/sdk-theme.css).
+ * --pd-explore-h is the Metabase question's height (ExploreQuestion.tsx hands it to the SDK): the window's
+ * height less the top bar and the card's head, so the question fills the screen once scrolled to, and never
+ * shorter than 560px; under 900px less the tab bar too (on phones never shorter than 440px). No overflow is clipped
+ * anywhere around the question: its own menus and popovers must be free to reach past the card.
+ */
+
+/* ── Start from ──────────────────────────────────────────── */
+.pd-app .pd-explore-start { display: flex; align-items: flex-start; gap: 4px 14px; margin: -8px 0; }
+/* On the first line of pills when they wrap. */
+.pd-app .pd-explore-start > .pd-label { flex: none; line-height: 44px; }
+.pd-app .pd-explore-start-pills { display: flex; flex-wrap: wrap; gap: 0 8px; min-width: 0; }
+
+/* ── The question's card ─────────────────────────────────── */
+.pd-app .pd-explore-card { --pd-explore-h: max(560px, calc(100vh - 140px)); display: flex; flex-direction: column; gap: 6px; padding: 4px 20px 20px; border: 1px solid var(--pd-hairline); border-radius: var(--pd-r-panel); background: var(--pd-surface); }
+.pd-app .pd-explore-card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 16px; min-height: 48px; }
+/* Right of the title: "Save in Metabase ↗", or once saved from the app, the confirmation and its link. */
+.pd-app .pd-explore-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; }
+.pd-app .pd-explore-saved { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; font-size: 13.5px; }
+/* Empty until a save (it stays in the page so the confirmation is read out): no gap for it. */
+.pd-app .pd-explore-saved:empty { margin-left: -14px; }
+.pd-app .pd-explore-saved-note { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--pd-olive-ink); }
+.pd-app .pd-explore-saved > a { display: inline-flex; align-items: center; gap: 3px; min-height: 44px; font-size: 13.5px; font-weight: 700; color: var(--pd-terracotta); text-decoration: none; }
+.pd-app .pd-explore-saved > a:hover { text-decoration: underline; }
+/*
+ * "Save in Metabase": a solid pill button (plum, cream ink: the pair flips together in dark mode). It is a
+ * link to Metabase in a new tab. 40px tall in a 44px hit area.
+ */
+.pd-app .pd-explore-savelink { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; margin: 2px 0; padding: 0 18px 0 14px; border-radius: var(--pd-r-pill); background: var(--pd-plum); color: var(--pd-cream); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: background-color .16s ease; }
+.pd-app .pd-explore-savelink::after { content: ""; position: absolute; inset: -2px 0; }
+.pd-app .pd-explore-savelink:hover { background: var(--pd-plum-hill); color: var(--pd-cream); }
+.pd-app .pd-explore-savelink:focus-visible { outline: 2px solid var(--pd-terracotta); outline-offset: 2px; }
+.pd-app .pd-explore-savelink > svg { flex: none; }
+/* Metabase pads its question by 16px all round: pulled out by that much on the sides, its toolbar lines up with the title. */
+.pd-app .pd-explore-question { min-height: var(--pd-explore-h); margin: -6px -16px 0; }
+.pd-app .pd-explore-question > .pd-state { margin: 0 16px; }
+/* Loading (and the static preview's stand-in): skeleton lines at the top of the question's room. */
+.pd-app .pd-explore-question .pd-state.is-loading { justify-content: flex-start; min-height: var(--pd-explore-h); padding-top: 14px; }
+/* The countries' key of a metric: phones only (Metabase draws its own legend from 400px up). */
+.pd-app .pd-explore-countries { display: none; }
+
+/* ── Under 900px the tab bar is fixed at the bottom: the question stops above it ── */
+@media (max-width: 899.98px) {
+  .pd-app .pd-explore-card { --pd-explore-h: max(560px, calc(100vh - var(--pd-tabbar-h) - 140px)); }
+}
+
+/* ── Phone ───────────────────────────────────────────────── */
+@media (max-width: 599.98px) {
+  /* The label over the pills; the pills scroll sideways, edge to edge. */
+  .pd-app .pd-explore-start { flex-direction: column; align-items: stretch; gap: 0; margin: -6px 0; }
+  .pd-app .pd-explore-start > .pd-label { line-height: 1.4; }
+  .pd-app .pd-explore-start-pills { flex-wrap: nowrap; margin: 0 -16px; padding: 0 16px; overflow-x: auto; scrollbar-width: none; }
+  .pd-app .pd-explore-start-pills::-webkit-scrollbar { display: none; }
+  .pd-app .pd-explore-start-pills > .pd-pill { flex: none; }
+  .pd-app .pd-explore-card { --pd-explore-h: max(440px, calc(100vh - var(--pd-tabbar-h) - 150px)); margin: 0 -8px; padding: 2px 12px 12px; }
+  .pd-app .pd-explore-question { margin: -6px -12px 0; }
+  .pd-app .pd-explore-question > .pd-state { margin: 0 12px; }
+  .pd-app .pd-explore-countries { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 12px 8px; }
+  .pd-app .pd-explore-metric.has-key { --pd-explore-h: max(400px, calc(100vh - var(--pd-tabbar-h) - 200px)); }
+}
+
+/* A question on its way: the harvest loader holds the question's own height, so nothing jumps when it arrives. */
+.pd-app .pd-explore-pending > .pd-harvest { height: 100%; }

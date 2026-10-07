@@ -1,0 +1,93 @@
+/*
+ * The yard (fleet/VanYard.tsx): "All vans" on the Harvest & fleet page. A card per hub (the hub, its clock, the
+ * count line) over a grid of van tiles, and the van's hover card. Scoped to .pd-app, named pd-yard-*; the hub disc
+ * is the hub cards' (.pd-fleet-disc, pages/fleet.css). Colours are tokens, so the yard follows the theme.
+ * The yard is an inline-size container. From 1080px (a desktop with the sidebar) the hub sits in a column at the
+ * left of its tiles, the count line one fact per line, as on the board; narrower, it heads them, the count line
+ * under its name. Tiles are at least 72px and at most a tenth of the row: ten across on a desktop, nine at 820,
+ * four on a phone; 72px still holds "Heading back".
+ */
+
+/*
+ * Page colours with no shared token. The tile wash of a van on the road: olive-soft in light, the firmer olive-wash
+ * in dark (olive-soft is too close to the surface there). The workshop's wash, a little plum in the surface. The van
+ * heading back: between muted and faint, quieter than a van at work, still a shape on the stone tile.
+ */
+.pd-app, .pd-app [data-theme="light"] { --pd-yard-road: var(--pd-olive-soft); }
+.pd-app[data-theme="dark"], .pd-app [data-theme="dark"] { --pd-yard-road: var(--pd-olive-wash); }
+.pd-app, .pd-app [data-theme] { --pd-yard-shop: color-mix(in srgb, var(--pd-plum) 10%, var(--pd-surface)); --pd-yard-back: color-mix(in srgb, var(--pd-muted) 55%, var(--pd-faint)); }
+
+/* ── The yard and its hub cards ──────────────────────────── */
+/* The hover card's frame (VanYard places the card in its coordinates). */
+.pd-app .pd-yard { container: pd-yard / inline-size; position: relative; display: flex; flex-direction: column; gap: 14px; }
+.pd-app .pd-yard-head { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.pd-app .pd-yard-id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pd-app .pd-yard-id > div { min-width: 0; }
+.pd-app .pd-yard-where { font-size: 13px; line-height: 1.35; color: var(--pd-muted); font-variant-numeric: tabular-nums; }
+/* "10 on the road · 1 late · 8 at the hub": the dot goes with the fact before it, so a wrapped line never starts on one. */
+.pd-app .pd-yard-counts { display: flex; flex-wrap: wrap; gap: 2px 0; font-size: 13.5px; line-height: 1.4; color: var(--pd-ink-soft); font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-yard-counts > span { white-space: nowrap; }
+.pd-app .pd-yard-counts > span:not(:last-child)::after { content: "·"; margin: 0 7px; font-weight: 400; color: var(--pd-muted); }
+.pd-app .pd-yard-counts > .is-late { font-weight: 700; color: var(--pd-terracotta); }
+
+/* The board's layout: the hub in a 200px column, its tiles beside it. */
+@container pd-yard (min-width: 1080px) {
+  .pd-app .pd-yard-hub { display: grid; grid-template-columns: 200px minmax(0, 1fr); align-items: start; gap: 24px; }
+  .pd-app .pd-yard-head { gap: 14px; }
+  .pd-app .pd-yard-counts { flex-direction: column; gap: 3px; }
+  .pd-app .pd-yard-counts > span:not(:last-child)::after { content: none; }
+}
+
+/* ── Tiles ───────────────────────────────────────────────── */
+.pd-app .pd-yard-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(72px, (100% - 72px) / 10), 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.pd-app .pd-yard-tiles > li { display: flex; min-width: 0; }
+/* A tile's wash says what the van is doing, with the glyph's colour: stone at the hub, olive on the road, blush and a pumpkin ring late. */
+.pd-app .pd-yard-tile { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 2px 9px; border-radius: var(--pd-r-inset); background: var(--pd-stone); color: var(--pd-ink); text-decoration: none; }
+.pd-app .pd-yard-tile:hover { color: var(--pd-ink); box-shadow: inset 0 0 0 1px var(--pd-border); }
+.pd-app .pd-yard-tile.is-road { background: var(--pd-yard-road); }
+.pd-app .pd-yard-tile.is-late, .pd-app .pd-yard-tile.is-late:hover { background: var(--pd-blush); box-shadow: inset 0 0 0 1.5px var(--pd-pumpkin); }
+.pd-app .pd-yard-tile.is-shop { background: var(--pd-yard-shop); }
+/* A small lift under the pointer, only where motion is welcome. */
+@media (prefers-reduced-motion: no-preference) {
+  .pd-app .pd-yard-tile { transition: transform .16s ease, box-shadow .16s ease; }
+  .pd-app .pd-yard-tile:hover { transform: translateY(-2px); }
+}
+
+.pd-app .pd-yard-glyph { display: block; color: var(--pd-plum); }
+.pd-app .is-road > .pd-yard-glyph { color: var(--pd-olive); }
+.pd-app .is-late > .pd-yard-glyph { color: var(--pd-pumpkin-deep); }
+.pd-app .is-back > .pd-yard-glyph { color: var(--pd-yard-back); }
+.pd-app .is-shop > .pd-yard-glyph { color: var(--pd-muted); }
+.pd-app .pd-yard-glyph-window { fill: var(--pd-page); opacity: .7; }
+.pd-app .pd-yard-glyph-wheel { fill: var(--pd-ink); }
+.pd-app .pd-yard-no { margin-top: 1px; font-size: 15px; }
+.pd-app .pd-yard-line { max-width: 100%; overflow: hidden; font-size: 11.5px; line-height: 1.35; color: var(--pd-muted); white-space: nowrap; text-overflow: ellipsis; }
+
+/* ── Hover card ──────────────────────────────────────────── */
+/*
+ * Floats over the tiles, above its own (VanYard places it); the Stores card's surface, border and soft shadow.
+ * Before it is placed (the static preview, which measures nothing) it waits at the yard's top right.
+ */
+.pd-app .pd-yard-peek { position: absolute; z-index: 25; top: 0; right: 0; display: flex; flex-direction: column; gap: 8px; width: 280px; max-width: calc(100vw - 16px); padding: 14px 16px; border: 1px solid var(--pd-border); border-radius: var(--pd-r-panel); background: var(--pd-surface); box-shadow: 0 24px 48px -24px var(--pd-scrim); color: var(--pd-ink); font-size: 13.5px; line-height: 1.4; font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-yard-peek-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 10px; }
+.pd-app .pd-yard-peek-head > strong { font-size: 15px; font-weight: 700; }
+.pd-app .pd-yard-peek-head > span { font-size: 13px; color: var(--pd-muted); }
+.pd-app .pd-yard-peek-now { display: flex; flex-direction: column; gap: 5px; }
+.pd-app .pd-yard-peek-now > strong { font-weight: 600; }
+.pd-app .pd-yard-peek-late { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.pd-app .pd-yard-peek-late > span:last-child:not(.pd-chip) { font-size: 12.5px; line-height: 1.35; color: var(--pd-muted); }
+.pd-app .pd-yard-peek-eta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-yard-peek-bar { width: 56px; }
+.pd-app .pd-yard-peek-soft { color: var(--pd-ink-soft); }
+.pd-app .pd-yard-peek-now > .pd-yard-peek-soft { font-size: 13px; }
+.pd-app .pd-yard-peek-service { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--pd-ink-soft); }
+.pd-app .pd-yard-peek-fault { display: flex; align-items: flex-start; gap: 6px; font-size: 12.5px; font-weight: 600; line-height: 1.35; color: var(--pd-amber-ink); }
+.pd-app .pd-yard-peek-fault.is-critical { color: var(--pd-terracotta); }
+.pd-app .pd-yard-peek-fault > svg { margin-top: 1px; }
+.pd-app .pd-yard-peek-season { margin-top: 2px; padding-top: 9px; border-top: 1px solid var(--pd-hairline); color: var(--pd-ink-soft); }
+.pd-app .pd-yard-peek-season > strong { font-weight: 700; color: var(--pd-ink); }
+
+/* ── Phone ───────────────────────────────────────────────── */
+@media (max-width: 599.98px) {
+  .pd-app .pd-yard-counts { font-size: 13px; }
+}

@@ -1,0 +1,144 @@
+/*
+ * Store page (src/pages/StorePage.tsx). Shared pieces come from styles/base.css, the band under the title from
+ * components/drill-band.css (as on the City page); these are the page's own.
+ * Two columns from 960px of content width (main 600 + rail 340 + 20 gap); narrower, one column with the
+ * panels interleaved so the next delivery follows the stock.
+ * Colours are tokens (styles/tokens.css), so the page follows the theme; those the tokens lack are below.
+ */
+
+/* ── Theme: the page's own colours, in light and dark ────── */
+.pd-app, .pd-app [data-theme="light"] {
+  /* On the way, in the stock bars and their legend. */
+  --pd-store-incoming: var(--pd-incoming);
+  /* The hatch of a stockout on an hour chart. */
+  --pd-store-hatch: rgba(226, 104, 28, .13);
+  /* The count of a variety that is out (see city.css: severe is a fill in dark, not ink). */
+  --pd-store-out-ink: var(--pd-severe);
+}
+.pd-app[data-theme="dark"], .pd-app [data-theme="dark"] {
+  /* The dark incoming token is as light as the rose-plum on-shelf bar beside it (1.03:1), so the two only
+     differed in hue. A dimmer apricot keeps light's order: on the shelf the strong mark, on the way the soft one. */
+  --pd-store-incoming: #bf7d4c;
+  --pd-store-hatch: rgba(240, 130, 58, .14);
+  --pd-store-out-ink: var(--pd-terracotta);
+}
+
+/* ── Columns ─────────────────────────────────────────────── */
+.pd-app .pd-store-wrap { container-type: inline-size; }
+.pd-app .pd-store-rail { flex-basis: 340px; }
+@container (max-width: 959.98px) {
+  .pd-app .pd-store-cols { flex-direction: column; flex-wrap: nowrap; }
+  .pd-app .pd-store-main, .pd-app .pd-store-rail { display: contents; }
+  .pd-app .pd-store-stock { order: 1; }
+  .pd-app .pd-store-nextdel { order: 2; }
+  .pd-app .pd-store-sales { order: 3; }
+  .pd-app .pd-store-outs { order: 4; }
+  .pd-app .pd-store-drops { order: 5; }
+  .pd-app .pd-store-week { order: 6; }
+  .pd-app .pd-store-details { order: 7; }
+}
+/* Panels that end in rows: 8px under the last one. */
+.pd-app .pd-panel.pd-store-list { padding-bottom: 8px; }
+.pd-app .pd-store-pending.is-flush { margin-top: 4px; padding: 0 20px 14px; }
+
+/* ── Stock ───────────────────────────────────────────────── */
+.pd-app .pd-store-cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 12px; }
+.pd-app .pd-store-cell { min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 15px; border: 1px solid var(--pd-hairline); border-radius: var(--pd-r-inset); }
+.pd-app .pd-store-cell-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 8px; min-height: 24px; }
+.pd-app .pd-store-cell-head > strong { font-size: 14px; font-weight: 600; }
+.pd-app .pd-store-cell-head > .pd-tag { padding: 3px 9px; }
+.pd-app .pd-store-cover { font-size: 13px; color: var(--pd-muted); white-space: nowrap; }
+.pd-app .pd-store-cell-num { display: flex; align-items: baseline; gap: 7px; font-size: 13px; color: var(--pd-muted); }
+/* The numeral look is .pd-num's (base.css); 25px stands where the serif's 28 did. */
+.pd-app .pd-store-cell-num > .pd-num { font-size: 25px; line-height: 1; }
+.pd-app .pd-store-cell-num > .pd-num.is-out { color: var(--pd-store-out-ink); }
+.pd-app .pd-store-cell-inc { font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-store-cell-inc.is-none { color: var(--pd-muted); }
+
+/* ── The period's sales ──────────────────────────────────── */
+/* The labels under the columns (periodAxis, chart-tip.css) answer to the panel's width. */
+/* Its sold and lost totals are the band's (drill-band.css): the chart follows the title, 16px down as on City. */
+.pd-app .pd-store-sales { container: pd-period-chart / inline-size; }
+
+/* Columns: each is a full-height button, the bars sit inside it; an hour not reached yet is a plain placeholder. */
+.pd-app .pd-store-bars { position: absolute; inset: 0; display: flex; align-items: flex-end; touch-action: pan-y; }
+.pd-app .pd-store-col { position: relative; flex: 1 1 0; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 9px 9px 0 0; background: transparent; }
+/* The column whose card shows (mouse, focus or finger). */
+.pd-app .pd-store-col.is-tip { background: var(--pd-tint-strong); }
+.pd-app .pd-store-col:focus-visible { outline-offset: -2px; }
+.pd-app .pd-store-col > i { position: absolute; left: 22%; right: 22%; display: block; }
+.pd-app .pd-store-col > .is-sold { bottom: 0; border-radius: 6px 6px 0 0; background: var(--pd-olive); }
+.pd-app .pd-store-col > .is-sold.is-under { border-radius: 0; }
+.pd-app .pd-store-col > .is-lost { border-radius: 6px 6px 0 0; background: var(--pd-pumpkin); }
+/* Still running (this hour, or today's bar): lighter. */
+.pd-app .pd-store-col.is-current > i { opacity: .55; }
+/* Not reached yet: a faint stub on the baseline (which covers the plot's bottom 2px). */
+.pd-app .pd-store-col.is-future > i { bottom: 3px; height: 2px; border-radius: 2px; background: var(--pd-track); }
+/* Thirty days: wider bars with smaller corners, so a phone still shows them. */
+.pd-app .pd-store-chart.is-dense .pd-store-col > i { left: 14%; right: 14%; }
+.pd-app .pd-store-chart.is-dense .pd-store-col > :is(.is-sold:not(.is-under), .is-lost) { border-radius: 3px 3px 0 0; }
+.pd-app .pd-store-chart.is-dense .pd-store-col { border-radius: 5px 5px 0 0; }
+
+/* The time a variety was out: a hatched band from the moment it ran out. */
+.pd-app .pd-store-out { position: absolute; top: 0; bottom: 0; border-left: 2px dashed var(--pd-pumpkin-deep); background: repeating-linear-gradient(135deg, var(--pd-store-hatch) 0 6px, transparent 6px 12px); }
+.pd-app .pd-store-outlabel { position: absolute; left: 0; right: 0; display: flex; pointer-events: none; font-size: 12px; line-height: 1.45; color: var(--pd-terracotta-deep); }
+/* The spacer puts the label 8px right of the line, and gives way before the label would leave the plot. */
+.pd-app .pd-store-outlabel > i { flex: 0 1 calc(var(--pd-store-at, 0%) + 8px); min-width: 0; }
+.pd-app .pd-store-outlabel > b { flex: none; font-weight: 700; white-space: nowrap; }
+/* No room right of the line: the label ends 8px left of it. */
+.pd-app .pd-store-outlabel.is-flip { right: calc(100% - var(--pd-store-flip, var(--pd-store-at, 0%)) + 8px); justify-content: flex-end; }
+.pd-app .pd-store-outlabel.is-flip > i { display: none; }
+
+/* The card's heading carries what was out in that hour (ChartTip, chart-tip.css). */
+.pd-app .pd-tip-head > .pd-store-tipnote { display: block; margin-top: 3px; font-size: 12.5px; font-weight: 600; color: var(--pd-terracotta); white-space: normal; }
+
+.pd-app .pd-store-chart .pd-chart-x { line-height: 1.35; }
+
+/* ── Week and season ─────────────────────────────────────── */
+.pd-app .pd-store-periods { --pd-cols: minmax(150px, 1.6fr) minmax(100px, 1fr) minmax(100px, 1fr); --pd-table-min: 420px; }
+.pd-app .pd-store-periods .pd-tr { min-height: 44px; font-weight: 600; }
+.pd-app .pd-store-periods .pd-tr:last-child { border-bottom-color: transparent; }
+
+/* ── Next delivery ───────────────────────────────────────── */
+.pd-app .pd-store-next { display: grid; grid-template-columns: minmax(0, 1fr) 16px; align-items: center; gap: 8px; padding: 14px 10px 15px 14px; border-radius: var(--pd-r-inset); background: var(--pd-stone); color: var(--pd-ink); text-decoration: none; }
+.pd-app .pd-store-next:hover { color: var(--pd-ink); }
+.pd-app .pd-store-next.is-problem { background: var(--pd-blush); }
+.pd-app .pd-store-next > svg { color: var(--pd-terracotta); transition: transform .16s ease; }
+.pd-app a.pd-store-next:hover > svg { transform: translateX(2px); }
+.pd-app .pd-store-next-body { min-width: 0; display: flex; flex-direction: column; gap: 7px; font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-store-next-body > strong, .pd-app .pd-store-next.is-none > strong { font-size: 15px; font-weight: 700; line-height: 1.3; color: var(--pd-ink); }
+.pd-app .pd-store-next-status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.pd-app .pd-store-next-status strong { font-weight: 700; color: var(--pd-ink); }
+.pd-app .pd-store-next-status > .pd-chip { padding: 4px 10px; }
+.pd-app .pd-store-next-flag { font-size: 12.5px; font-weight: 600; color: var(--pd-terracotta-deep); }
+/* No van on the way: the same inset, not a link. */
+.pd-app .pd-store-next.is-none { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 14px; font-size: 13px; color: var(--pd-ink-soft); font-variant-numeric: tabular-nums; }
+
+/* ── Stockouts and deliveries: two-line rows ─────────────── */
+.pd-app .pd-store-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 16px; align-items: center; gap: 10px; min-height: 67px; padding: 10px 0; border-top: 1px solid var(--pd-hairline); }
+.pd-app .pd-store-row > span:first-child { min-width: 0; }
+.pd-app .pd-store-row-top { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 13px; color: var(--pd-muted); }
+.pd-app .pd-store-row-top.is-spread { justify-content: space-between; }
+.pd-app .pd-store-row-top strong { font-size: 14px; font-weight: 600; color: var(--pd-ink); }
+.pd-app .pd-store-row-top .pd-tag { padding: 2px 9px; }
+.pd-app .pd-store-row-top.is-spread > span:first-child > span { font-weight: 500; }
+.pd-app .pd-store-row-sub { display: block; margin-top: 3px; font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-store-truck { font-weight: 600; color: var(--pd-terracotta); }
+.pd-app .pd-store-lost { display: flex; flex-direction: column; gap: 3px; text-align: right; font-size: 13px; color: var(--pd-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pd-app .pd-store-lost > strong { font-size: 14px; font-weight: 700; color: var(--pd-ink); }
+/* Stockout rows spread their two lines over the row's 46px, as the mockup's grid did. */
+.pd-app .pd-store-outs .pd-store-row-sub { margin-top: 5px; }
+.pd-app .pd-store-outs .pd-store-lost { gap: 5px; }
+
+/* ── Details ─────────────────────────────────────────────── */
+.pd-app .pd-store-details .pd-facts > div { align-items: stretch; padding: 10px 0; font-size: 14px; }
+.pd-app .pd-store-details .pd-facts dt { font-size: 13px; }
+
+/* ── Phone ───────────────────────────────────────────────── */
+@media (max-width: 599.98px) {
+  /* Three columns that fit the screen: nothing to scroll. */
+  .pd-app .pd-store-periods { --pd-cols: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr); --pd-table-min: 0px; }
+  .pd-app .pd-store-pending.is-flush { padding: 0 16px 14px; }
+  .pd-app .pd-store-outlabel.is-flip-narrow { right: calc(100% - var(--pd-store-flip, var(--pd-store-at, 0%)) + 8px); justify-content: flex-end; }
+  .pd-app .pd-store-outlabel.is-flip-narrow > i { display: none; }
+}
