@@ -57,29 +57,29 @@ type Station = {
 };
 
 const STATIONS: Record<StationId, Station> = {
-  postgres: { line: "budapest", name: "Postgres", sub: "Every 15 s", fact: "Every 15 s", x: 90, y: 110,
+  postgres: { line: "budapest", name: "Postgres", sub: "Transactional source", fact: "Every 15 s", x: 90, y: 110,
     text: "The simulator. A ticker calls tick() every 15 s, which writes the new sales, trips and stock. Postgres 17.11 with logical WAL." },
-  debezium: { line: "budapest", name: "Debezium", sub: "Change capture", fact: "Change capture", x: 250, y: 110,
+  debezium: { line: "budapest", name: "Debezium", sub: "CDC layer", fact: "CDC layer", x: 250, y: 110,
     text: "Reads each change from the Postgres log and turns it into a Kafka message. It runs inside the Kafka Connect container." },
   redpanda: { line: "budapest", name: "Redpanda", sub: "33 Kafka topics", fact: "33 topics", x: 410, y: 110,
     text: "The Kafka broker on the mini PC: one node, one topic per published table." },
   console: { line: "budapest", name: "Console", sub: "localhost:8080", fact: "localhost:8080", x: 450, y: 200,
     text: "Redpanda Console, for watching topics and messages. Open on the mini PC only." },
-  connect: { line: "budapest", name: "Kafka Connect", sub: "ClickHouse sink", fact: "Outbound only", x: 570, y: 110,
+  connect: { line: "budapest", name: "ClickHouse sink", sub: "Kafka Connect", fact: "Outbound only", x: 570, y: 110,
     text: "The ClickHouse sink sends each message to ClickHouse Cloud over HTTPS and saves its place every 10 s. Nothing connects in." },
   express: { line: "express", name: "Budapest → London", sub: "1.4 s median", fact: "1.4 s median", x: 770, y: 160,
     text: "From a Postgres commit in Budapest to a row in ClickHouse in London. A sale takes 8.7 s end to end, mostly waiting for the next tick." },
-  raw: { line: "london", name: "pumpkin_raw", sub: "33 landing tables", fact: "33 landing tables", x: 820, y: 240,
+  raw: { line: "london", name: "pumpkin_raw", sub: "Raw / landing layer", fact: "33 landing tables", x: 820, y: 240,
     text: "One table per topic. 198k rows take 2.6 MB here, 9× smaller than the 25 MB of data." },
-  core: { line: "london", name: "pumpkin_core", sub: "Dedup and clock", fact: "34 views", x: 820, y: 320,
+  core: { line: "london", name: "pumpkin_core", sub: "Transformation layer", fact: "34 views", x: 820, y: 320,
     text: "Views that drop duplicate rows and keep the simulation clock." },
   live: { line: "london", name: "pumpkin_live", sub: "26 views", fact: "26 views", x: 820, y: 400,
     text: "The views this app reads, rebuilt from the raw rows on every query." },
-  db: { line: "metabase", name: "Pumpkin database", sub: "Database 102", fact: "Database 102", x: 820, y: 470,
+  db: { line: "metabase", name: "ClickHouse database", sub: "Pumpkin", fact: "Database 102", x: 820, y: 470,
     text: "Metabase database 102, connected to ClickHouse Cloud. Metabase asks it over HTTPS." },
   library: { line: "metabase", name: "Library", sub: "24 tables, 24 metrics", fact: "24 tables · 24 metrics", x: 620, y: 470,
     text: "The tables and metrics in the Metabase Library. The app’s questions are built on them." },
-  questions: { line: "metabase", name: "App questions", sub: "41 in the app collection", fact: "41 questions", x: 420, y: 470,
+  questions: { line: "metabase", name: "Saved queries", sub: "41 questions", fact: "41 questions", x: 420, y: 470,
     text: "41 saved questions in the app’s collection. The app runs these." },
   app: { line: "metabase", name: "MetaPumpkin", sub: "Polls 10 s to 2 min", fact: "Polls 10 s to 2 min", x: 200, y: 470,
     text: "This app. Each panel asks again every 10 s to 2 min, and a query takes 0.1–1.2 s." },
@@ -164,7 +164,7 @@ function Key() {
       <li><i className="pd-flow-swatch is-london"/><span><b>London line</b> · ClickHouse Cloud</span></li>
       <li><i className="pd-flow-swatch is-metabase"/><span><b>Metabase line</b> · database to app</span></li>
       <li><svg className="pd-flow-swatch-pk" viewBox="-14 -14 28 26" aria-hidden="true"><Pumpkin/></svg><span><b>A sale</b> · 8.7 s to London, median</span></li>
-      <li><i className="pd-flow-swatch is-change"/><span><b>Change</b> · Metabase asks ClickHouse</span></li>
+      <li><i className="pd-flow-swatch is-change"/><span><b>Query</b> · Metabase → ClickHouse</span></li>
     </ul>
   </>;
 }
@@ -185,10 +185,10 @@ function Dot({ id, small }: { id: GlyphId; small?: boolean }) {
 /* ── Stats ───────────────────────────────────────────────── */
 
 const STATS: { kind: TileKind; label: string; value: string; unit: string; note: string }[] = [
-  { kind: "watch", label: "Sale to ClickHouse", value: "8.7", unit: " s", note: "Median, 17 s at most" },
-  { kind: "plane", label: "Budapest to London", value: "1.4", unit: " s", note: "Median, commit to row" },
-  { kind: "squeeze", label: "On disk in ClickHouse", value: "9×", unit: " smaller", note: "198k rows in 2.6 MB" },
-  { kind: "bolt", label: "Per app query", value: "0.1–1.2", unit: " s", note: "Rebuilt from the raw rows" },
+  { kind: "watch", label: "End-to-end latency", value: "8.7", unit: " s median", note: "Sale → ClickHouse" },
+  { kind: "plane", label: "CDC latency", value: "1.4", unit: " s median", note: "Commit → ClickHouse" },
+  { kind: "squeeze", label: "Storage compression", value: "9×", unit: " smaller", note: "198k rows · 2.6 MB" },
+  { kind: "bolt", label: "Query latency", value: "0.1–1.2", unit: " s", note: "Per app query" },
 ];
 
 /* ── Page ────────────────────────────────────────────────── */
@@ -240,7 +240,7 @@ function LinesTab({ initial }: { initial?: Partial<DataFlowState> }) {
   </button>;
 
   return <>
-    <Panel title="Lines" aside={<><span>Measured on 6 October 2026</span>{pause}</>} className={`pd-flow${paused ? " is-paused" : ""}`}>
+    <Panel title="Lines" aside={pause} className={`pd-flow${paused ? " is-paused" : ""}`}>
       <div className="pd-flow-map">
         <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
           <rect className="pd-flow-zone is-budapest" x={24} y={24} width={736} height={220} rx={28}/>
@@ -316,7 +316,7 @@ function LinesTab({ initial }: { initial?: Partial<DataFlowState> }) {
         <div className="pd-flow-between">
           <div className="pd-flow-changerow">
             <span className="pd-flow-rail"><i className="pd-flow-bar is-london is-stub-top"/><i className="pd-flow-bar is-metabase is-stub-bottom"/><i className="pd-flow-capsule"/></span>
-            <span className="pd-flow-row-text"><b>Change for Metabase</b><span>Queries over HTTPS</span></span>
+            <span className="pd-flow-row-text"><b>Query</b><span>Metabase → ClickHouse</span></span>
           </div>
         </div>
         <div className="pd-flow-block is-metabase">

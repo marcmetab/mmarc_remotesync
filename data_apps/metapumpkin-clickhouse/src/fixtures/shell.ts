@@ -5,8 +5,7 @@ import type { Clock } from "../types";
  * before Halloween) and six late vans. Live: `clock` maps from sim_status (sim_now, mode,
  * days_to_halloween) and `lateVans` from hub_now (sum of vans_late).
  */
-export const shellFixture: { clock: Clock; lateVans: number; footnote: string } = {
+export const shellFixture: { clock: Clock; lateVans: number } = {
   clock: { now: "2026-10-28T18:20:00Z", mode: "live", daysToHalloween: 3 },
   lateVans: 6,
-  footnote: "Mock data · simulated clock",
 };

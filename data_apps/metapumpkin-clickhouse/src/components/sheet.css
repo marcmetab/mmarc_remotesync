@@ -40,7 +40,6 @@
 .pd-app a.pd-sheet-row.is-link { border-radius: 21px; color: var(--pd-ink); text-decoration: none; }
 .pd-app a.pd-sheet-row.is-link:hover { background: var(--pd-tint); color: var(--pd-ink); }
 .pd-app a.pd-sheet-row.is-link > svg { flex: none; color: var(--pd-muted); }
-.pd-app .pd-sheet-foot { align-self: center; font-size: 12.5px; color: var(--pd-muted); }
 
 /* ── Me ──────────────────────────────────────────────────── */
 .pd-app .pd-me-who { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 12px; }

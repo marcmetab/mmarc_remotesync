@@ -99,7 +99,7 @@ const noop = () => {};
 
 export const html = renderToStaticMarkup(
   <StaticNav pathname={${JSON.stringify(meta.path)}}>
-    <Shell active={${JSON.stringify(meta.tab)}} scope={scope} onScope={noop} clock={shellFixture.clock} lateVans={shellFixture.lateVans} footnote={shellFixture.footnote} theme={${JSON.stringify(theme)}}${typeof state.period === "string" ? ` period={${JSON.stringify(state.period)}}` : ""}>
+    <Shell active={${JSON.stringify(meta.tab)}} scope={scope} onScope={noop} clock={shellFixture.clock} lateVans={shellFixture.lateVans} theme={${JSON.stringify(theme)}}${typeof state.period === "string" ? ` period={${JSON.stringify(state.period)}}` : ""}>
       <Page vm={vm} scope={scope} onScope={noop} clock={shellFixture.clock} initial={${JSON.stringify(state)}}/>
     </Shell>
   </StaticNav>

@@ -27,9 +27,12 @@
 .pd-app a:hover { color: var(--pd-terracotta-dark); }
 .pd-app :is(button, a, input, select, [tabindex]):focus-visible { outline: 2px solid var(--pd-terracotta); outline-offset: 2px; }
 /* A press shows at once: a tap acts without waiting to see if it is a double tap, and a control darkens a touch while
-   it is held down (the World map's sprites keep their own look). */
+   it is held down (the World map's sprites keep their own look). A link whose hit area stretches over its row darkens
+   the row instead: a filter on the link would make it the box its ::after fills, so the hit area would shrink back to
+   the link mid-press and a click released anywhere else on the row would be lost. */
 .pd-app :is(button, a, summary, [role="button"]) { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-.pd-app :is(button, a, [role="button"]):not(:disabled, .pd-world-plane *):active { filter: brightness(.94); }
+.pd-app :is(button, a, [role="button"]):not(:disabled, .pd-world-plane *, .pd-business-ls-hit, .pd-business-bd-hit):active { filter: brightness(.94); }
+.pd-app :is(.pd-business-ls-row, .pd-business-bd-row.is-hit):active { filter: brightness(.94); }
 .pd-app svg { flex: none; }
 .pd-app :is(h1, h2, h3, p, dl, dd, figure) { margin: 0; }
 .pd-app .pd-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -88,7 +91,6 @@
 /* Each top-level element a page returns is one row of this column. */
 .pd-app .pd-content { display: flex; flex-direction: column; gap: 24px; max-width: var(--pd-content); margin: 0 auto; padding: 0 var(--pd-gutter) 32px; }
 .pd-app .pd-content > * { min-width: 0; }
-.pd-app .pd-footer { font-size: 12.5px; color: var(--pd-muted); }
 
 /* ── Banner: art only ────────────────────────────────────── */
 .pd-app .pd-banner { position: relative; flex: none; overflow: hidden; height: 148px; border-radius: var(--pd-r-banner); background: var(--pd-sky); }

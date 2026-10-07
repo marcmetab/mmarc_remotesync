@@ -38,8 +38,6 @@ class PageBoundary extends Component<{ children: ReactNode }, { failed: boolean 
   }
 }
 
-const FOOTNOTE = "Live data · simulated clock";
-
 /*
  * One live container per page: it runs the page's hook (src/data/) and hands the view model to the
  * presentational page. Only the open page's queries run and poll. The static preview
@@ -183,7 +181,7 @@ function Root() {
   const live = useMemo(() => ({ route: pageRoute, scope, onScope: setScope, clock, period, truckPeriod, onPeriod: pickPeriod }), [pageRoute, scope, clock, period, truckPeriod, pickPeriod]);
   // The countries this viewer may see reach the shell's region control and every page (src/visible.ts).
   return <VisibleContext.Provider value={visible}><Shell active={tabOf(route.page)} scope={scope} onScope={setScope} period={route.page === "Truck" ? truckPeriod : period} onPeriod={pickPeriod}
-    clock={clock} lateVans={lateVans} footnote={FOOTNOTE} theme={theme} onTheme={setTheme}>
+    clock={clock} lateVans={lateVans} theme={theme} onTheme={setTheme}>
     <LiveContext.Provider value={live}>
       <PageBoundary key={pagePath}><LivePage/></PageBoundary>
     </LiveContext.Provider>
