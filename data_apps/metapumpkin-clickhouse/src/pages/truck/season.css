@@ -1,0 +1,63 @@
+/*
+ * The van page's season chart (SeasonChart.tsx). Scoped to .pd-app, named pd-truck-season-* and pd-truck-day.
+ * The column's card is ChartTip's (components/chart-tip.css). Numbers here match the component's: bars at most
+ * 96px tall (72 on a phone) under a 16px strip for the fault dots. The axis answers to the panel's width.
+ */
+.pd-app .pd-truck-season-panel { container: pd-truck-season / inline-size; }
+.pd-app .pd-truck-season-unit { font-weight: 500; color: var(--pd-muted); }
+.pd-app .pd-truck-season { --pd-season-h: 96px; display: flex; flex-direction: column; gap: 8px; }
+.pd-app .pd-truck-season-plot { position: relative; height: calc(var(--pd-season-h) + 16px); border-bottom: 1px solid var(--pd-border); }
+/* The time switch's days, shaded behind their columns. */
+.pd-app .pd-truck-season-shade { position: absolute; top: 12px; bottom: 0; border-radius: 6px 6px 0 0; background: var(--pd-stone); }
+.pd-app .pd-truck-season-cols { position: absolute; inset: 0; display: flex; touch-action: pan-y; }
+
+/* A day: a full-height column (a button once reached); its bar, stub or dash sits on the baseline. */
+.pd-app .pd-truck-day { position: relative; flex: 1 1 0; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 4px 4px 0 0; background: transparent; cursor: default; }
+.pd-app .pd-truck-day.is-on { background: var(--pd-tint-strong); }
+.pd-app .pd-truck-day:focus-visible { outline-offset: 0; }
+.pd-app .pd-truck-day > span { position: absolute; bottom: 0; left: 12%; right: 12%; }
+.pd-app .pd-truck-day-bar { height: max(6px, calc(var(--pd-v, 0) * var(--pd-season-h))); border-radius: 3px 3px 1px 1px; background: var(--pd-olive); }
+.pd-app .pd-truck-day-bar.is-late { background: var(--pd-pumpkin-deep); }
+/* Under way: striped, still filling. */
+.pd-app .pd-truck-day-bar.is-now { background: repeating-linear-gradient(135deg, var(--pd-olive) 0 3px, var(--pd-meadow) 3px 6px); }
+.pd-app .pd-truck-day-bar.is-now-late { background: repeating-linear-gradient(135deg, var(--pd-pumpkin-deep) 0 3px, var(--pd-pumpkin-light) 3px 6px); }
+/* Outside the switch's days the bars step back. */
+.pd-app .pd-truck-day.is-out > .pd-truck-day-bar { opacity: .35; }
+/* No trip that day: a short stub. Still to come: a dash, the dashes running on into Halloween. */
+.pd-app .pd-truck-day > .pd-truck-day-stub { height: 3px; border-radius: 2px; background: var(--pd-border); }
+.pd-app .pd-truck-day > .pd-truck-day-dash { left: 0; right: 0; height: 3px; background: repeating-linear-gradient(90deg, var(--pd-border) 0 3px, transparent 3px 6px); }
+/* Today: an ink line under its column. */
+.pd-app .pd-truck-day.is-today::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: -2px; height: 3px; border-radius: 2px; background: var(--pd-ink); }
+/* A fault raised that day: a small dot over the column (its colour inline: amber warning, deep orange critical). */
+.pd-app .pd-truck-day-fault { position: absolute; top: 2px; left: 50%; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%; }
+/* Where the card is placed (ChartTip measures against it): the plot and a strip above it (top is inline). */
+.pd-app .pd-truck-season-tip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; pointer-events: none; }
+.pd-app .pd-truck-season .pd-tip { --pd-tip-w: 252px; }
+.pd-app .pd-truck-season .pd-tip-value { white-space: normal; text-wrap: balance; }
+
+/* Labels under the columns: months, Mondays' dates, Today and Halloween (after a small pumpkin) in ink. */
+.pd-app .pd-truck-season-x { position: relative; height: 18px; font-size: 12px; line-height: 18px; color: var(--pd-muted); font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-truck-x { position: absolute; top: 0; display: flex; align-items: center; gap: 4px; height: 18px; white-space: nowrap; }
+.pd-app .pd-truck-x.is-strong { font-weight: 700; color: var(--pd-ink); }
+/*
+ * Each label knows at which widths it would touch a stronger one (SeasonChart's Axis): wide, middle, phone. Hidden
+ * there (is-hide-*), or, for Halloween, down to its pumpkin (is-short-*).
+ */
+.pd-app .pd-truck-x.is-hide-l { display: none; }
+.pd-app .pd-truck-x.is-short-l > .pd-truck-x-word { display: none; }
+@container pd-truck-season (max-width: 899.98px) {
+  .pd-app .pd-truck-x.is-hide-l { display: flex; }
+  .pd-app .pd-truck-x.is-short-l > .pd-truck-x-word { display: inline; }
+  .pd-app .pd-truck-x.is-hide-m { display: none; }
+  .pd-app .pd-truck-x.is-short-m > .pd-truck-x-word { display: none; }
+}
+@container pd-truck-season (max-width: 559.98px) {
+  .pd-app .pd-truck-x.is-hide-m { display: flex; }
+  .pd-app .pd-truck-x.is-short-m > .pd-truck-x-word { display: inline; }
+  .pd-app .pd-truck-x.is-hide-s { display: none; }
+  .pd-app .pd-truck-x.is-short-s > .pd-truck-x-word { display: none; }
+  .pd-app .pd-truck-season { --pd-season-h: 72px; }
+  .pd-app .pd-truck-day > span { left: 8%; right: 8%; }
+  .pd-app .pd-truck-day-bar { border-radius: 2px 2px 1px 1px; }
+  .pd-app .pd-truck-day-fault { width: 5px; height: 5px; margin-left: -2.5px; }
+}

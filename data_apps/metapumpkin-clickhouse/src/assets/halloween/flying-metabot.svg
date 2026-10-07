@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400" fill="none" role="img" aria-labelledby="mpf-title mpf-desc">
+  <title id="mpf-title">Flying MetaPumpkin</title>
+  <desc id="mpf-desc">A friendly pumpkin MetaBot with a cream face and plum bat wings. Transparent, editable vector artwork. The body, left wing, right wing, and orange motion lines are separately grouped. Each wing's local origin is its shoulder.</desc>
+  <defs>
+    <linearGradient id="mpf-wing-fill" x1="0" y1="0" x2="0.8" y2="1">
+      <stop stop-color="#704151"/><stop offset="1" stop-color="#512D40"/>
+    </linearGradient>
+    <linearGradient id="mpf-pumpkin-left" x1="201" y1="139" x2="314" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F89E42"/><stop offset="1" stop-color="#EF8B38"/>
+    </linearGradient>
+    <linearGradient id="mpf-pumpkin-right" x1="395" y1="147" x2="456" y2="315" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F69B42"/><stop offset="1" stop-color="#EC8533"/>
+    </linearGradient>
+    <linearGradient id="mpf-pumpkin-center" x1="281" y1="128" x2="382" y2="332" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F79D46"/><stop offset="0.55" stop-color="#EE8F3B"/><stop offset="1" stop-color="#F49A43"/>
+    </linearGradient>
+    <linearGradient id="mpf-stem-fill" x1="346" y1="80" x2="379" y2="132" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6D9545"/><stop offset="1" stop-color="#4D7137"/>
+    </linearGradient>
+    <linearGradient id="mpf-face-fill" x1="269" y1="181" x2="383" y2="288" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCF8F2"/><stop offset="1" stop-color="#F7F2ED"/>
+    </linearGradient>
+  </defs>
+  <!-- Animate #metabot to bob the entire character. Keep the static shoulder anchors below. -->
+  <g id="metabot">
+    <!-- Left shoulder: (220,212) in the root viewBox. Animate the INNER #wing-left about (0,0). -->
+    <g id="wing-left-anchor" transform="translate(220 212)">
+      <g id="wing-left" data-pivot-x="0" data-pivot-y="0" stroke-linejoin="round" stroke-linecap="round">
+        <path fill="url(#mpf-wing-fill)" stroke="#432738" stroke-width="6.5" d="M 2 -27 L -43 -58 C -72 -75 -137 -43 -171 -8 Q -176 -2 -172 -4 C -142 -15 -99 -2 -85 38 C -60 19 -32 22 -4 39 L 14 6 Z"/>
+        <path fill="#754557" opacity="0.32" d="M -164 -9 C -127 -42 -82 -58 -47 -53 C -72 -29 -77 5 -85 31 C -96 1 -130 -16 -164 -9 Z"/>
+        <path stroke="#47283A" stroke-width="6.5" d="M -43 -58 C -61 -30 -76 8 -85 38"/>
+      </g>
+    </g>
+    <!-- Right shoulder: (452,254). Animate the INNER #wing-right about (0,0). -->
+    <g id="wing-right-anchor" transform="translate(452 254)">
+      <g id="wing-right" data-pivot-x="0" data-pivot-y="0" stroke-linejoin="round" stroke-linecap="round">
+        <path fill="url(#mpf-wing-fill)" stroke="#432738" stroke-width="6.5" d="M 7 -16 L 46 -31 C 58 -35 86 -19 106 1 C 125 19 137 39 140 54 C 112 33 83 38 62 53 C 54 59 49 65 45 70 C 37 53 23 45 2 47 L -16 54 Z"/>
+        <path fill="#774758" opacity="0.3" d="M 51 -23 C 81 -11 118 22 134 45 C 107 31 80 37 52 57 C 59 28 58 1 51 -23 Z"/>
+        <path stroke="#47283A" stroke-width="6.5" d="M 46 -31 C 54 -1 54 35 45 70"/>
+      </g>
+    </g>
+    <!-- The complete pumpkin, stem, and face. Wings render behind the body. -->
+    <g id="body" stroke="#38271F" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round">
+      <g id="stem">
+        <path fill="url(#mpf-stem-fill)" d="M 327 120 C 339 88 362 61 389 57 C 397 55 405 55 407 60 C 409 64 402 69 397 75 C 381 93 373 112 373 131 C 357 136 340 130 327 120 Z"/>
+        <path fill="#83A453" opacity="0.36" stroke="none" d="M 334 116 C 348 83 370 65 399 63 C 379 75 360 94 352 124 Z"/>
+      </g>
+      <g id="pumpkin-shell">
+        <path id="pumpkin-left-lobe" fill="url(#mpf-pumpkin-left)" d="M 316 121 C 293 111 265 116 242 131 C 211 151 193 181 194 220 C 192 263 214 297 246 307 C 260 312 277 313 291 309 L 303 280 L 299 157 Z"/>
+        <path id="pumpkin-right-lobe" fill="url(#mpf-pumpkin-right)" d="M 383 132 C 416 126 450 148 464 182 C 480 220 470 268 449 297 C 429 323 398 341 368 332 L 352 305 L 376 252 L 400 167 Z"/>
+        <path id="pumpkin-center-lobe" fill="url(#mpf-pumpkin-center)" d="M 325 123 C 304 117 281 137 263 166 C 248 192 240 217 244 254 C 247 288 265 316 291 322 C 309 327 331 331 347 332 C 369 335 387 316 402 289 C 417 262 423 233 419 207 C 416 172 408 145 390 133 C 370 129 348 133 325 123 Z"/>
+      </g>
+      <g id="face">
+        <path id="face-panel" fill="url(#mpf-face-fill)" d="M 283 173 C 263 170 249 181 242 201 C 234 221 234 244 243 259 C 251 271 267 274 290 279 L 372 291 C 391 294 405 283 412 265 C 420 244 422 221 415 206 C 410 196 403 192 389 189 Z"/>
+        <g id="eyes" stroke="none" fill="#38271F">
+          <ellipse id="eye-left" cx="280.5" cy="223.5" rx="14.6" ry="15.3" transform="rotate(8 280.5 223.5)"/>
+          <ellipse id="eye-right" cx="376" cy="240.5" rx="14.5" ry="15.1" transform="rotate(8 376 240.5)"/>
+        </g>
+        <path id="smile" stroke="none" fill="#38271F" d="M 312 237 C 308 234 303 238 305 247 C 307 258 317 266 330 266 C 342 266 351 257 351 248 C 351 242 347 240 343 244 C 337 249 321 246 316 243 C 314 242 314 239 312 237 Z"/>
+      </g>
+    </g>
+    <g id="whoosh" stroke="#E78235" stroke-width="8" stroke-linecap="round">
+      <path d="M 151 287 L 177 277"/>
+      <path d="M 170 323 L 190 302"/>
+    </g>
+  </g>
+</svg>

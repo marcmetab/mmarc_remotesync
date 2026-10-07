@@ -1,0 +1,97 @@
+/*
+ * Business page · Breakdown: the dimension tabs with the metric switch, and the sortable table. Rows are the
+ * shared .pd-thead / .pd-tr grids (styles/base.css) on --pd-cols; the table scrolls sideways in its own box
+ * when the panel is narrower than --pd-table-min. Everything is scoped to .pd-app and named pd-business-bd-*.
+ */
+
+/* ── Controls ────────────────────────────────────────────── */
+/* Above the title's 44px tap area, which would otherwise take the top of the tabs. */
+.pd-app .pd-business-bd-controls { position: relative; z-index: 1; padding: 0 20px; margin-top: 4px; }
+.pd-app .pd-business-bd-controls .pd-tabs { gap: 0 24px; }
+.pd-app .pd-business-bd-controls .pd-tabs-trailing { padding: 4px 0; }
+/* The metric switch is a segmented control; channel can only show revenue, so its other options turn faint. */
+.pd-app .pd-business-bd-metric > button:disabled { cursor: default; color: var(--pd-faint); }
+.pd-app .pd-business-bd-metric > button:disabled:hover { color: var(--pd-faint); }
+.pd-app .pd-business-bd-state { padding: 14px 20px 8px; }
+
+/* A country's cities: "‹ All countries / United States · 4 cities" above the table. */
+.pd-app .pd-business-bd-crumb { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; padding: 4px 20px; border-bottom: 1px solid var(--pd-hairline); font-size: 13.5px; color: var(--pd-ink); }
+.pd-app .pd-business-bd-back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; margin-left: -4px; padding: 0 4px; border: 0; background: transparent; color: var(--pd-terracotta); font-weight: 700; }
+.pd-app .pd-business-bd-back:hover { color: var(--pd-terracotta-dark); }
+.pd-app .pd-business-bd-crumb-sep { color: var(--pd-faint); }
+.pd-app .pd-business-bd-crumb > strong { font-weight: 700; }
+.pd-app .pd-business-bd-crumb-note { color: var(--pd-muted); }
+
+/* ── Table ───────────────────────────────────────────────── */
+.pd-app .pd-business-bd-table {
+  --pd-cols: minmax(132px, 1.6fr) minmax(80px, .8fr) minmax(104px, 1.1fr) 68px 100px 84px 100px;
+  --pd-table-min: 768px;
+}
+.pd-app .pd-business-bd-table :is(.pd-thead, .pd-tr) { gap: 10px; }
+.pd-app .pd-business-bd-table .pd-tr > * { min-width: 0; }
+.pd-app .pd-business-bd-table .pd-thead { align-items: center; padding-top: 0; padding-bottom: 0; }
+/* The panel's own border closes the table; "Show all" draws the line above itself. */
+.pd-app .pd-business-bd-table > .pd-tr:last-child { border-bottom: 0; }
+
+/* Sortable headings: a 44px button that looks like the heading; the active one is ink with an arrow. */
+.pd-app .pd-business-bd-sort { position: relative; display: inline-flex; align-items: center; gap: 3px; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--pd-muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
+/* At least 44px wide to tap, however short the heading ("Share"). */
+.pd-app .pd-business-bd-sort::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: max(100%, 44px); transform: translateX(-50%); }
+.pd-app .pd-business-bd-sort:hover, .pd-app .pd-business-bd-sort.is-on { color: var(--pd-ink); }
+.pd-app .pd-business-bd-sort.is-on { font-weight: 700; }
+.pd-app .pd-business-bd-trend-head { white-space: nowrap; }
+
+/* A row whose name is a button or a link: the name's hit area stretches over the whole row. */
+.pd-app .pd-business-bd-row { position: relative; }
+.pd-app .pd-business-bd-row.is-hit:hover { background: var(--pd-stone); }
+.pd-app .pd-business-bd-hit { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--pd-ink); text-align: left; text-decoration: none; }
+.pd-app .pd-business-bd-hit:hover { color: var(--pd-ink); }
+.pd-app .pd-business-bd-hit::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.pd-app .pd-business-bd-hit:focus-visible { outline: none; }
+.pd-app .pd-business-bd-hit:focus-visible::after { outline: 2px solid var(--pd-terracotta); outline-offset: -2px; }
+.pd-app .pd-business-bd-plain { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pd-app .pd-business-bd-label { display: flex; flex-direction: column; min-width: 0; }
+.pd-app .pd-business-bd-label > strong { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.pd-app .pd-business-bd-label > small { font-size: 12px; color: var(--pd-muted); white-space: nowrap; }
+.pd-app .pd-business-bd-row.is-group .pd-business-bd-label > strong { font-weight: 700; color: var(--pd-ink-soft); }
+
+.pd-app .pd-business-bd-value { font-weight: 600; }
+.pd-app .pd-business-bd-share { display: flex; align-items: center; gap: 10px; }
+.pd-app .pd-business-bd-share > :first-child { flex: 1 1 auto; }
+.pd-app .pd-business-bd-share > span:last-child { flex: none; min-width: 44px; text-align: right; font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-business-bd-lost { color: var(--pd-ink-soft); }
+.pd-app .pd-business-bd-trend { display: flex; align-items: center; gap: 0; }
+.pd-app .pd-business-bd-trend > svg:last-child:not(:first-child) { color: var(--pd-terracotta); }
+.pd-app .pd-business-bd-row.is-hit:hover .pd-business-bd-trend > svg:last-child:not(:first-child) { transform: translateX(2px); transition: transform .16s ease; }
+
+/* "Show all 25": a full-width row under the table. */
+.pd-app .pd-business-bd-more { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 44px; padding: 0 20px; border: 0; border-top: 1px solid var(--pd-row-line); background: transparent; color: var(--pd-terracotta); font-size: 13.5px; font-weight: 700; text-align: left; }
+.pd-app .pd-business-bd-more:hover { color: var(--pd-terracotta-dark); }
+
+/*
+ * The scroll box lays the table out beside a fade that sticks to its right edge: while columns are off to the
+ * side it sits over them; scrolled to the end it sits over the rows' right padding. Shown on phones only.
+ */
+.pd-app .pd-business-bd-scroll { display: flex; }
+.pd-app .pd-business-bd-scroll > .pd-table { flex: 1 1 0; }
+.pd-app .pd-business-bd-fade { display: none; }
+
+/* ── Phone ───────────────────────────────────────────────── */
+@media (max-width: 599.98px) {
+  .pd-app .pd-business-bd-fade { position: sticky; right: 0; z-index: 2; display: block; flex: none; width: 24px; margin-left: -24px; background: linear-gradient(to right, var(--pd-page-clear), var(--pd-page) 80%); pointer-events: none; }
+  .pd-app .pd-business-bd-controls { padding: 0 16px; }
+  .pd-app .pd-business-bd-controls .pd-tabs-list { gap: 0 12px; }
+  .pd-app .pd-business-bd-metric > button > span { padding: 0 11px; }
+  .pd-app .pd-business-bd-state { padding: 12px 16px 8px; }
+  .pd-app .pd-business-bd-crumb { padding: 4px 16px; }
+  .pd-app .pd-business-bd-more { padding: 0 16px; }
+}
+/* A narrow phone (375): the five dimension tabs stay on one line. */
+@media (max-width: 399.98px) {
+  .pd-app .pd-business-bd-controls .pd-tabs-list { gap: 0 8px; }
+  .pd-app .pd-business-bd-controls .pd-tabs-list > button { font-size: 13px; }
+}
+/* A very narrow phone (320): the metric switch keeps inside its panel. */
+@media (max-width: 359.98px) {
+  .pd-app .pd-business-bd-metric > button > span { padding: 0 7px; }
+}

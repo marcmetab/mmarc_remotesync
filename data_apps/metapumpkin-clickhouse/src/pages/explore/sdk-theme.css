@@ -1,0 +1,909 @@
+/*
+ * The Metabase question in the app's theme (QuestionFrame.tsx imports this).
+ *
+ * The SDK takes its theme once, when the app loads: Golden Hour on Metabase's light or dark preset, from the
+ * viewer's system preference (theme.ts sdkLoadTheme, sdkThemeFor). Each question sits in a QuestionFrame
+ * (.pd-mb) that says which one it loaded (data-sdk-theme). Nothing here applies while the app's theme is the
+ * SDK's. When the in-app switch moves away from it, the rules below repaint the question in the app's theme,
+ * on the frame, so everything inside follows: the toolbar, the query editor, the data picker, popovers and
+ * menus (the SDK portals them into #metabase-sdk-portal-root, inside the question's own wrapper, so inside
+ * the frame), the chart's tooltip and legend, and the chart itself.
+ *
+ * Three kinds of colour, three ways:
+ *   1. Metabase's CSS variables (--mb-color-*, declared on :root): declared again on the frame with the other
+ *      preset's values. Those built from others (color-mix of --mb-color-core-brand…) are declared again too,
+ *      so they are rebuilt from the new ones.
+ *   2. Mantine's (--mantine-color-*, on every .mb-wrapper): each Metabase colour is a palette of ten equal
+ *      shades written out as literals, so the shades Mantine reads (0, 1, 4) are pointed at the Metabase
+ *      variable; plus Mantine's scheme variables (body, text, borders) and its shadows.
+ *   3. Colours Metabase resolves in JavaScript from the loaded theme and writes into the chart's SVG as
+ *      attributes (axis labels, the axis line, hollow dots, the series), into the legend dots (a color
+ *      attribute) and into the tooltip's markers (a marker-RRGGBB class): matched by value and repainted.
+ *      CSS beats an SVG presentation attribute. The series colours are the theme's chartColors and the
+ *      Explore cards' country colours (business/Explore.tsx), both drawn from the loaded theme. A hovered
+ *      series is redrawn in a shade ECharts derives from its colour, written as rgb(): it is the series whose
+ *      marks are not dimmed (the others get an opacity), so :has() finds which colour it should be.
+ *
+ * What does not follow: styles keyed on the wrapper's data-mantine-color-scheme (the SDK sets it from the
+ * loaded preset), which only touch a few of Mantine's own greys; the one that shows, the edge of popovers
+ * and menus, is matched below. Metabase's colours, which the question's UI is drawn in, all follow.
+ *
+ * Parts 1 and 2 are generated from the SDK's own variables, read in the browser under each preset (dumped from
+ * the :root rule, the .mb-wrapper rule and the .mb-wrapper[data-mantine-color-scheme] rules); regenerate them
+ * after an SDK upgrade or a change to sdkThemeFor's colours.
+ */
+
+/* ── Colours resolved in JavaScript: chart, legend, tooltip markers ── */
+/* Dark app, light SDK. */
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#3a2230" i] { fill: #f7ebe4; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#3a2230" i] { stroke: #f7ebe4; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#5a4550" i] { fill: #dfcdc8; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#5a4550" i] { stroke: #dfcdc8; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#6f5a64" i] { fill: #b9a5a8; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#6f5a64" i] { stroke: #b9a5a8; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#e2d8d1" i] { fill: #54424a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#e2d8d1" i] { stroke: #54424a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#fdfbf9" i] { fill: #22161a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#fdfbf9" i] { stroke: #22161a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#e2681c" i] { fill: #f0823a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#e2681c" i] { stroke: #f0823a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#4a2638" i] { fill: #dcb3c6; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#4a2638" i] { stroke: #dcb3c6; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#5f6d2c" i] { fill: #b0bf68; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#5f6d2c" i] { stroke: #b0bf68; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#e3a047" i] { fill: #e9ad5c; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#e3a047" i] { stroke: #e9ad5c; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#a8667a" i] { fill: #cf8aa0; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#a8667a" i] { stroke: #cf8aa0; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#c9683c" i] { fill: #de8a5f; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#c9683c" i] { stroke: #de8a5f; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [fill="#8f9a4e" i] { fill: #8e9a52; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg [stroke="#8f9a4e" i] { stroke: #8e9a52; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] [color="#e2681c" i], .pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .marker-E2681C { background-color: #f0823a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] [color="#4a2638" i], .pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .marker-4A2638 { background-color: #dcb3c6; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] [color="#5f6d2c" i], .pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .marker-5F6D2C { background-color: #b0bf68; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] [color="#e3a047" i], .pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .marker-E3A047 { background-color: #e9ad5c; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] [color="#a8667a" i], .pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .marker-A8667A { background-color: #cf8aa0; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] [color="#c9683c" i], .pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .marker-C9683C { background-color: #de8a5f; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] [color="#8f9a4e" i], .pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .marker-8F9A4E { background-color: #8e9a52; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#e2681c" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #f0823a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#e2681c" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #f0823a; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#4a2638" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #dcb3c6; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#4a2638" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #dcb3c6; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#5f6d2c" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #b0bf68; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#5f6d2c" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #b0bf68; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#e3a047" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #e9ad5c; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#e3a047" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #e9ad5c; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#a8667a" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #cf8aa0; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#a8667a" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #cf8aa0; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#c9683c" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #de8a5f; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#c9683c" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #de8a5f; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#8f9a4e" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #8e9a52; }
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] svg:has(path[stroke="#8f9a4e" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #8e9a52; }
+
+/* Light app, dark SDK. */
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#f7ebe4" i] { fill: #3a2230; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#f7ebe4" i] { stroke: #3a2230; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#dfcdc8" i] { fill: #5a4550; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#dfcdc8" i] { stroke: #5a4550; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#b9a5a8" i] { fill: #6f5a64; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#b9a5a8" i] { stroke: #6f5a64; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#54424a" i] { fill: #e2d8d1; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#54424a" i] { stroke: #e2d8d1; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#22161a" i] { fill: #fdfbf9; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#22161a" i] { stroke: #fdfbf9; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#f0823a" i] { fill: #e2681c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#f0823a" i] { stroke: #e2681c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#dcb3c6" i] { fill: #4a2638; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#dcb3c6" i] { stroke: #4a2638; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#b0bf68" i] { fill: #5f6d2c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#b0bf68" i] { stroke: #5f6d2c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#e9ad5c" i] { fill: #e3a047; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#e9ad5c" i] { stroke: #e3a047; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#cf8aa0" i] { fill: #a8667a; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#cf8aa0" i] { stroke: #a8667a; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#de8a5f" i] { fill: #c9683c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#de8a5f" i] { stroke: #c9683c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [fill="#8e9a52" i] { fill: #8f9a4e; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg [stroke="#8e9a52" i] { stroke: #8f9a4e; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] [color="#f0823a" i], .pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .marker-F0823A { background-color: #e2681c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] [color="#dcb3c6" i], .pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .marker-DCB3C6 { background-color: #4a2638; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] [color="#b0bf68" i], .pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .marker-B0BF68 { background-color: #5f6d2c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] [color="#e9ad5c" i], .pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .marker-E9AD5C { background-color: #e3a047; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] [color="#cf8aa0" i], .pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .marker-CF8AA0 { background-color: #a8667a; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] [color="#de8a5f" i], .pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .marker-DE8A5F { background-color: #c9683c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] [color="#8e9a52" i], .pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .marker-8E9A52 { background-color: #8f9a4e; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#f0823a" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #e2681c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#f0823a" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #e2681c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#dcb3c6" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #4a2638; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#dcb3c6" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #4a2638; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#b0bf68" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #5f6d2c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#b0bf68" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #5f6d2c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#e9ad5c" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #e3a047; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#e9ad5c" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #e3a047; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#cf8aa0" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #a8667a; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#cf8aa0" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #a8667a; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#de8a5f" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #c9683c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#de8a5f" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #c9683c; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#8e9a52" i]:not([opacity])) :is(path[stroke^="rgb("]) { stroke: #8f9a4e; }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] svg:has(path[stroke="#8e9a52" i]:not([opacity])) :is(path[fill^="rgb("]) { fill: #8f9a4e; }
+
+
+/* ── Rules Metabase keys on the wrapper's colour scheme ──── */
+/* Popovers and menus: an edge in dark (none in light, where they have a shadow), as under each preset. */
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .mb-mantine-Popover-dropdown { border-color: var(--mb-color-border-neutral-strong); }
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .mb-mantine-Popover-dropdown { border-color: transparent; }
+
+/* ── Both ways ───────────────────────────────────────────── */
+/*
+ * The chart tooltip's series markers get a thin cream ring in light: its background is plum (theme.ts
+ * sdkThemeFor), the United States' own colour, whose marker would otherwise vanish into it.
+ */
+.pd-app[data-theme="light"] .pd-mb span[class*=" marker-"] { box-shadow: 0 0 0 1px rgba(251, 227, 207, .7); }
+
+/* ── Generated: the SDK's variables in the app's theme (see the header) ── */
+
+/* Dark app, light SDK: the dark preset's values. */
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] {
+  --mb-color-admin-navbar: hsla(240, 43%, 33%, 1);
+  --mb-color-admin-navbar-secondary: hsla(240, 46%, 58%, 1);
+  --mb-color-admin-navbar-inverse: hsla(240, 46%, 58%, 1);
+  --mb-color-background-brand: color-mix(in srgb, var(--mb-color-core-brand), black 75%);
+  --mb-color-background-filter: color-mix(in srgb, var(--mb-color-core-filter), black 75%);
+  --mb-color-background-disabled-inverse: hsla(204, 66%, 8%, 0.05);
+  --mb-color-background-error-secondary: hsla(1, 75%, 17%, 1);
+  --mb-color-background-highlight: color-mix(in srgb, var(--mb-color-core-brand) 7%, transparent);
+  --mb-color-background-selected: color-mix(in srgb, var(--mb-color-core-brand) 21%, transparent);
+  --mb-color-background-primary-inverse: hsla(195, 6%, 87%, 1);
+  --mb-color-background-secondary-inverse: hsla(203, 6%, 73%, 1);
+  --mb-color-background-tertiary-inverse: hsla(204, 12%, 32%, 1);
+  --mb-color-overlay: hsla(204, 66%, 8%, 0.74);
+  --mb-color-background-success: hsla(92, 62%, 10%, 1);
+  --mb-color-background-success-secondary: hsla(89, 50%, 24%, 1);
+  --mb-color-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), white 35%);
+  --mb-color-icon-brand: var(--mb-color-core-brand);
+  --mb-color-icon-brand-inverse: color-mix(in srgb, var(--mb-color-core-brand), black 12%);
+  --mb-color-icon-primary: hsla(0, 0%, 100%, 0.95);
+  --mb-color-icon-primary-inverse: hsla(204, 66%, 8%, 0.84);
+  --mb-color-icon-disabled: hsla(0, 0%, 100%, 0.46);
+  --mb-color-icon-disabled-inverse: hsla(204, 66%, 8%, 0.44);
+  --mb-color-icon-secondary: hsla(0, 0%, 100%, 0.69);
+  --mb-color-icon-secondary-inverse: hsla(204, 66%, 8%, 0.62);
+  --mb-color-illustration-brand-secondary: color-mix(in srgb, var(--mb-color-core-brand), black 62%);
+  --mb-color-illustration-brand-tertiary: color-mix(in srgb, var(--mb-color-core-brand), black 75%);
+  --mb-color-metabase-brand-hover: hsla(208, 68%, 53%, 1.00);
+  --mb-color-saturated-blue: hsla(208, 72%, 60%, 1);
+  --mb-color-saturated-green: hsla(89, 47%, 45%, 1);
+  --mb-color-saturated-purple: hsla(240, 69%, 74%, 1);
+  --mb-color-saturated-red: hsla(1, 84%, 69%, 1);
+  --mb-color-success-secondary: hsla(89, 47%, 45%, 1);
+  --mb-color-syntax-parameters-active: hsla(26, 79%, 13%, 1);
+  --mb-color-syntax-parameters: hsla(26, 79%, 54%, 1);
+  --mb-color-text-tertiary-inverse: hsla(204, 66%, 8%, 0.44);
+  --mb-color-text-secondary-opaque: hsla(195, 6%, 87%, 1);
+  --mb-color-background-warning: hsla(46, 88%,  10%, 1);
+  --mb-color-background-warning-secondary: hsla(46, 79%,  22%, 1);
+  --mb-color-info: hsla(203, 5%, 53%, 1);
+  --mb-color-background-info: hsla(204, 34%, 14%, 1);
+  --mb-color-border-strong: hsla(0, 0%, 100%, 0.33);
+  --mb-color-border-stronger: hsla(0, 0%, 100%, 0.53);
+  --mb-color-border-subtle: hsla(0, 0%, 100%, 0.10);
+  --mb-color-upsell-primary: hsla(208, 73%, 74%, 1);
+  --mb-color-upsell-secondary: hsla(208, 82%, 22%, 1);
+  --mb-color-background_page-filter: color-mix(in srgb, var(--mb-color-core-filter), black 75%);
+  --mb-color-background_page-highlighted: color-mix(in srgb, var(--mb-color-core-brand) 7%, transparent);
+  --mb-color-background_page-primary-inverse: hsla(0, 0%, 100%, 1.00);
+  --mb-color-background_page-secondary-inverse: hsla(240, 11%, 98%, 1);
+  --mb-color-background_page-tertiary-inverse: hsla(240, 4%, 95%, 1);
+  --mb-color-background_surface-brand-strong: color-mix(in srgb, var(--mb-color-core-brand), white 70%);
+  --mb-color-background_surface-brand-strong-hover: color-mix(in srgb, var(--mb-color-core-brand), white 91%);
+  --mb-color-background_surface-brand-strong-pressed: color-mix(in srgb, var(--mb-color-core-brand), white 70%);
+  --mb-color-background_surface-brand-subtle: color-mix(in srgb, var(--mb-color-core-brand) 10%, transparent);
+  --mb-color-background_surface-brand-subtle-hover: color-mix(in srgb, var(--mb-color-core-brand), black 50%);
+  --mb-color-background_surface-brand-subtle-pressed: color-mix(in srgb, var(--mb-color-core-brand), black 75%);
+  --mb-color-background_surface-disabled-inverse: hsla(204, 66%, 8%, 0.05);
+  --mb-color-background_surface-error-subtle: hsla(1, 75%, 17%, 1);
+  --mb-color-background_surface-primary-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-background_surface-primary-inverse: hsla(0, 0%, 100%, 1.00);
+  --mb-color-background_surface-primary-inverse-hover: hsla(204, 66%, 8%, 0.05);
+  --mb-color-background_surface-primary-inverse-pressed: hsla(204, 66%, 8%, 0.17);
+  --mb-color-background_surface-primary-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background_surface-secondary: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background_surface-secondary-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-background_surface-secondary-inverse: hsla(204, 66%, 8%, 0.05);
+  --mb-color-background_surface-secondary-inverse-hover: hsla(204, 66%, 8%, 0.17);
+  --mb-color-background_surface-secondary-inverse-pressed: hsla(204, 66%, 8%, 0.29);
+  --mb-color-background_surface-secondary-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background_surface-selected: color-mix(in srgb, var(--mb-color-core-brand) 21%, transparent);
+  --mb-color-background_surface-success: hsla(92, 62%, 10%, 1);
+  --mb-color-background_surface-warning: hsla(46, 88%,  10%, 1);
+  --mb-color-background_surface-warning-strong: hsla(46, 79%,  22%, 1);
+  --mb-color-border-brand: color-mix(in srgb, var(--mb-color-core-brand), black 62%);
+  --mb-color-border-filter: color-mix(in srgb, var(--mb-color-core-filter), black 62%);
+  --mb-color-border-highlight: color-mix(in srgb, var(--mb-color-core-brand), white 35%);
+  --mb-color-border-neutral-inverse-strong: hsla(204, 66%, 8%, 0.29);
+  --mb-color-border-neutral-strong: hsla(0, 0%, 100%, 0.33);
+  --mb-color-border-neutral-strongest: hsla(0, 0%, 100%, 0.53);
+  --mb-color-border-neutral-subtle: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-default-neutral-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-default-neutral-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-filled-brand-default: color-mix(in srgb, var(--mb-color-core-brand), white 70%);
+  --mb-color-button-filled-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), white 91%);
+  --mb-color-button-filled-brand-pressed: color-mix(in srgb, var(--mb-color-core-brand), white 70%);
+  --mb-color-button-filled-filter-default: color-mix(in srgb, var(--mb-color-core-filter), white 70%);
+  --mb-color-button-filled-filter-hover: color-mix(in srgb, var(--mb-color-core-filter), white 91%);
+  --mb-color-button-filled-filter-pressed: color-mix(in srgb, var(--mb-color-core-filter), white 70%);
+  --mb-color-button-filled-negative-default: hsla(2, 67%, 90%, 1);
+  --mb-color-button-filled-negative-hover: hsla(0, 76%, 97%, 1);
+  --mb-color-button-filled-negative-pressed: hsla(2, 67%, 90%, 1);
+  --mb-color-button-filled-positive-default: hsla(91, 51%, 81%, 1);
+  --mb-color-button-filled-positive-hover: hsla(92, 65%, 92%, 1);
+  --mb-color-button-filled-positive-pressed: hsla(91, 51%, 81%, 1);
+  --mb-color-button-filled-warning-hover: hsla(46, 96%,  90%, 1);
+  --mb-color-button-filled-warning-pressed: hsla(46, 94%,  74%, 1);
+  --mb-color-button-light-brand-default: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-brand-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-light-brand-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-filter-default: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-filter-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-light-filter-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-negative-default: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-negative-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-light-negative-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-neutral-default: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-neutral-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-light-neutral-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-positive-default: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-light-positive-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-light-positive-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-subtle-brand-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-subtle-brand-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-subtle-negative-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-subtle-negative-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-subtle-neutral-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-subtle-neutral-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button-subtle-positive-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-button-subtle-positive-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-button_label-filled-brand-default: color-mix(in srgb, var(--mb-color-core-brand), black 62%);
+  --mb-color-button_label-filled-filter-default: color-mix(in srgb, var(--mb-color-core-filter), black 62%);
+  --mb-color-button_label-filled-negative-default: hsla(1, 71%, 26%, 1);
+  --mb-color-button_label-filled-positive-default: hsla(89, 54%, 16%, 1);
+  --mb-color-button_label-light-brand-default: color-mix(in srgb, var(--mb-color-core-brand), white 35%);
+  --mb-color-button_label-light-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), white 70%);
+  --mb-color-button_label-light-filter-default: color-mix(in srgb, var(--mb-color-core-filter), white 35%);
+  --mb-color-button_label-light-filter-hover: color-mix(in srgb, var(--mb-color-core-filter), white 70%);
+  --mb-color-button_label-light-negative-default: hsla(1, 85%, 81%, 1);
+  --mb-color-button_label-light-negative-hover: hsla(2, 67%, 90%, 1);
+  --mb-color-button_label-light-positive-default: hsla(90, 47%, 60%, 1);
+  --mb-color-button_label-light-positive-hover: hsla(91, 51%, 81%, 1);
+  --mb-color-button_label-subtle-brand-default: color-mix(in srgb, var(--mb-color-core-brand), white 35%);
+  --mb-color-button_label-subtle-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), white 70%);
+  --mb-color-button_label-subtle-negative-default: hsla(1, 85%, 81%, 1);
+  --mb-color-button_label-subtle-negative-hover: hsla(2, 67%, 90%, 1);
+  --mb-color-button_label-subtle-positive-default: hsla(90, 47%, 60%, 1);
+  --mb-color-button_label-subtle-positive-hover: hsla(91, 51%, 81%, 1);
+  --mb-color-core-blue-saturated: hsla(208, 72%, 60%, 1);
+  --mb-color-core-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), white 35%);
+  --mb-color-core-filter-strong: color-mix(in srgb, var(--mb-color-core-filter), white 70%);
+  --mb-color-core-green-saturated: hsla(89, 47%, 45%, 1);
+  --mb-color-core-info: hsla(203, 5%, 53%, 1);
+  --mb-color-core-metabase_brand-hover: hsla(208, 68%, 53%, 1.00);
+  --mb-color-core-purple-saturated: hsla(240, 69%, 74%, 1);
+  --mb-color-core-red-saturated: hsla(1, 84%, 69%, 1);
+  --mb-color-feedback-neutral-strong: hsla(0, 0%, 100%, 0.33);
+  --mb-color-feedback-positive-selected: hsla(89, 47%, 45%, 1);
+  --mb-color-feedback-warning-strong: hsla(46, 94%,  74%, 1);
+  --mb-color-illustration-secondary-brand: color-mix(in srgb, var(--mb-color-core-brand), black 62%);
+  --mb-color-illustration-tertiary-brand: color-mix(in srgb, var(--mb-color-core-brand), black 75%);
+  --mb-color-input-background: hsla(0, 0%, 100%, 0.10);
+  --mb-color-modal-overlay: hsla(204, 66%, 8%, 0.74);
+  --mb-color-navbar-admin: hsla(240, 43%, 33%, 1);
+  --mb-color-navbar-admin-inverse: hsla(240, 46%, 58%, 1);
+  --mb-color-navbar-admin-secondary: hsla(240, 46%, 58%, 1);
+  --mb-color-segmented_control-hover: hsla(0, 0%, 100%, 0.33);
+  --mb-color-segmented_control-pressed: hsla(0, 0%, 100%, 0.21);
+  --mb-color-segmented_control-selected: hsla(0, 0%, 100%, 0.21);
+  --mb-color-switch-checked: color-mix(in srgb, var(--mb-color-core-brand), white 35%);
+  --mb-color-switch-disabled: hsla(0, 0%, 100%, 0.21);
+  --mb-color-switch-unchecked: hsla(0, 0%, 100%, 0.46);
+  --mb-color-switch_thumb-disabled: hsla(0, 0%, 100%, 0.46);
+  --mb-color-text-brand: var(--mb-color-core-brand);
+  --mb-color-text-brand-strong: color-mix(in srgb, var(--mb-color-core-brand), white 70%);
+  --mb-color-text-brand-strong-hover: color-mix(in srgb, var(--mb-color-core-brand), white 91%);
+  --mb-color-text-disabled-inverse: hsla(204, 66%, 8%, 0.44);
+  --mb-color-text-filter: color-mix(in srgb, var(--mb-color-core-filter), white 35%);
+  --mb-color-text-secondary-inverse: hsla(204, 66%, 8%, 0.62);
+  --mb-color-text-selected: hsla(0, 0%, 100%, 1.00);
+  --mb-color-text-syntax-parameter: hsla(26, 79%, 54%, 1);
+  --mb-color-text-syntax-parameter-active: hsla(26, 79%, 13%, 1);
+  --mb-color-accent-gray: hsla(205, 19%, 23%, 1);
+  --mb-color-accent-gray-light: hsla(205, 19%, 23%, 1);
+  --mb-color-accent-gray-dark: hsla(205, 63%, 5%, 1);
+  --mb-color-brand: #ee8a68;
+  --mb-color-core-brand: #ee8a68;
+  --mb-color-background-hover: #3e2a26;
+  --mb-color-background_surface-hover: #3e2a26;
+  --mb-color-border: #54424a;
+  --mb-color-border-neutral: #54424a;
+  --mb-color-filter: #9d7a8b;
+  --mb-color-core-filter: #9d7a8b;
+  --mb-color-summarize: #b0bf68;
+  --mb-color-core-summarize: #b0bf68;
+  --mb-color-text-primary: #f7ebe4;
+  --mb-color-button_label-default-neutral-default: #f7ebe4;
+  --mb-color-button_label-light-neutral-default: #f7ebe4;
+  --mb-color-button_label-subtle-neutral-default: #f7ebe4;
+  --mb-color-text-secondary: #dfcdc8;
+  --mb-color-text-tertiary: #b9a5a8;
+  --mb-color-text-disabled: #b9a5a8;
+  --mb-color-background-primary: #22161a;
+  --mb-color-background_page-primary: #22161a;
+  --mb-color-background_surface-primary: #22161a;
+  --mb-color-button-default-neutral-default: #22161a;
+  --mb-color-background-tertiary: #2e2126;
+  --mb-color-background_page-tertiary: #2e2126;
+  --mb-color-background-disabled: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background_surface-disabled: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background-secondary: #2e2126;
+  --mb-color-background_page-secondary: #2e2126;
+  --mb-color-shadow: hsla(205, 63%, 5%, 0.2);
+  --mb-color-shadow-default: hsla(205, 63%, 5%, 0.2);
+  --mb-color-success: #b0bf68;
+  --mb-color-feedback-positive: #b0bf68;
+  --mb-color-feedback-positive-strong: #b0bf68;
+  --mb-color-danger: #c44f28;
+  --mb-color-feedback-negative-strong: #c44f28;
+  --mb-color-text-primary-inverse: hsla(204, 66%, 8%, 0.84);
+  --mb-color-white: hsla(205, 63%, 5%, 1);
+  --mb-color-core-white: hsla(205, 63%, 5%, 1);
+  --mb-color-feedback-negative: #c44f28;
+  --mb-color-background-error: hsla(1, 75%, 17%, 1);
+  --mb-color-background_surface-error: hsla(1, 75%, 17%, 1);
+  --mb-color-text-hover: color-mix(in srgb, var(--mb-color-core-brand), white 35%);
+  --mb-color-text-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), white 35%);
+  --mb-color-focus: hsla(208, 80%, 31%, 1.00);
+  --mb-color-input-focus: hsla(208, 80%, 31%, 1.00);
+  --mb-color-tooltip-text: #f7ebe4;
+  --mb-color-tooltip-text-secondary: #dfcdc8;
+  --mb-color-tooltip-background: #4d3a42;
+  --mb-color-tooltip-background-focused: #5e4852;
+  --mb-color-bg-sdk-question-toolbar: rgb(51, 33, 39);
+  --mb-color-notebook-step-bg: rgb(51, 33, 39);
+  --mb-color-notebook-step-bg-hover: rgb(48, 31, 36);
+  --mb-color-cartesian-grid-line: #54424a;
+  --mb-color-table-border: rgba(84, 66, 74, 0.15);
+  --mb-color-bg-dashboard: var(--mb-color-background_page-primary);
+  --mb-color-bg-dashboard-card: var(--mb-color-background_page-primary);
+  --mb-color-text-collection-browser-expand-button: var(--mb-color-text-secondary);
+  --mb-color-text-collection-browser-expand-button-hover: var(--mb-color-text-primary-inverse);
+  --mb-color-bg-collection-browser-expand-button-hover: var(--mb-color-core-brand);
+}
+.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"] .mb-wrapper {
+  --mantine-color-scheme: dark;
+  --mantine-color-bright: var(--mantine-color-white);
+  --mantine-color-text: var(--mantine-color-dark-0);
+  --mantine-color-body: var(--mantine-color-dark-7);
+  --mantine-color-error: var(--mantine-color-red-8);
+  --mantine-color-placeholder: var(--mantine-color-dark-3);
+  --mantine-color-anchor: var(--mantine-color-core-brand-4);
+  --mantine-color-default: var(--mantine-color-dark-6);
+  --mantine-color-default-hover: var(--mantine-color-dark-5);
+  --mantine-color-default-color: var(--mantine-color-white);
+  --mantine-color-default-border: var(--mantine-color-dark-4);
+  --mantine-color-dimmed: var(--mantine-color-dark-2);
+  --mantine-color-disabled: var(--mantine-color-dark-6);
+  --mantine-color-disabled-color: var(--mantine-color-dark-3);
+  --mantine-color-disabled-border: var(--mantine-color-dark-4);
+  --mantine-shadow-xs: 0 1px 3px 0 rgba(0, 0, 0, 0.20);
+  --mantine-shadow-sm: 0 1px 4px 0 rgba(0, 0, 0, 0.07), 0 5px 15px 0 rgba(0, 0, 0, 0.20);
+  --mantine-shadow-xs_outline: 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 1px 3px 0 rgba(0, 0, 0, 0.20);
+  --mantine-shadow-sm_outline: 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 1px 4px 0 rgba(0, 0, 0, 0.07), 0 5px 15px 0 rgba(0, 0, 0, 0.20);
+  --mantine-shadow-lg_outline: 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 5px 15px 0 rgba(0, 0, 0, 0.20), 0 30px 60px 0 rgba(0, 0, 0, 0.40);
+}
+
+/* Light app, dark SDK: the light preset's values. */
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] {
+  --mb-color-admin-navbar: hsla(240, 46%, 58%, 1);
+  --mb-color-admin-navbar-secondary: hsla(240, 69%, 74%, 1);
+  --mb-color-admin-navbar-inverse: hsla(240, 43%, 33%, 1);
+  --mb-color-background-brand: color-mix(in srgb, var(--mb-color-core-brand), white 91%);
+  --mb-color-background-filter: color-mix(in srgb, var(--mb-color-core-filter), white 96%);
+  --mb-color-background-disabled-inverse: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background-error-secondary: hsla(0, 100%, 99%, 1);
+  --mb-color-background-highlight: color-mix(in srgb, var(--mb-color-core-brand) 7%, transparent);
+  --mb-color-background-selected: color-mix(in srgb, var(--mb-color-core-brand) 21%, transparent);
+  --mb-color-background-primary-inverse: hsla(205, 19%, 23%, 1);
+  --mb-color-background-secondary-inverse: hsla(204, 12%, 32%, 1);
+  --mb-color-background-tertiary-inverse: hsla(205, 6%, 60%, 1);
+  --mb-color-overlay: hsla(204, 66%, 8%, 0.62);
+  --mb-color-background-success: hsla(93, 73%, 97%, 1);
+  --mb-color-background-success-secondary: hsla(91, 51%, 81%, 1);
+  --mb-color-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), black 12%);
+  --mb-color-icon-brand: color-mix(in srgb, var(--mb-color-core-brand), black 12%);
+  --mb-color-icon-brand-inverse: color-mix(in srgb, var(--mb-color-core-brand), white 70%);
+  --mb-color-icon-primary: hsla(204, 66%, 8%, 0.84);
+  --mb-color-icon-primary-inverse: hsla(0, 0%, 100%, 0.95);
+  --mb-color-icon-disabled: hsla(204, 66%, 8%, 0.44);
+  --mb-color-icon-disabled-inverse: hsla(0, 0%, 100%, 0.46);
+  --mb-color-icon-secondary: hsla(204, 66%, 8%, 0.62);
+  --mb-color-icon-secondary-inverse: hsla(0, 0%, 100%, 0.69);
+  --mb-color-illustration-brand-secondary: color-mix(in srgb, var(--mb-color-core-brand), white 91%);
+  --mb-color-illustration-brand-tertiary: color-mix(in srgb, var(--mb-color-core-brand), white 96%);
+  --mb-color-metabase-brand-hover: hsla(208, 73%, 74%, 1.00);
+  --mb-color-saturated-blue: hsla(208, 78%, 42%, 1);
+  --mb-color-saturated-green: hsla(89, 48%, 32%, 1);
+  --mb-color-saturated-purple: hsla(240, 46%, 58%, 1);
+  --mb-color-saturated-red: hsla(1, 67%, 49%, 1);
+  --mb-color-success-secondary: hsla(89, 48%, 32%, 1);
+  --mb-color-syntax-parameters-active: hsla(25, 100%, 95%, 1);
+  --mb-color-syntax-parameters: hsla(26, 69%, 39%, 1);
+  --mb-color-text-tertiary-inverse: hsla(0, 0%, 100%, 0.46);
+  --mb-color-text-secondary-opaque: hsla(205, 8%, 43%, 1);
+  --mb-color-background-warning: hsla(45, 100%, 96%, 1);
+  --mb-color-background-warning-secondary: hsla(46, 94%,  74%, 1);
+  --mb-color-info: hsla(205, 6%, 60%, 1);
+  --mb-color-background-info: hsla(240, 4%, 95%, 1);
+  --mb-color-border-strong: hsla(204, 66%, 8%, 0.29);
+  --mb-color-border-stronger: hsla(204, 66%, 8%, 0.51);
+  --mb-color-border-subtle: hsla(204, 66%, 8%, 0.05);
+  --mb-color-upsell-primary: hsla(208, 80%, 31%, 1);
+  --mb-color-upsell-secondary: hsla(209, 73%, 88%, 1);
+  --mb-color-background_page-filter: color-mix(in srgb, var(--mb-color-core-filter), white 96%);
+  --mb-color-background_page-highlighted: color-mix(in srgb, var(--mb-color-core-brand) 7%, transparent);
+  --mb-color-background_page-primary-inverse: hsla(204, 53%, 10%, 1);
+  --mb-color-background_page-secondary-inverse: hsla(204, 66%, 8%, 1);
+  --mb-color-background_page-tertiary-inverse: hsla(205, 63%, 5%, 1);
+  --mb-color-background_surface-brand-strong: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-background_surface-brand-strong-hover: color-mix(in srgb, var(--mb-color-core-brand), black 47%);
+  --mb-color-background_surface-brand-strong-pressed: color-mix(in srgb, var(--mb-color-core-brand), black 62%);
+  --mb-color-background_surface-brand-subtle: color-mix(in srgb, var(--mb-color-core-brand) 10%, transparent);
+  --mb-color-background_surface-brand-subtle-hover: color-mix(in srgb, var(--mb-color-core-brand) 30%, transparent);
+  --mb-color-background_surface-brand-subtle-pressed: color-mix(in srgb, var(--mb-color-core-brand) 60%, transparent);
+  --mb-color-background_surface-disabled-inverse: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background_surface-error-subtle: hsla(0, 100%, 99%, 1);
+  --mb-color-background_surface-primary-hover: hsla(204, 66%, 8%, 0.05);
+  --mb-color-background_surface-primary-inverse: hsla(204, 53%, 10%, 1);
+  --mb-color-background_surface-primary-inverse-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-background_surface-primary-inverse-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background_surface-primary-pressed: hsla(204, 66%, 8%, 0.17);
+  --mb-color-background_surface-secondary: hsla(204, 66%, 8%, 0.05);
+  --mb-color-background_surface-secondary-hover: hsla(204, 66%, 8%, 0.17);
+  --mb-color-background_surface-secondary-inverse: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background_surface-secondary-inverse-hover: hsla(0, 0%, 100%, 0.21);
+  --mb-color-background_surface-secondary-inverse-pressed: hsla(0, 0%, 100%, 0.10);
+  --mb-color-background_surface-secondary-pressed: hsla(204, 66%, 8%, 0.29);
+  --mb-color-background_surface-selected: color-mix(in srgb, var(--mb-color-core-brand) 21%, transparent);
+  --mb-color-background_surface-success: hsla(93, 73%, 97%, 1);
+  --mb-color-background_surface-warning: hsla(45, 100%, 96%, 1);
+  --mb-color-background_surface-warning-strong: hsla(46, 94%,  74%, 1);
+  --mb-color-border-brand: color-mix(in srgb, var(--mb-color-core-brand), white 91%);
+  --mb-color-border-filter: color-mix(in srgb, var(--mb-color-core-filter), white 70%);
+  --mb-color-border-highlight: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-border-neutral-inverse-strong: hsla(0, 0%, 100%, 0.33);
+  --mb-color-border-neutral-strong: hsla(204, 66%, 8%, 0.29);
+  --mb-color-border-neutral-strongest: hsla(204, 66%, 8%, 0.51);
+  --mb-color-border-neutral-subtle: hsla(204, 66%, 8%, 0.05);
+  --mb-color-button-default-neutral-hover: hsla(204, 66%, 8%, 0.05);
+  --mb-color-button-default-neutral-pressed: hsla(204, 66%, 8%, 0.17);
+  --mb-color-button-filled-brand-default: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-button-filled-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), black 47%);
+  --mb-color-button-filled-brand-pressed: color-mix(in srgb, var(--mb-color-core-brand), black 62%);
+  --mb-color-button-filled-filter-default: color-mix(in srgb, var(--mb-color-core-filter), black 28%);
+  --mb-color-button-filled-filter-hover: color-mix(in srgb, var(--mb-color-core-filter), black 47%);
+  --mb-color-button-filled-filter-pressed: color-mix(in srgb, var(--mb-color-core-filter), black 62%);
+  --mb-color-button-filled-negative-default: hsla(1, 67%, 49%, 1);
+  --mb-color-button-filled-negative-hover: hsla(1, 69%, 37%, 1);
+  --mb-color-button-filled-negative-pressed: hsla(1, 71%, 26%, 1);
+  --mb-color-button-filled-positive-default: hsla(89, 48%, 32%, 1);
+  --mb-color-button-filled-positive-hover: hsla(89, 50%, 24%, 1);
+  --mb-color-button-filled-positive-pressed: hsla(89, 54%, 16%, 1);
+  --mb-color-button-filled-warning-hover: hsla(46, 81%,  52%, 1);
+  --mb-color-button-filled-warning-pressed: hsla(46, 75%,  44%, 1);
+  --mb-color-button-light-brand-default: color-mix(in srgb, var(--mb-color-core-brand) 7%, transparent);
+  --mb-color-button-light-brand-hover: color-mix(in srgb, var(--mb-color-core-brand) 21%, transparent);
+  --mb-color-button-light-brand-pressed: color-mix(in srgb, var(--mb-color-core-brand) 45%, transparent);
+  --mb-color-button-light-filter-default: color-mix(in srgb, var(--mb-color-core-filter) 15%, transparent);
+  --mb-color-button-light-filter-hover: color-mix(in srgb, var(--mb-color-core-filter) 30%, transparent);
+  --mb-color-button-light-filter-pressed: color-mix(in srgb, var(--mb-color-core-filter) 60%, transparent);
+  --mb-color-button-light-negative-default: hsla(358, 71%, 54%, 0.07);
+  --mb-color-button-light-negative-hover: hsla(358, 71%, 54%, 0.21);
+  --mb-color-button-light-negative-pressed: hsla(358, 71%, 54%, 0.45);
+  --mb-color-button-light-neutral-default: hsla(204, 66%, 8%, 0.05);
+  --mb-color-button-light-neutral-hover: hsla(204, 66%, 8%, 0.17);
+  --mb-color-button-light-neutral-pressed: hsla(204, 66%, 8%, 0.29);
+  --mb-color-button-light-positive-default: hsla(90, 100%, 41%, 0.13);
+  --mb-color-button-light-positive-hover: hsla(90, 100%, 34%, 0.29);
+  --mb-color-button-light-positive-pressed: hsla(90, 100%, 31%, 0.57);
+  --mb-color-button-subtle-brand-hover: color-mix(in srgb, var(--mb-color-core-brand) 21%, transparent);
+  --mb-color-button-subtle-brand-pressed: color-mix(in srgb, var(--mb-color-core-brand) 45%, transparent);
+  --mb-color-button-subtle-negative-hover: hsla(358, 71%, 54%, 0.21);
+  --mb-color-button-subtle-negative-pressed: hsla(358, 71%, 54%, 0.45);
+  --mb-color-button-subtle-neutral-hover: hsla(204, 66%, 8%, 0.05);
+  --mb-color-button-subtle-neutral-pressed: hsla(204, 66%, 8%, 0.17);
+  --mb-color-button-subtle-positive-hover: hsla(90, 100%, 34%, 0.29);
+  --mb-color-button-subtle-positive-pressed: hsla(90, 100%, 31%, 0.57);
+  --mb-color-button_label-filled-brand-default: hsla(0, 0%, 100%, 1.00);
+  --mb-color-button_label-filled-filter-default: hsla(0, 0%, 100%, 1.00);
+  --mb-color-button_label-filled-negative-default: hsla(0, 0%, 100%, 1.00);
+  --mb-color-button_label-filled-positive-default: hsla(0, 0%, 100%, 1.00);
+  --mb-color-button_label-light-brand-default: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-button_label-light-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), black 47%);
+  --mb-color-button_label-light-filter-default: color-mix(in srgb, var(--mb-color-core-filter), black 47%);
+  --mb-color-button_label-light-filter-hover: color-mix(in srgb, var(--mb-color-core-filter), black 62%);
+  --mb-color-button_label-light-negative-default: hsla(1, 69%, 37%, 1);
+  --mb-color-button_label-light-negative-hover: hsla(1, 71%, 26%, 1);
+  --mb-color-button_label-light-positive-default: hsla(89, 50%, 24%, 1);
+  --mb-color-button_label-light-positive-hover: hsla(89, 54%, 16%, 1);
+  --mb-color-button_label-subtle-brand-default: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-button_label-subtle-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), black 47%);
+  --mb-color-button_label-subtle-negative-default: hsla(1, 69%, 37%, 1);
+  --mb-color-button_label-subtle-negative-hover: hsla(1, 71%, 26%, 1);
+  --mb-color-button_label-subtle-positive-default: hsla(89, 50%, 24%, 1);
+  --mb-color-button_label-subtle-positive-hover: hsla(89, 54%, 16%, 1);
+  --mb-color-core-blue-saturated: hsla(208, 78%, 42%, 1);
+  --mb-color-core-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), black 12%);
+  --mb-color-core-filter-strong: color-mix(in srgb, var(--mb-color-core-filter), black 12%);
+  --mb-color-core-green-saturated: hsla(89, 48%, 32%, 1);
+  --mb-color-core-info: hsla(205, 6%, 60%, 1);
+  --mb-color-core-metabase_brand-hover: hsla(208, 73%, 74%, 1.00);
+  --mb-color-core-purple-saturated: hsla(240, 46%, 58%, 1);
+  --mb-color-core-red-saturated: hsla(1, 67%, 49%, 1);
+  --mb-color-feedback-neutral-strong: hsla(204, 66%, 8%, 0.62);
+  --mb-color-feedback-positive-selected: hsla(89, 48%, 32%, 1);
+  --mb-color-feedback-warning-strong: hsla(26, 69%, 39%, 1);
+  --mb-color-illustration-secondary-brand: color-mix(in srgb, var(--mb-color-core-brand), white 91%);
+  --mb-color-illustration-tertiary-brand: color-mix(in srgb, var(--mb-color-core-brand), white 96%);
+  --mb-color-input-background: hsla(204, 66%, 8%, 0.02);
+  --mb-color-modal-overlay: hsla(204, 66%, 8%, 0.62);
+  --mb-color-navbar-admin: hsla(240, 46%, 58%, 1);
+  --mb-color-navbar-admin-inverse: hsla(240, 43%, 33%, 1);
+  --mb-color-navbar-admin-secondary: hsla(240, 69%, 74%, 1);
+  --mb-color-segmented_control-hover: hsla(204, 66%, 8%, 0.05);
+  --mb-color-segmented_control-pressed: hsla(204, 66%, 8%, 0.17);
+  --mb-color-segmented_control-selected: hsla(0, 0%, 100%, 1.00);
+  --mb-color-switch-checked: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-switch-disabled: hsla(204, 66%, 8%, 0.17);
+  --mb-color-switch-unchecked: hsla(204, 66%, 8%, 0.29);
+  --mb-color-switch_thumb-disabled: hsla(0, 0%, 100%, 1.00);
+  --mb-color-text-brand: color-mix(in srgb, var(--mb-color-core-brand), black 12%);
+  --mb-color-text-brand-strong: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-text-brand-strong-hover: color-mix(in srgb, var(--mb-color-core-brand), black 47%);
+  --mb-color-text-disabled-inverse: hsla(0, 0%, 100%, 0.46);
+  --mb-color-text-filter: color-mix(in srgb, var(--mb-color-core-filter), black 12%);
+  --mb-color-text-secondary-inverse: hsla(0, 0%, 100%, 0.69);
+  --mb-color-text-selected: hsla(204, 66%, 8%, 0.84);
+  --mb-color-text-syntax-parameter: hsla(26, 69%, 39%, 1);
+  --mb-color-text-syntax-parameter-active: hsla(25, 100%, 95%, 1);
+  --mb-color-accent-gray: hsla(240, 4%, 95%, 1);
+  --mb-color-accent-gray-light: hsla(240, 11%, 98%, 1);
+  --mb-color-accent-gray-dark: hsla(195, 6%, 87%, 1);
+  --mb-color-brand: #a8440f;
+  --mb-color-core-brand: #a8440f;
+  --mb-color-background-hover: #fbeee2;
+  --mb-color-background_surface-hover: #fbeee2;
+  --mb-color-border: #e2d8d1;
+  --mb-color-border-neutral: #e2d8d1;
+  --mb-color-filter: #5b3445;
+  --mb-color-core-filter: #5b3445;
+  --mb-color-summarize: #5f6d2c;
+  --mb-color-core-summarize: #5f6d2c;
+  --mb-color-text-primary: #3a2230;
+  --mb-color-button_label-default-neutral-default: #3a2230;
+  --mb-color-button_label-light-neutral-default: #3a2230;
+  --mb-color-button_label-subtle-neutral-default: #3a2230;
+  --mb-color-text-secondary: #5a4550;
+  --mb-color-text-tertiary: #6f5a64;
+  --mb-color-text-disabled: #6f5a64;
+  --mb-color-background-primary: #fdfbf9;
+  --mb-color-background_page-primary: #fdfbf9;
+  --mb-color-background_surface-primary: #fdfbf9;
+  --mb-color-button-default-neutral-default: #fdfbf9;
+  --mb-color-background-tertiary: #f6f1ed;
+  --mb-color-background_page-tertiary: #f6f1ed;
+  --mb-color-background-disabled: hsla(204, 66%, 8%, 0.05);
+  --mb-color-background_surface-disabled: hsla(204, 66%, 8%, 0.05);
+  --mb-color-background-secondary: #f6f1ed;
+  --mb-color-background_page-secondary: #f6f1ed;
+  --mb-color-shadow: hsla(204, 66%, 8%, 0.17);
+  --mb-color-shadow-default: hsla(204, 66%, 8%, 0.17);
+  --mb-color-success: #5f6d2c;
+  --mb-color-feedback-positive: #5f6d2c;
+  --mb-color-feedback-positive-strong: #5f6d2c;
+  --mb-color-danger: #b5441a;
+  --mb-color-feedback-negative-strong: #b5441a;
+  --mb-color-text-primary-inverse: hsla(0, 0%, 100%, 0.95);
+  --mb-color-white: hsla(0, 0%, 100%, 1.00);
+  --mb-color-core-white: hsla(0, 0%, 100%, 1.00);
+  --mb-color-feedback-negative: #b5441a;
+  --mb-color-background-error: hsla(0, 76%, 97%, 1);
+  --mb-color-background_surface-error: hsla(0, 76%, 97%, 1);
+  --mb-color-text-hover: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-text-brand-hover: color-mix(in srgb, var(--mb-color-core-brand), black 28%);
+  --mb-color-focus: hsla(209, 73%, 88%, 1.00);
+  --mb-color-input-focus: hsla(209, 73%, 88%, 1.00);
+  --mb-color-tooltip-text: #fdfbf9;
+  --mb-color-tooltip-text-secondary: #fbe3cf;
+  --mb-color-tooltip-background: #4a2638;
+  --mb-color-tooltip-background-focused: #5b3445;
+  --mb-color-bg-sdk-question-toolbar: rgb(248, 241, 234);
+  --mb-color-notebook-step-bg: rgb(247, 238, 230);
+  --mb-color-notebook-step-bg-hover: rgb(241, 226, 211);
+  --mb-color-cartesian-grid-line: rgba(226, 216, 209, 0.5);
+  --mb-color-table-border: rgba(226, 216, 209, 0.5);
+  --mb-color-bg-dashboard: var(--mb-color-background_page-primary);
+  --mb-color-bg-dashboard-card: var(--mb-color-background_page-primary);
+  --mb-color-text-collection-browser-expand-button: var(--mb-color-text-secondary);
+  --mb-color-text-collection-browser-expand-button-hover: var(--mb-color-text-primary-inverse);
+  --mb-color-bg-collection-browser-expand-button-hover: var(--mb-color-core-brand);
+}
+.pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"] .mb-wrapper {
+  --mantine-color-scheme: light;
+  --mantine-color-bright: var(--mantine-color-black);
+  --mantine-color-text: #000;
+  --mantine-color-body: #fff;
+  --mantine-color-error: var(--mantine-color-red-6);
+  --mantine-color-placeholder: var(--mantine-color-gray-5);
+  --mantine-color-anchor: var(--mantine-color-core-brand-0);
+  --mantine-color-default: var(--mantine-color-white);
+  --mantine-color-default-hover: var(--mantine-color-gray-0);
+  --mantine-color-default-color: var(--mantine-color-black);
+  --mantine-color-default-border: var(--mantine-color-gray-4);
+  --mantine-color-dimmed: var(--mantine-color-gray-6);
+  --mantine-color-disabled: var(--mantine-color-gray-2);
+  --mantine-color-disabled-color: var(--mantine-color-gray-5);
+  --mantine-color-disabled-border: var(--mantine-color-gray-3);
+  --mantine-shadow-xs: 0 1px 3px 0 rgba(0, 0, 0, 0.07);
+  --mantine-shadow-sm: 0 1px 4px 0 rgba(0, 0, 0, 0.05), 0 5px 15px 0 rgba(0, 0, 0, 0.10);
+  --mantine-shadow-xs_outline: 0 0 0 0.5px rgba(0, 0, 0, 0.07), 0 1px 3px 0 rgba(0, 0, 0, 0.07);
+  --mantine-shadow-sm_outline: 0 0 0 0.5px rgba(0, 0, 0, 0.07), 0 1px 4px 0 rgba(0, 0, 0, 0.05), 0 5px 15px 0 rgba(0, 0, 0, 0.10);
+  --mantine-shadow-lg_outline: 0 0 0 0.5px rgba(0, 0, 0, 0.07), 0 5px 15px 0 rgba(0, 0, 0, 0.15), 0 30px 60px 0 rgba(0, 0, 0, 0.20);
+}
+
+/* Either way: Mantine's shades read the Metabase variables above. */
+:is(.pd-app[data-theme="dark"] .pd-mb[data-sdk-theme="light"], .pd-app[data-theme="light"] .pd-mb[data-sdk-theme="dark"]) .mb-wrapper {
+  --mantine-color-admin-navbar-0: var(--mb-color-admin-navbar); --mantine-color-admin-navbar-1: var(--mb-color-admin-navbar); --mantine-color-admin-navbar-4: var(--mb-color-admin-navbar);
+  --mantine-color-admin-navbar-secondary-0: var(--mb-color-admin-navbar-secondary); --mantine-color-admin-navbar-secondary-1: var(--mb-color-admin-navbar-secondary); --mantine-color-admin-navbar-secondary-4: var(--mb-color-admin-navbar-secondary);
+  --mantine-color-admin-navbar-inverse-0: var(--mb-color-admin-navbar-inverse); --mantine-color-admin-navbar-inverse-1: var(--mb-color-admin-navbar-inverse); --mantine-color-admin-navbar-inverse-4: var(--mb-color-admin-navbar-inverse);
+  --mantine-color-background-brand-0: var(--mb-color-background-brand); --mantine-color-background-brand-1: var(--mb-color-background-brand); --mantine-color-background-brand-4: var(--mb-color-background-brand);
+  --mantine-color-background-filter-0: var(--mb-color-background-filter); --mantine-color-background-filter-1: var(--mb-color-background-filter); --mantine-color-background-filter-4: var(--mb-color-background-filter);
+  --mantine-color-background-disabled-inverse-0: var(--mb-color-background-disabled-inverse); --mantine-color-background-disabled-inverse-1: var(--mb-color-background-disabled-inverse); --mantine-color-background-disabled-inverse-4: var(--mb-color-background-disabled-inverse);
+  --mantine-color-background-error-secondary-0: var(--mb-color-background-error-secondary); --mantine-color-background-error-secondary-1: var(--mb-color-background-error-secondary); --mantine-color-background-error-secondary-4: var(--mb-color-background-error-secondary);
+  --mantine-color-background-highlight-0: var(--mb-color-background-highlight); --mantine-color-background-highlight-1: var(--mb-color-background-highlight); --mantine-color-background-highlight-4: var(--mb-color-background-highlight);
+  --mantine-color-background-selected-0: var(--mb-color-background-selected); --mantine-color-background-selected-1: var(--mb-color-background-selected); --mantine-color-background-selected-4: var(--mb-color-background-selected);
+  --mantine-color-background-primary-inverse-0: var(--mb-color-background-primary-inverse); --mantine-color-background-primary-inverse-1: var(--mb-color-background-primary-inverse); --mantine-color-background-primary-inverse-4: var(--mb-color-background-primary-inverse);
+  --mantine-color-background-secondary-inverse-0: var(--mb-color-background-secondary-inverse); --mantine-color-background-secondary-inverse-1: var(--mb-color-background-secondary-inverse); --mantine-color-background-secondary-inverse-4: var(--mb-color-background-secondary-inverse);
+  --mantine-color-background-tertiary-inverse-0: var(--mb-color-background-tertiary-inverse); --mantine-color-background-tertiary-inverse-1: var(--mb-color-background-tertiary-inverse); --mantine-color-background-tertiary-inverse-4: var(--mb-color-background-tertiary-inverse);
+  --mantine-color-overlay-0: var(--mb-color-overlay); --mantine-color-overlay-1: var(--mb-color-overlay); --mantine-color-overlay-4: var(--mb-color-overlay);
+  --mantine-color-background-success-0: var(--mb-color-background-success); --mantine-color-background-success-1: var(--mb-color-background-success); --mantine-color-background-success-4: var(--mb-color-background-success);
+  --mantine-color-background-success-secondary-0: var(--mb-color-background-success-secondary); --mantine-color-background-success-secondary-1: var(--mb-color-background-success-secondary); --mantine-color-background-success-secondary-4: var(--mb-color-background-success-secondary);
+  --mantine-color-brand-hover-0: var(--mb-color-brand-hover); --mantine-color-brand-hover-1: var(--mb-color-brand-hover); --mantine-color-brand-hover-4: var(--mb-color-brand-hover);
+  --mantine-color-icon-brand-0: var(--mb-color-icon-brand); --mantine-color-icon-brand-1: var(--mb-color-icon-brand); --mantine-color-icon-brand-4: var(--mb-color-icon-brand);
+  --mantine-color-icon-brand-inverse-0: var(--mb-color-icon-brand-inverse); --mantine-color-icon-brand-inverse-1: var(--mb-color-icon-brand-inverse); --mantine-color-icon-brand-inverse-4: var(--mb-color-icon-brand-inverse);
+  --mantine-color-icon-primary-0: var(--mb-color-icon-primary); --mantine-color-icon-primary-1: var(--mb-color-icon-primary); --mantine-color-icon-primary-4: var(--mb-color-icon-primary);
+  --mantine-color-icon-primary-inverse-0: var(--mb-color-icon-primary-inverse); --mantine-color-icon-primary-inverse-1: var(--mb-color-icon-primary-inverse); --mantine-color-icon-primary-inverse-4: var(--mb-color-icon-primary-inverse);
+  --mantine-color-icon-disabled-0: var(--mb-color-icon-disabled); --mantine-color-icon-disabled-1: var(--mb-color-icon-disabled); --mantine-color-icon-disabled-4: var(--mb-color-icon-disabled);
+  --mantine-color-icon-disabled-inverse-0: var(--mb-color-icon-disabled-inverse); --mantine-color-icon-disabled-inverse-1: var(--mb-color-icon-disabled-inverse); --mantine-color-icon-disabled-inverse-4: var(--mb-color-icon-disabled-inverse);
+  --mantine-color-icon-secondary-0: var(--mb-color-icon-secondary); --mantine-color-icon-secondary-1: var(--mb-color-icon-secondary); --mantine-color-icon-secondary-4: var(--mb-color-icon-secondary);
+  --mantine-color-icon-secondary-inverse-0: var(--mb-color-icon-secondary-inverse); --mantine-color-icon-secondary-inverse-1: var(--mb-color-icon-secondary-inverse); --mantine-color-icon-secondary-inverse-4: var(--mb-color-icon-secondary-inverse);
+  --mantine-color-illustration-brand-secondary-0: var(--mb-color-illustration-brand-secondary); --mantine-color-illustration-brand-secondary-1: var(--mb-color-illustration-brand-secondary); --mantine-color-illustration-brand-secondary-4: var(--mb-color-illustration-brand-secondary);
+  --mantine-color-illustration-brand-tertiary-0: var(--mb-color-illustration-brand-tertiary); --mantine-color-illustration-brand-tertiary-1: var(--mb-color-illustration-brand-tertiary); --mantine-color-illustration-brand-tertiary-4: var(--mb-color-illustration-brand-tertiary);
+  --mantine-color-metabase-brand-hover-0: var(--mb-color-metabase-brand-hover); --mantine-color-metabase-brand-hover-1: var(--mb-color-metabase-brand-hover); --mantine-color-metabase-brand-hover-4: var(--mb-color-metabase-brand-hover);
+  --mantine-color-saturated-blue-0: var(--mb-color-saturated-blue); --mantine-color-saturated-blue-1: var(--mb-color-saturated-blue); --mantine-color-saturated-blue-4: var(--mb-color-saturated-blue);
+  --mantine-color-saturated-green-0: var(--mb-color-saturated-green); --mantine-color-saturated-green-1: var(--mb-color-saturated-green); --mantine-color-saturated-green-4: var(--mb-color-saturated-green);
+  --mantine-color-saturated-purple-0: var(--mb-color-saturated-purple); --mantine-color-saturated-purple-1: var(--mb-color-saturated-purple); --mantine-color-saturated-purple-4: var(--mb-color-saturated-purple);
+  --mantine-color-saturated-red-0: var(--mb-color-saturated-red); --mantine-color-saturated-red-1: var(--mb-color-saturated-red); --mantine-color-saturated-red-4: var(--mb-color-saturated-red);
+  --mantine-color-success-secondary-0: var(--mb-color-success-secondary); --mantine-color-success-secondary-1: var(--mb-color-success-secondary); --mantine-color-success-secondary-4: var(--mb-color-success-secondary);
+  --mantine-color-syntax-parameters-active-0: var(--mb-color-syntax-parameters-active); --mantine-color-syntax-parameters-active-1: var(--mb-color-syntax-parameters-active); --mantine-color-syntax-parameters-active-4: var(--mb-color-syntax-parameters-active);
+  --mantine-color-syntax-parameters-0: var(--mb-color-syntax-parameters); --mantine-color-syntax-parameters-1: var(--mb-color-syntax-parameters); --mantine-color-syntax-parameters-4: var(--mb-color-syntax-parameters);
+  --mantine-color-text-tertiary-inverse-0: var(--mb-color-text-tertiary-inverse); --mantine-color-text-tertiary-inverse-1: var(--mb-color-text-tertiary-inverse); --mantine-color-text-tertiary-inverse-4: var(--mb-color-text-tertiary-inverse);
+  --mantine-color-text-secondary-opaque-0: var(--mb-color-text-secondary-opaque); --mantine-color-text-secondary-opaque-1: var(--mb-color-text-secondary-opaque); --mantine-color-text-secondary-opaque-4: var(--mb-color-text-secondary-opaque);
+  --mantine-color-background-warning-0: var(--mb-color-background-warning); --mantine-color-background-warning-1: var(--mb-color-background-warning); --mantine-color-background-warning-4: var(--mb-color-background-warning);
+  --mantine-color-background-warning-secondary-0: var(--mb-color-background-warning-secondary); --mantine-color-background-warning-secondary-1: var(--mb-color-background-warning-secondary); --mantine-color-background-warning-secondary-4: var(--mb-color-background-warning-secondary);
+  --mantine-color-info-0: var(--mb-color-info); --mantine-color-info-1: var(--mb-color-info); --mantine-color-info-4: var(--mb-color-info);
+  --mantine-color-background-info-0: var(--mb-color-background-info); --mantine-color-background-info-1: var(--mb-color-background-info); --mantine-color-background-info-4: var(--mb-color-background-info);
+  --mantine-color-border-strong-0: var(--mb-color-border-strong); --mantine-color-border-strong-1: var(--mb-color-border-strong); --mantine-color-border-strong-4: var(--mb-color-border-strong);
+  --mantine-color-border-stronger-0: var(--mb-color-border-stronger); --mantine-color-border-stronger-1: var(--mb-color-border-stronger); --mantine-color-border-stronger-4: var(--mb-color-border-stronger);
+  --mantine-color-border-subtle-0: var(--mb-color-border-subtle); --mantine-color-border-subtle-1: var(--mb-color-border-subtle); --mantine-color-border-subtle-4: var(--mb-color-border-subtle);
+  --mantine-color-upsell-primary-0: var(--mb-color-upsell-primary); --mantine-color-upsell-primary-1: var(--mb-color-upsell-primary); --mantine-color-upsell-primary-4: var(--mb-color-upsell-primary);
+  --mantine-color-upsell-secondary-0: var(--mb-color-upsell-secondary); --mantine-color-upsell-secondary-1: var(--mb-color-upsell-secondary); --mantine-color-upsell-secondary-4: var(--mb-color-upsell-secondary);
+  --mantine-color-background_page-filter-0: var(--mb-color-background_page-filter); --mantine-color-background_page-filter-1: var(--mb-color-background_page-filter); --mantine-color-background_page-filter-4: var(--mb-color-background_page-filter);
+  --mantine-color-background_page-highlighted-0: var(--mb-color-background_page-highlighted); --mantine-color-background_page-highlighted-1: var(--mb-color-background_page-highlighted); --mantine-color-background_page-highlighted-4: var(--mb-color-background_page-highlighted);
+  --mantine-color-background_page-primary-inverse-0: var(--mb-color-background_page-primary-inverse); --mantine-color-background_page-primary-inverse-1: var(--mb-color-background_page-primary-inverse); --mantine-color-background_page-primary-inverse-4: var(--mb-color-background_page-primary-inverse);
+  --mantine-color-background_page-secondary-inverse-0: var(--mb-color-background_page-secondary-inverse); --mantine-color-background_page-secondary-inverse-1: var(--mb-color-background_page-secondary-inverse); --mantine-color-background_page-secondary-inverse-4: var(--mb-color-background_page-secondary-inverse);
+  --mantine-color-background_page-tertiary-inverse-0: var(--mb-color-background_page-tertiary-inverse); --mantine-color-background_page-tertiary-inverse-1: var(--mb-color-background_page-tertiary-inverse); --mantine-color-background_page-tertiary-inverse-4: var(--mb-color-background_page-tertiary-inverse);
+  --mantine-color-background_surface-brand-strong-0: var(--mb-color-background_surface-brand-strong); --mantine-color-background_surface-brand-strong-1: var(--mb-color-background_surface-brand-strong); --mantine-color-background_surface-brand-strong-4: var(--mb-color-background_surface-brand-strong);
+  --mantine-color-background_surface-brand-strong-hover-0: var(--mb-color-background_surface-brand-strong-hover); --mantine-color-background_surface-brand-strong-hover-1: var(--mb-color-background_surface-brand-strong-hover); --mantine-color-background_surface-brand-strong-hover-4: var(--mb-color-background_surface-brand-strong-hover);
+  --mantine-color-background_surface-brand-strong-pressed-0: var(--mb-color-background_surface-brand-strong-pressed); --mantine-color-background_surface-brand-strong-pressed-1: var(--mb-color-background_surface-brand-strong-pressed); --mantine-color-background_surface-brand-strong-pressed-4: var(--mb-color-background_surface-brand-strong-pressed);
+  --mantine-color-background_surface-brand-subtle-0: var(--mb-color-background_surface-brand-subtle); --mantine-color-background_surface-brand-subtle-1: var(--mb-color-background_surface-brand-subtle); --mantine-color-background_surface-brand-subtle-4: var(--mb-color-background_surface-brand-subtle);
+  --mantine-color-background_surface-brand-subtle-hover-0: var(--mb-color-background_surface-brand-subtle-hover); --mantine-color-background_surface-brand-subtle-hover-1: var(--mb-color-background_surface-brand-subtle-hover); --mantine-color-background_surface-brand-subtle-hover-4: var(--mb-color-background_surface-brand-subtle-hover);
+  --mantine-color-background_surface-brand-subtle-pressed-0: var(--mb-color-background_surface-brand-subtle-pressed); --mantine-color-background_surface-brand-subtle-pressed-1: var(--mb-color-background_surface-brand-subtle-pressed); --mantine-color-background_surface-brand-subtle-pressed-4: var(--mb-color-background_surface-brand-subtle-pressed);
+  --mantine-color-background_surface-disabled-inverse-0: var(--mb-color-background_surface-disabled-inverse); --mantine-color-background_surface-disabled-inverse-1: var(--mb-color-background_surface-disabled-inverse); --mantine-color-background_surface-disabled-inverse-4: var(--mb-color-background_surface-disabled-inverse);
+  --mantine-color-background_surface-error-subtle-0: var(--mb-color-background_surface-error-subtle); --mantine-color-background_surface-error-subtle-1: var(--mb-color-background_surface-error-subtle); --mantine-color-background_surface-error-subtle-4: var(--mb-color-background_surface-error-subtle);
+  --mantine-color-background_surface-primary-hover-0: var(--mb-color-background_surface-primary-hover); --mantine-color-background_surface-primary-hover-1: var(--mb-color-background_surface-primary-hover); --mantine-color-background_surface-primary-hover-4: var(--mb-color-background_surface-primary-hover);
+  --mantine-color-background_surface-primary-inverse-0: var(--mb-color-background_surface-primary-inverse); --mantine-color-background_surface-primary-inverse-1: var(--mb-color-background_surface-primary-inverse); --mantine-color-background_surface-primary-inverse-4: var(--mb-color-background_surface-primary-inverse);
+  --mantine-color-background_surface-primary-inverse-hover-0: var(--mb-color-background_surface-primary-inverse-hover); --mantine-color-background_surface-primary-inverse-hover-1: var(--mb-color-background_surface-primary-inverse-hover); --mantine-color-background_surface-primary-inverse-hover-4: var(--mb-color-background_surface-primary-inverse-hover);
+  --mantine-color-background_surface-primary-inverse-pressed-0: var(--mb-color-background_surface-primary-inverse-pressed); --mantine-color-background_surface-primary-inverse-pressed-1: var(--mb-color-background_surface-primary-inverse-pressed); --mantine-color-background_surface-primary-inverse-pressed-4: var(--mb-color-background_surface-primary-inverse-pressed);
+  --mantine-color-background_surface-primary-pressed-0: var(--mb-color-background_surface-primary-pressed); --mantine-color-background_surface-primary-pressed-1: var(--mb-color-background_surface-primary-pressed); --mantine-color-background_surface-primary-pressed-4: var(--mb-color-background_surface-primary-pressed);
+  --mantine-color-background_surface-secondary-0: var(--mb-color-background_surface-secondary); --mantine-color-background_surface-secondary-1: var(--mb-color-background_surface-secondary); --mantine-color-background_surface-secondary-4: var(--mb-color-background_surface-secondary);
+  --mantine-color-background_surface-secondary-hover-0: var(--mb-color-background_surface-secondary-hover); --mantine-color-background_surface-secondary-hover-1: var(--mb-color-background_surface-secondary-hover); --mantine-color-background_surface-secondary-hover-4: var(--mb-color-background_surface-secondary-hover);
+  --mantine-color-background_surface-secondary-inverse-0: var(--mb-color-background_surface-secondary-inverse); --mantine-color-background_surface-secondary-inverse-1: var(--mb-color-background_surface-secondary-inverse); --mantine-color-background_surface-secondary-inverse-4: var(--mb-color-background_surface-secondary-inverse);
+  --mantine-color-background_surface-secondary-inverse-hover-0: var(--mb-color-background_surface-secondary-inverse-hover); --mantine-color-background_surface-secondary-inverse-hover-1: var(--mb-color-background_surface-secondary-inverse-hover); --mantine-color-background_surface-secondary-inverse-hover-4: var(--mb-color-background_surface-secondary-inverse-hover);
+  --mantine-color-background_surface-secondary-inverse-pressed-0: var(--mb-color-background_surface-secondary-inverse-pressed); --mantine-color-background_surface-secondary-inverse-pressed-1: var(--mb-color-background_surface-secondary-inverse-pressed); --mantine-color-background_surface-secondary-inverse-pressed-4: var(--mb-color-background_surface-secondary-inverse-pressed);
+  --mantine-color-background_surface-secondary-pressed-0: var(--mb-color-background_surface-secondary-pressed); --mantine-color-background_surface-secondary-pressed-1: var(--mb-color-background_surface-secondary-pressed); --mantine-color-background_surface-secondary-pressed-4: var(--mb-color-background_surface-secondary-pressed);
+  --mantine-color-background_surface-selected-0: var(--mb-color-background_surface-selected); --mantine-color-background_surface-selected-1: var(--mb-color-background_surface-selected); --mantine-color-background_surface-selected-4: var(--mb-color-background_surface-selected);
+  --mantine-color-background_surface-success-0: var(--mb-color-background_surface-success); --mantine-color-background_surface-success-1: var(--mb-color-background_surface-success); --mantine-color-background_surface-success-4: var(--mb-color-background_surface-success);
+  --mantine-color-background_surface-warning-0: var(--mb-color-background_surface-warning); --mantine-color-background_surface-warning-1: var(--mb-color-background_surface-warning); --mantine-color-background_surface-warning-4: var(--mb-color-background_surface-warning);
+  --mantine-color-background_surface-warning-strong-0: var(--mb-color-background_surface-warning-strong); --mantine-color-background_surface-warning-strong-1: var(--mb-color-background_surface-warning-strong); --mantine-color-background_surface-warning-strong-4: var(--mb-color-background_surface-warning-strong);
+  --mantine-color-border-brand-0: var(--mb-color-border-brand); --mantine-color-border-brand-1: var(--mb-color-border-brand); --mantine-color-border-brand-4: var(--mb-color-border-brand);
+  --mantine-color-border-filter-0: var(--mb-color-border-filter); --mantine-color-border-filter-1: var(--mb-color-border-filter); --mantine-color-border-filter-4: var(--mb-color-border-filter);
+  --mantine-color-border-highlight-0: var(--mb-color-border-highlight); --mantine-color-border-highlight-1: var(--mb-color-border-highlight); --mantine-color-border-highlight-4: var(--mb-color-border-highlight);
+  --mantine-color-border-neutral-inverse-strong-0: var(--mb-color-border-neutral-inverse-strong); --mantine-color-border-neutral-inverse-strong-1: var(--mb-color-border-neutral-inverse-strong); --mantine-color-border-neutral-inverse-strong-4: var(--mb-color-border-neutral-inverse-strong);
+  --mantine-color-border-neutral-strong-0: var(--mb-color-border-neutral-strong); --mantine-color-border-neutral-strong-1: var(--mb-color-border-neutral-strong); --mantine-color-border-neutral-strong-4: var(--mb-color-border-neutral-strong);
+  --mantine-color-border-neutral-strongest-0: var(--mb-color-border-neutral-strongest); --mantine-color-border-neutral-strongest-1: var(--mb-color-border-neutral-strongest); --mantine-color-border-neutral-strongest-4: var(--mb-color-border-neutral-strongest);
+  --mantine-color-border-neutral-subtle-0: var(--mb-color-border-neutral-subtle); --mantine-color-border-neutral-subtle-1: var(--mb-color-border-neutral-subtle); --mantine-color-border-neutral-subtle-4: var(--mb-color-border-neutral-subtle);
+  --mantine-color-button-default-neutral-hover-0: var(--mb-color-button-default-neutral-hover); --mantine-color-button-default-neutral-hover-1: var(--mb-color-button-default-neutral-hover); --mantine-color-button-default-neutral-hover-4: var(--mb-color-button-default-neutral-hover);
+  --mantine-color-button-default-neutral-pressed-0: var(--mb-color-button-default-neutral-pressed); --mantine-color-button-default-neutral-pressed-1: var(--mb-color-button-default-neutral-pressed); --mantine-color-button-default-neutral-pressed-4: var(--mb-color-button-default-neutral-pressed);
+  --mantine-color-button-filled-brand-default-0: var(--mb-color-button-filled-brand-default); --mantine-color-button-filled-brand-default-1: var(--mb-color-button-filled-brand-default); --mantine-color-button-filled-brand-default-4: var(--mb-color-button-filled-brand-default);
+  --mantine-color-button-filled-brand-hover-0: var(--mb-color-button-filled-brand-hover); --mantine-color-button-filled-brand-hover-1: var(--mb-color-button-filled-brand-hover); --mantine-color-button-filled-brand-hover-4: var(--mb-color-button-filled-brand-hover);
+  --mantine-color-button-filled-brand-pressed-0: var(--mb-color-button-filled-brand-pressed); --mantine-color-button-filled-brand-pressed-1: var(--mb-color-button-filled-brand-pressed); --mantine-color-button-filled-brand-pressed-4: var(--mb-color-button-filled-brand-pressed);
+  --mantine-color-button-filled-filter-default-0: var(--mb-color-button-filled-filter-default); --mantine-color-button-filled-filter-default-1: var(--mb-color-button-filled-filter-default); --mantine-color-button-filled-filter-default-4: var(--mb-color-button-filled-filter-default);
+  --mantine-color-button-filled-filter-hover-0: var(--mb-color-button-filled-filter-hover); --mantine-color-button-filled-filter-hover-1: var(--mb-color-button-filled-filter-hover); --mantine-color-button-filled-filter-hover-4: var(--mb-color-button-filled-filter-hover);
+  --mantine-color-button-filled-filter-pressed-0: var(--mb-color-button-filled-filter-pressed); --mantine-color-button-filled-filter-pressed-1: var(--mb-color-button-filled-filter-pressed); --mantine-color-button-filled-filter-pressed-4: var(--mb-color-button-filled-filter-pressed);
+  --mantine-color-button-filled-negative-default-0: var(--mb-color-button-filled-negative-default); --mantine-color-button-filled-negative-default-1: var(--mb-color-button-filled-negative-default); --mantine-color-button-filled-negative-default-4: var(--mb-color-button-filled-negative-default);
+  --mantine-color-button-filled-negative-hover-0: var(--mb-color-button-filled-negative-hover); --mantine-color-button-filled-negative-hover-1: var(--mb-color-button-filled-negative-hover); --mantine-color-button-filled-negative-hover-4: var(--mb-color-button-filled-negative-hover);
+  --mantine-color-button-filled-negative-pressed-0: var(--mb-color-button-filled-negative-pressed); --mantine-color-button-filled-negative-pressed-1: var(--mb-color-button-filled-negative-pressed); --mantine-color-button-filled-negative-pressed-4: var(--mb-color-button-filled-negative-pressed);
+  --mantine-color-button-filled-positive-default-0: var(--mb-color-button-filled-positive-default); --mantine-color-button-filled-positive-default-1: var(--mb-color-button-filled-positive-default); --mantine-color-button-filled-positive-default-4: var(--mb-color-button-filled-positive-default);
+  --mantine-color-button-filled-positive-hover-0: var(--mb-color-button-filled-positive-hover); --mantine-color-button-filled-positive-hover-1: var(--mb-color-button-filled-positive-hover); --mantine-color-button-filled-positive-hover-4: var(--mb-color-button-filled-positive-hover);
+  --mantine-color-button-filled-positive-pressed-0: var(--mb-color-button-filled-positive-pressed); --mantine-color-button-filled-positive-pressed-1: var(--mb-color-button-filled-positive-pressed); --mantine-color-button-filled-positive-pressed-4: var(--mb-color-button-filled-positive-pressed);
+  --mantine-color-button-filled-warning-hover-0: var(--mb-color-button-filled-warning-hover); --mantine-color-button-filled-warning-hover-1: var(--mb-color-button-filled-warning-hover); --mantine-color-button-filled-warning-hover-4: var(--mb-color-button-filled-warning-hover);
+  --mantine-color-button-filled-warning-pressed-0: var(--mb-color-button-filled-warning-pressed); --mantine-color-button-filled-warning-pressed-1: var(--mb-color-button-filled-warning-pressed); --mantine-color-button-filled-warning-pressed-4: var(--mb-color-button-filled-warning-pressed);
+  --mantine-color-button-light-brand-default-0: var(--mb-color-button-light-brand-default); --mantine-color-button-light-brand-default-1: var(--mb-color-button-light-brand-default); --mantine-color-button-light-brand-default-4: var(--mb-color-button-light-brand-default);
+  --mantine-color-button-light-brand-hover-0: var(--mb-color-button-light-brand-hover); --mantine-color-button-light-brand-hover-1: var(--mb-color-button-light-brand-hover); --mantine-color-button-light-brand-hover-4: var(--mb-color-button-light-brand-hover);
+  --mantine-color-button-light-brand-pressed-0: var(--mb-color-button-light-brand-pressed); --mantine-color-button-light-brand-pressed-1: var(--mb-color-button-light-brand-pressed); --mantine-color-button-light-brand-pressed-4: var(--mb-color-button-light-brand-pressed);
+  --mantine-color-button-light-filter-default-0: var(--mb-color-button-light-filter-default); --mantine-color-button-light-filter-default-1: var(--mb-color-button-light-filter-default); --mantine-color-button-light-filter-default-4: var(--mb-color-button-light-filter-default);
+  --mantine-color-button-light-filter-hover-0: var(--mb-color-button-light-filter-hover); --mantine-color-button-light-filter-hover-1: var(--mb-color-button-light-filter-hover); --mantine-color-button-light-filter-hover-4: var(--mb-color-button-light-filter-hover);
+  --mantine-color-button-light-filter-pressed-0: var(--mb-color-button-light-filter-pressed); --mantine-color-button-light-filter-pressed-1: var(--mb-color-button-light-filter-pressed); --mantine-color-button-light-filter-pressed-4: var(--mb-color-button-light-filter-pressed);
+  --mantine-color-button-light-negative-default-0: var(--mb-color-button-light-negative-default); --mantine-color-button-light-negative-default-1: var(--mb-color-button-light-negative-default); --mantine-color-button-light-negative-default-4: var(--mb-color-button-light-negative-default);
+  --mantine-color-button-light-negative-hover-0: var(--mb-color-button-light-negative-hover); --mantine-color-button-light-negative-hover-1: var(--mb-color-button-light-negative-hover); --mantine-color-button-light-negative-hover-4: var(--mb-color-button-light-negative-hover);
+  --mantine-color-button-light-negative-pressed-0: var(--mb-color-button-light-negative-pressed); --mantine-color-button-light-negative-pressed-1: var(--mb-color-button-light-negative-pressed); --mantine-color-button-light-negative-pressed-4: var(--mb-color-button-light-negative-pressed);
+  --mantine-color-button-light-neutral-default-0: var(--mb-color-button-light-neutral-default); --mantine-color-button-light-neutral-default-1: var(--mb-color-button-light-neutral-default); --mantine-color-button-light-neutral-default-4: var(--mb-color-button-light-neutral-default);
+  --mantine-color-button-light-neutral-hover-0: var(--mb-color-button-light-neutral-hover); --mantine-color-button-light-neutral-hover-1: var(--mb-color-button-light-neutral-hover); --mantine-color-button-light-neutral-hover-4: var(--mb-color-button-light-neutral-hover);
+  --mantine-color-button-light-neutral-pressed-0: var(--mb-color-button-light-neutral-pressed); --mantine-color-button-light-neutral-pressed-1: var(--mb-color-button-light-neutral-pressed); --mantine-color-button-light-neutral-pressed-4: var(--mb-color-button-light-neutral-pressed);
+  --mantine-color-button-light-positive-default-0: var(--mb-color-button-light-positive-default); --mantine-color-button-light-positive-default-1: var(--mb-color-button-light-positive-default); --mantine-color-button-light-positive-default-4: var(--mb-color-button-light-positive-default);
+  --mantine-color-button-light-positive-hover-0: var(--mb-color-button-light-positive-hover); --mantine-color-button-light-positive-hover-1: var(--mb-color-button-light-positive-hover); --mantine-color-button-light-positive-hover-4: var(--mb-color-button-light-positive-hover);
+  --mantine-color-button-light-positive-pressed-0: var(--mb-color-button-light-positive-pressed); --mantine-color-button-light-positive-pressed-1: var(--mb-color-button-light-positive-pressed); --mantine-color-button-light-positive-pressed-4: var(--mb-color-button-light-positive-pressed);
+  --mantine-color-button-subtle-brand-hover-0: var(--mb-color-button-subtle-brand-hover); --mantine-color-button-subtle-brand-hover-1: var(--mb-color-button-subtle-brand-hover); --mantine-color-button-subtle-brand-hover-4: var(--mb-color-button-subtle-brand-hover);
+  --mantine-color-button-subtle-brand-pressed-0: var(--mb-color-button-subtle-brand-pressed); --mantine-color-button-subtle-brand-pressed-1: var(--mb-color-button-subtle-brand-pressed); --mantine-color-button-subtle-brand-pressed-4: var(--mb-color-button-subtle-brand-pressed);
+  --mantine-color-button-subtle-negative-hover-0: var(--mb-color-button-subtle-negative-hover); --mantine-color-button-subtle-negative-hover-1: var(--mb-color-button-subtle-negative-hover); --mantine-color-button-subtle-negative-hover-4: var(--mb-color-button-subtle-negative-hover);
+  --mantine-color-button-subtle-negative-pressed-0: var(--mb-color-button-subtle-negative-pressed); --mantine-color-button-subtle-negative-pressed-1: var(--mb-color-button-subtle-negative-pressed); --mantine-color-button-subtle-negative-pressed-4: var(--mb-color-button-subtle-negative-pressed);
+  --mantine-color-button-subtle-neutral-hover-0: var(--mb-color-button-subtle-neutral-hover); --mantine-color-button-subtle-neutral-hover-1: var(--mb-color-button-subtle-neutral-hover); --mantine-color-button-subtle-neutral-hover-4: var(--mb-color-button-subtle-neutral-hover);
+  --mantine-color-button-subtle-neutral-pressed-0: var(--mb-color-button-subtle-neutral-pressed); --mantine-color-button-subtle-neutral-pressed-1: var(--mb-color-button-subtle-neutral-pressed); --mantine-color-button-subtle-neutral-pressed-4: var(--mb-color-button-subtle-neutral-pressed);
+  --mantine-color-button-subtle-positive-hover-0: var(--mb-color-button-subtle-positive-hover); --mantine-color-button-subtle-positive-hover-1: var(--mb-color-button-subtle-positive-hover); --mantine-color-button-subtle-positive-hover-4: var(--mb-color-button-subtle-positive-hover);
+  --mantine-color-button-subtle-positive-pressed-0: var(--mb-color-button-subtle-positive-pressed); --mantine-color-button-subtle-positive-pressed-1: var(--mb-color-button-subtle-positive-pressed); --mantine-color-button-subtle-positive-pressed-4: var(--mb-color-button-subtle-positive-pressed);
+  --mantine-color-button_label-filled-brand-default-0: var(--mb-color-button_label-filled-brand-default); --mantine-color-button_label-filled-brand-default-1: var(--mb-color-button_label-filled-brand-default); --mantine-color-button_label-filled-brand-default-4: var(--mb-color-button_label-filled-brand-default);
+  --mantine-color-button_label-filled-filter-default-0: var(--mb-color-button_label-filled-filter-default); --mantine-color-button_label-filled-filter-default-1: var(--mb-color-button_label-filled-filter-default); --mantine-color-button_label-filled-filter-default-4: var(--mb-color-button_label-filled-filter-default);
+  --mantine-color-button_label-filled-negative-default-0: var(--mb-color-button_label-filled-negative-default); --mantine-color-button_label-filled-negative-default-1: var(--mb-color-button_label-filled-negative-default); --mantine-color-button_label-filled-negative-default-4: var(--mb-color-button_label-filled-negative-default);
+  --mantine-color-button_label-filled-positive-default-0: var(--mb-color-button_label-filled-positive-default); --mantine-color-button_label-filled-positive-default-1: var(--mb-color-button_label-filled-positive-default); --mantine-color-button_label-filled-positive-default-4: var(--mb-color-button_label-filled-positive-default);
+  --mantine-color-button_label-light-brand-default-0: var(--mb-color-button_label-light-brand-default); --mantine-color-button_label-light-brand-default-1: var(--mb-color-button_label-light-brand-default); --mantine-color-button_label-light-brand-default-4: var(--mb-color-button_label-light-brand-default);
+  --mantine-color-button_label-light-brand-hover-0: var(--mb-color-button_label-light-brand-hover); --mantine-color-button_label-light-brand-hover-1: var(--mb-color-button_label-light-brand-hover); --mantine-color-button_label-light-brand-hover-4: var(--mb-color-button_label-light-brand-hover);
+  --mantine-color-button_label-light-filter-default-0: var(--mb-color-button_label-light-filter-default); --mantine-color-button_label-light-filter-default-1: var(--mb-color-button_label-light-filter-default); --mantine-color-button_label-light-filter-default-4: var(--mb-color-button_label-light-filter-default);
+  --mantine-color-button_label-light-filter-hover-0: var(--mb-color-button_label-light-filter-hover); --mantine-color-button_label-light-filter-hover-1: var(--mb-color-button_label-light-filter-hover); --mantine-color-button_label-light-filter-hover-4: var(--mb-color-button_label-light-filter-hover);
+  --mantine-color-button_label-light-negative-default-0: var(--mb-color-button_label-light-negative-default); --mantine-color-button_label-light-negative-default-1: var(--mb-color-button_label-light-negative-default); --mantine-color-button_label-light-negative-default-4: var(--mb-color-button_label-light-negative-default);
+  --mantine-color-button_label-light-negative-hover-0: var(--mb-color-button_label-light-negative-hover); --mantine-color-button_label-light-negative-hover-1: var(--mb-color-button_label-light-negative-hover); --mantine-color-button_label-light-negative-hover-4: var(--mb-color-button_label-light-negative-hover);
+  --mantine-color-button_label-light-positive-default-0: var(--mb-color-button_label-light-positive-default); --mantine-color-button_label-light-positive-default-1: var(--mb-color-button_label-light-positive-default); --mantine-color-button_label-light-positive-default-4: var(--mb-color-button_label-light-positive-default);
+  --mantine-color-button_label-light-positive-hover-0: var(--mb-color-button_label-light-positive-hover); --mantine-color-button_label-light-positive-hover-1: var(--mb-color-button_label-light-positive-hover); --mantine-color-button_label-light-positive-hover-4: var(--mb-color-button_label-light-positive-hover);
+  --mantine-color-button_label-subtle-brand-default-0: var(--mb-color-button_label-subtle-brand-default); --mantine-color-button_label-subtle-brand-default-1: var(--mb-color-button_label-subtle-brand-default); --mantine-color-button_label-subtle-brand-default-4: var(--mb-color-button_label-subtle-brand-default);
+  --mantine-color-button_label-subtle-brand-hover-0: var(--mb-color-button_label-subtle-brand-hover); --mantine-color-button_label-subtle-brand-hover-1: var(--mb-color-button_label-subtle-brand-hover); --mantine-color-button_label-subtle-brand-hover-4: var(--mb-color-button_label-subtle-brand-hover);
+  --mantine-color-button_label-subtle-negative-default-0: var(--mb-color-button_label-subtle-negative-default); --mantine-color-button_label-subtle-negative-default-1: var(--mb-color-button_label-subtle-negative-default); --mantine-color-button_label-subtle-negative-default-4: var(--mb-color-button_label-subtle-negative-default);
+  --mantine-color-button_label-subtle-negative-hover-0: var(--mb-color-button_label-subtle-negative-hover); --mantine-color-button_label-subtle-negative-hover-1: var(--mb-color-button_label-subtle-negative-hover); --mantine-color-button_label-subtle-negative-hover-4: var(--mb-color-button_label-subtle-negative-hover);
+  --mantine-color-button_label-subtle-positive-default-0: var(--mb-color-button_label-subtle-positive-default); --mantine-color-button_label-subtle-positive-default-1: var(--mb-color-button_label-subtle-positive-default); --mantine-color-button_label-subtle-positive-default-4: var(--mb-color-button_label-subtle-positive-default);
+  --mantine-color-button_label-subtle-positive-hover-0: var(--mb-color-button_label-subtle-positive-hover); --mantine-color-button_label-subtle-positive-hover-1: var(--mb-color-button_label-subtle-positive-hover); --mantine-color-button_label-subtle-positive-hover-4: var(--mb-color-button_label-subtle-positive-hover);
+  --mantine-color-core-blue-saturated-0: var(--mb-color-core-blue-saturated); --mantine-color-core-blue-saturated-1: var(--mb-color-core-blue-saturated); --mantine-color-core-blue-saturated-4: var(--mb-color-core-blue-saturated);
+  --mantine-color-core-brand-hover-0: var(--mb-color-core-brand-hover); --mantine-color-core-brand-hover-1: var(--mb-color-core-brand-hover); --mantine-color-core-brand-hover-4: var(--mb-color-core-brand-hover);
+  --mantine-color-core-filter-strong-0: var(--mb-color-core-filter-strong); --mantine-color-core-filter-strong-1: var(--mb-color-core-filter-strong); --mantine-color-core-filter-strong-4: var(--mb-color-core-filter-strong);
+  --mantine-color-core-green-saturated-0: var(--mb-color-core-green-saturated); --mantine-color-core-green-saturated-1: var(--mb-color-core-green-saturated); --mantine-color-core-green-saturated-4: var(--mb-color-core-green-saturated);
+  --mantine-color-core-info-0: var(--mb-color-core-info); --mantine-color-core-info-1: var(--mb-color-core-info); --mantine-color-core-info-4: var(--mb-color-core-info);
+  --mantine-color-core-metabase_brand-hover-0: var(--mb-color-core-metabase_brand-hover); --mantine-color-core-metabase_brand-hover-1: var(--mb-color-core-metabase_brand-hover); --mantine-color-core-metabase_brand-hover-4: var(--mb-color-core-metabase_brand-hover);
+  --mantine-color-core-purple-saturated-0: var(--mb-color-core-purple-saturated); --mantine-color-core-purple-saturated-1: var(--mb-color-core-purple-saturated); --mantine-color-core-purple-saturated-4: var(--mb-color-core-purple-saturated);
+  --mantine-color-core-red-saturated-0: var(--mb-color-core-red-saturated); --mantine-color-core-red-saturated-1: var(--mb-color-core-red-saturated); --mantine-color-core-red-saturated-4: var(--mb-color-core-red-saturated);
+  --mantine-color-feedback-neutral-strong-0: var(--mb-color-feedback-neutral-strong); --mantine-color-feedback-neutral-strong-1: var(--mb-color-feedback-neutral-strong); --mantine-color-feedback-neutral-strong-4: var(--mb-color-feedback-neutral-strong);
+  --mantine-color-feedback-positive-selected-0: var(--mb-color-feedback-positive-selected); --mantine-color-feedback-positive-selected-1: var(--mb-color-feedback-positive-selected); --mantine-color-feedback-positive-selected-4: var(--mb-color-feedback-positive-selected);
+  --mantine-color-feedback-warning-strong-0: var(--mb-color-feedback-warning-strong); --mantine-color-feedback-warning-strong-1: var(--mb-color-feedback-warning-strong); --mantine-color-feedback-warning-strong-4: var(--mb-color-feedback-warning-strong);
+  --mantine-color-illustration-secondary-brand-0: var(--mb-color-illustration-secondary-brand); --mantine-color-illustration-secondary-brand-1: var(--mb-color-illustration-secondary-brand); --mantine-color-illustration-secondary-brand-4: var(--mb-color-illustration-secondary-brand);
+  --mantine-color-illustration-tertiary-brand-0: var(--mb-color-illustration-tertiary-brand); --mantine-color-illustration-tertiary-brand-1: var(--mb-color-illustration-tertiary-brand); --mantine-color-illustration-tertiary-brand-4: var(--mb-color-illustration-tertiary-brand);
+  --mantine-color-input-background-0: var(--mb-color-input-background); --mantine-color-input-background-1: var(--mb-color-input-background); --mantine-color-input-background-4: var(--mb-color-input-background);
+  --mantine-color-modal-overlay-0: var(--mb-color-modal-overlay); --mantine-color-modal-overlay-1: var(--mb-color-modal-overlay); --mantine-color-modal-overlay-4: var(--mb-color-modal-overlay);
+  --mantine-color-navbar-admin-0: var(--mb-color-navbar-admin); --mantine-color-navbar-admin-1: var(--mb-color-navbar-admin); --mantine-color-navbar-admin-4: var(--mb-color-navbar-admin);
+  --mantine-color-navbar-admin-inverse-0: var(--mb-color-navbar-admin-inverse); --mantine-color-navbar-admin-inverse-1: var(--mb-color-navbar-admin-inverse); --mantine-color-navbar-admin-inverse-4: var(--mb-color-navbar-admin-inverse);
+  --mantine-color-navbar-admin-secondary-0: var(--mb-color-navbar-admin-secondary); --mantine-color-navbar-admin-secondary-1: var(--mb-color-navbar-admin-secondary); --mantine-color-navbar-admin-secondary-4: var(--mb-color-navbar-admin-secondary);
+  --mantine-color-segmented_control-hover-0: var(--mb-color-segmented_control-hover); --mantine-color-segmented_control-hover-1: var(--mb-color-segmented_control-hover); --mantine-color-segmented_control-hover-4: var(--mb-color-segmented_control-hover);
+  --mantine-color-segmented_control-pressed-0: var(--mb-color-segmented_control-pressed); --mantine-color-segmented_control-pressed-1: var(--mb-color-segmented_control-pressed); --mantine-color-segmented_control-pressed-4: var(--mb-color-segmented_control-pressed);
+  --mantine-color-segmented_control-selected-0: var(--mb-color-segmented_control-selected); --mantine-color-segmented_control-selected-1: var(--mb-color-segmented_control-selected); --mantine-color-segmented_control-selected-4: var(--mb-color-segmented_control-selected);
+  --mantine-color-switch-checked-0: var(--mb-color-switch-checked); --mantine-color-switch-checked-1: var(--mb-color-switch-checked); --mantine-color-switch-checked-4: var(--mb-color-switch-checked);
+  --mantine-color-switch-disabled-0: var(--mb-color-switch-disabled); --mantine-color-switch-disabled-1: var(--mb-color-switch-disabled); --mantine-color-switch-disabled-4: var(--mb-color-switch-disabled);
+  --mantine-color-switch-unchecked-0: var(--mb-color-switch-unchecked); --mantine-color-switch-unchecked-1: var(--mb-color-switch-unchecked); --mantine-color-switch-unchecked-4: var(--mb-color-switch-unchecked);
+  --mantine-color-switch_thumb-disabled-0: var(--mb-color-switch_thumb-disabled); --mantine-color-switch_thumb-disabled-1: var(--mb-color-switch_thumb-disabled); --mantine-color-switch_thumb-disabled-4: var(--mb-color-switch_thumb-disabled);
+  --mantine-color-text-brand-0: var(--mb-color-text-brand); --mantine-color-text-brand-1: var(--mb-color-text-brand); --mantine-color-text-brand-4: var(--mb-color-text-brand);
+  --mantine-color-text-brand-strong-0: var(--mb-color-text-brand-strong); --mantine-color-text-brand-strong-1: var(--mb-color-text-brand-strong); --mantine-color-text-brand-strong-4: var(--mb-color-text-brand-strong);
+  --mantine-color-text-brand-strong-hover-0: var(--mb-color-text-brand-strong-hover); --mantine-color-text-brand-strong-hover-1: var(--mb-color-text-brand-strong-hover); --mantine-color-text-brand-strong-hover-4: var(--mb-color-text-brand-strong-hover);
+  --mantine-color-text-disabled-inverse-0: var(--mb-color-text-disabled-inverse); --mantine-color-text-disabled-inverse-1: var(--mb-color-text-disabled-inverse); --mantine-color-text-disabled-inverse-4: var(--mb-color-text-disabled-inverse);
+  --mantine-color-text-filter-0: var(--mb-color-text-filter); --mantine-color-text-filter-1: var(--mb-color-text-filter); --mantine-color-text-filter-4: var(--mb-color-text-filter);
+  --mantine-color-text-secondary-inverse-0: var(--mb-color-text-secondary-inverse); --mantine-color-text-secondary-inverse-1: var(--mb-color-text-secondary-inverse); --mantine-color-text-secondary-inverse-4: var(--mb-color-text-secondary-inverse);
+  --mantine-color-text-selected-0: var(--mb-color-text-selected); --mantine-color-text-selected-1: var(--mb-color-text-selected); --mantine-color-text-selected-4: var(--mb-color-text-selected);
+  --mantine-color-text-syntax-parameter-0: var(--mb-color-text-syntax-parameter); --mantine-color-text-syntax-parameter-1: var(--mb-color-text-syntax-parameter); --mantine-color-text-syntax-parameter-4: var(--mb-color-text-syntax-parameter);
+  --mantine-color-text-syntax-parameter-active-0: var(--mb-color-text-syntax-parameter-active); --mantine-color-text-syntax-parameter-active-1: var(--mb-color-text-syntax-parameter-active); --mantine-color-text-syntax-parameter-active-4: var(--mb-color-text-syntax-parameter-active);
+  --mantine-color-accent-gray-0: var(--mb-color-accent-gray); --mantine-color-accent-gray-1: var(--mb-color-accent-gray); --mantine-color-accent-gray-4: var(--mb-color-accent-gray);
+  --mantine-color-accent-gray-light-0: var(--mb-color-accent-gray-light); --mantine-color-accent-gray-light-1: var(--mb-color-accent-gray-light); --mantine-color-accent-gray-light-4: var(--mb-color-accent-gray-light);
+  --mantine-color-accent-gray-dark-0: var(--mb-color-accent-gray-dark); --mantine-color-accent-gray-dark-1: var(--mb-color-accent-gray-dark); --mantine-color-accent-gray-dark-4: var(--mb-color-accent-gray-dark);
+  --mantine-color-brand-0: var(--mb-color-brand); --mantine-color-brand-1: var(--mb-color-brand); --mantine-color-brand-4: var(--mb-color-brand);
+  --mantine-color-core-brand-0: var(--mb-color-core-brand); --mantine-color-core-brand-1: var(--mb-color-core-brand); --mantine-color-core-brand-4: var(--mb-color-core-brand);
+  --mantine-color-background-hover-0: var(--mb-color-background-hover); --mantine-color-background-hover-1: var(--mb-color-background-hover); --mantine-color-background-hover-4: var(--mb-color-background-hover);
+  --mantine-color-background_surface-hover-0: var(--mb-color-background_surface-hover); --mantine-color-background_surface-hover-1: var(--mb-color-background_surface-hover); --mantine-color-background_surface-hover-4: var(--mb-color-background_surface-hover);
+  --mantine-color-border-0: var(--mb-color-border); --mantine-color-border-1: var(--mb-color-border); --mantine-color-border-4: var(--mb-color-border);
+  --mantine-color-border-neutral-0: var(--mb-color-border-neutral); --mantine-color-border-neutral-1: var(--mb-color-border-neutral); --mantine-color-border-neutral-4: var(--mb-color-border-neutral);
+  --mantine-color-filter-0: var(--mb-color-filter); --mantine-color-filter-1: var(--mb-color-filter); --mantine-color-filter-4: var(--mb-color-filter);
+  --mantine-color-core-filter-0: var(--mb-color-core-filter); --mantine-color-core-filter-1: var(--mb-color-core-filter); --mantine-color-core-filter-4: var(--mb-color-core-filter);
+  --mantine-color-summarize-0: var(--mb-color-summarize); --mantine-color-summarize-1: var(--mb-color-summarize); --mantine-color-summarize-4: var(--mb-color-summarize);
+  --mantine-color-core-summarize-0: var(--mb-color-core-summarize); --mantine-color-core-summarize-1: var(--mb-color-core-summarize); --mantine-color-core-summarize-4: var(--mb-color-core-summarize);
+  --mantine-color-text-primary-0: var(--mb-color-text-primary); --mantine-color-text-primary-1: var(--mb-color-text-primary); --mantine-color-text-primary-4: var(--mb-color-text-primary);
+  --mantine-color-button_label-default-neutral-default-0: var(--mb-color-button_label-default-neutral-default); --mantine-color-button_label-default-neutral-default-1: var(--mb-color-button_label-default-neutral-default); --mantine-color-button_label-default-neutral-default-4: var(--mb-color-button_label-default-neutral-default);
+  --mantine-color-button_label-light-neutral-default-0: var(--mb-color-button_label-light-neutral-default); --mantine-color-button_label-light-neutral-default-1: var(--mb-color-button_label-light-neutral-default); --mantine-color-button_label-light-neutral-default-4: var(--mb-color-button_label-light-neutral-default);
+  --mantine-color-button_label-subtle-neutral-default-0: var(--mb-color-button_label-subtle-neutral-default); --mantine-color-button_label-subtle-neutral-default-1: var(--mb-color-button_label-subtle-neutral-default); --mantine-color-button_label-subtle-neutral-default-4: var(--mb-color-button_label-subtle-neutral-default);
+  --mantine-color-text-secondary-0: var(--mb-color-text-secondary); --mantine-color-text-secondary-1: var(--mb-color-text-secondary); --mantine-color-text-secondary-4: var(--mb-color-text-secondary);
+  --mantine-color-text-tertiary-0: var(--mb-color-text-tertiary); --mantine-color-text-tertiary-1: var(--mb-color-text-tertiary); --mantine-color-text-tertiary-4: var(--mb-color-text-tertiary);
+  --mantine-color-text-disabled-0: var(--mb-color-text-disabled); --mantine-color-text-disabled-1: var(--mb-color-text-disabled); --mantine-color-text-disabled-4: var(--mb-color-text-disabled);
+  --mantine-color-background-primary-0: var(--mb-color-background-primary); --mantine-color-background-primary-1: var(--mb-color-background-primary); --mantine-color-background-primary-4: var(--mb-color-background-primary);
+  --mantine-color-background_page-primary-0: var(--mb-color-background_page-primary); --mantine-color-background_page-primary-1: var(--mb-color-background_page-primary); --mantine-color-background_page-primary-4: var(--mb-color-background_page-primary);
+  --mantine-color-background_surface-primary-0: var(--mb-color-background_surface-primary); --mantine-color-background_surface-primary-1: var(--mb-color-background_surface-primary); --mantine-color-background_surface-primary-4: var(--mb-color-background_surface-primary);
+  --mantine-color-button-default-neutral-default-0: var(--mb-color-button-default-neutral-default); --mantine-color-button-default-neutral-default-1: var(--mb-color-button-default-neutral-default); --mantine-color-button-default-neutral-default-4: var(--mb-color-button-default-neutral-default);
+  --mantine-color-background-tertiary-0: var(--mb-color-background-tertiary); --mantine-color-background-tertiary-1: var(--mb-color-background-tertiary); --mantine-color-background-tertiary-4: var(--mb-color-background-tertiary);
+  --mantine-color-background_page-tertiary-0: var(--mb-color-background_page-tertiary); --mantine-color-background_page-tertiary-1: var(--mb-color-background_page-tertiary); --mantine-color-background_page-tertiary-4: var(--mb-color-background_page-tertiary);
+  --mantine-color-background-disabled-0: var(--mb-color-background-disabled); --mantine-color-background-disabled-1: var(--mb-color-background-disabled); --mantine-color-background-disabled-4: var(--mb-color-background-disabled);
+  --mantine-color-background_surface-disabled-0: var(--mb-color-background_surface-disabled); --mantine-color-background_surface-disabled-1: var(--mb-color-background_surface-disabled); --mantine-color-background_surface-disabled-4: var(--mb-color-background_surface-disabled);
+  --mantine-color-background-secondary-0: var(--mb-color-background-secondary); --mantine-color-background-secondary-1: var(--mb-color-background-secondary); --mantine-color-background-secondary-4: var(--mb-color-background-secondary);
+  --mantine-color-background_page-secondary-0: var(--mb-color-background_page-secondary); --mantine-color-background_page-secondary-1: var(--mb-color-background_page-secondary); --mantine-color-background_page-secondary-4: var(--mb-color-background_page-secondary);
+  --mantine-color-shadow-0: var(--mb-color-shadow); --mantine-color-shadow-1: var(--mb-color-shadow); --mantine-color-shadow-4: var(--mb-color-shadow);
+  --mantine-color-shadow-default-0: var(--mb-color-shadow-default); --mantine-color-shadow-default-1: var(--mb-color-shadow-default); --mantine-color-shadow-default-4: var(--mb-color-shadow-default);
+  --mantine-color-success-0: var(--mb-color-success); --mantine-color-success-1: var(--mb-color-success); --mantine-color-success-4: var(--mb-color-success);
+  --mantine-color-feedback-positive-0: var(--mb-color-feedback-positive); --mantine-color-feedback-positive-1: var(--mb-color-feedback-positive); --mantine-color-feedback-positive-4: var(--mb-color-feedback-positive);
+  --mantine-color-feedback-positive-strong-0: var(--mb-color-feedback-positive-strong); --mantine-color-feedback-positive-strong-1: var(--mb-color-feedback-positive-strong); --mantine-color-feedback-positive-strong-4: var(--mb-color-feedback-positive-strong);
+  --mantine-color-danger-0: var(--mb-color-danger); --mantine-color-danger-1: var(--mb-color-danger); --mantine-color-danger-4: var(--mb-color-danger);
+  --mantine-color-feedback-negative-strong-0: var(--mb-color-feedback-negative-strong); --mantine-color-feedback-negative-strong-1: var(--mb-color-feedback-negative-strong); --mantine-color-feedback-negative-strong-4: var(--mb-color-feedback-negative-strong);
+  --mantine-color-text-primary-inverse-0: var(--mb-color-text-primary-inverse); --mantine-color-text-primary-inverse-1: var(--mb-color-text-primary-inverse); --mantine-color-text-primary-inverse-4: var(--mb-color-text-primary-inverse);
+  --mantine-color-white-0: var(--mb-color-white); --mantine-color-white-1: var(--mb-color-white); --mantine-color-white-4: var(--mb-color-white);
+  --mantine-color-core-white-0: var(--mb-color-core-white); --mantine-color-core-white-1: var(--mb-color-core-white); --mantine-color-core-white-4: var(--mb-color-core-white);
+  --mantine-color-feedback-negative-0: var(--mb-color-feedback-negative); --mantine-color-feedback-negative-1: var(--mb-color-feedback-negative); --mantine-color-feedback-negative-4: var(--mb-color-feedback-negative);
+  --mantine-color-background-error-0: var(--mb-color-background-error); --mantine-color-background-error-1: var(--mb-color-background-error); --mantine-color-background-error-4: var(--mb-color-background-error);
+  --mantine-color-background_surface-error-0: var(--mb-color-background_surface-error); --mantine-color-background_surface-error-1: var(--mb-color-background_surface-error); --mantine-color-background_surface-error-4: var(--mb-color-background_surface-error);
+  --mantine-color-text-hover-0: var(--mb-color-text-hover); --mantine-color-text-hover-1: var(--mb-color-text-hover); --mantine-color-text-hover-4: var(--mb-color-text-hover);
+  --mantine-color-text-brand-hover-0: var(--mb-color-text-brand-hover); --mantine-color-text-brand-hover-1: var(--mb-color-text-brand-hover); --mantine-color-text-brand-hover-4: var(--mb-color-text-brand-hover);
+  --mantine-color-focus-0: var(--mb-color-focus); --mantine-color-focus-1: var(--mb-color-focus); --mantine-color-focus-4: var(--mb-color-focus);
+  --mantine-color-input-focus-0: var(--mb-color-input-focus); --mantine-color-input-focus-1: var(--mb-color-input-focus); --mantine-color-input-focus-4: var(--mb-color-input-focus);
+  --mantine-color-tooltip-text-0: var(--mb-color-tooltip-text); --mantine-color-tooltip-text-1: var(--mb-color-tooltip-text); --mantine-color-tooltip-text-4: var(--mb-color-tooltip-text);
+  --mantine-color-tooltip-text-secondary-0: var(--mb-color-tooltip-text-secondary); --mantine-color-tooltip-text-secondary-1: var(--mb-color-tooltip-text-secondary); --mantine-color-tooltip-text-secondary-4: var(--mb-color-tooltip-text-secondary);
+  --mantine-color-tooltip-background-0: var(--mb-color-tooltip-background); --mantine-color-tooltip-background-1: var(--mb-color-tooltip-background); --mantine-color-tooltip-background-4: var(--mb-color-tooltip-background);
+  --mantine-color-tooltip-background-focused-0: var(--mb-color-tooltip-background-focused); --mantine-color-tooltip-background-focused-1: var(--mb-color-tooltip-background-focused); --mantine-color-tooltip-background-focused-4: var(--mb-color-tooltip-background-focused);
+}
+
+/*
+ * The SDK's own spinner (a small Mantine loader, centred while a question runs) is drawn over as the app's harvest
+ * loader (ui.tsx HarvestLoader): a pumpkin in a ring whose pumpkin arc turns, over "Loading the harvest…". A data app
+ * cannot hand the SDK a loader of its own: the host keeps only theme, custom visualisations and an error component
+ * from providerProps.
+ */
+.pd-app .pd-mb [data-testid="loading-indicator"] { opacity: 0; }
+/* The first load's spinner sits in a plain centring box, made the loader's frame here. When results are already
+   there, a re-run (a filter, a drill) shows the spinner in the SDK's overlay over the old chart, which places itself
+   (absolute, over it all): this rule weighs nothing (:where), so the overlay keeps its own place. Its own words
+   ("Doing science…") would sit right under ours: hidden. */
+:where(.pd-app .pd-mb :has(> [data-testid="loading-indicator"])) { position: relative; min-height: 150px; }
+.pd-app .pd-mb :has(> [data-testid="loading-indicator"]) > :not([data-testid="loading-indicator"]) { visibility: hidden; }
+.pd-app .pd-mb :has(> [data-testid="loading-indicator"])::before {
+  content: ""; position: absolute; left: 50%; top: 50%; box-sizing: border-box; width: 56px; height: 56px; margin: -44px 0 0 -28px;
+  border: 3px solid var(--pd-border); border-top-color: var(--pd-pumpkin); border-radius: 50%; animation: pd-harvest-turn 1.1s linear infinite;
+}
+.pd-app .pd-mb :has(> [data-testid="loading-indicator"])::after {
+  content: "Loading the harvest…"; position: absolute; left: 0; right: 0; top: 50%; margin-top: -44px; padding-top: 68px; text-align: center;
+  font: 600 14px/20px var(--pd-sans); color: var(--pd-ink-soft); pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 30'%3E%3Cpath d='M15 8c0-3 1.5-5.5 5-6.5l1 2.5c-2 .6-3 2-3 4z' fill='%236c7a36'/%3E%3Cellipse cx='9.5' cy='18.5' rx='7.5' ry='9.5' fill='%23d9601c'/%3E%3Cellipse cx='22.5' cy='18.5' rx='7.5' ry='9.5' fill='%23d9601c'/%3E%3Cellipse cx='16' cy='18.5' rx='7' ry='10.5' fill='%23f08a3c'/%3E%3C/svg%3E") no-repeat 50% 15px / 28px 26px;
+}

@@ -1,0 +1,155 @@
+/*
+ * MetaPumpkin · Golden Hour tokens
+ * Custom properties on .pd-app; every rule in the app is scoped to that class. Two themes: the root carries
+ * data-theme="light" or "dark" (App.tsx holds it, Shell renders it), and every colour token has a value in
+ * each. A part of the page can pin a theme with its own data-theme (nothing does today: the Metabase
+ * questions follow the app's theme, src/pages/explore/sdk-theme.css). src/theme.ts mirrors these names:
+ * `palette` holds var() references for inline styles, `lightPalette` and `darkPalette` the hex values for
+ * the SDK theme.
+ *
+ * Light: Golden Hour
+ *   Ground & surfaces  --pd-page #fdfbf9 · --pd-surface #fdfbf9 (panels and cards: no fill in light) · --pd-sidebar #f6f1ed (sidebar, tab bar)
+ *                      --pd-stone #f6f1ed (neutral insets, clock)
+ *                      --pd-group #f8f4f0 (group rows) · --pd-track #f0e8e2 (meter tracks)
+ *                      --pd-segment #e9e0d9 (segmented track, active nav row) · --pd-raised #fdfbf9 (raised segmented option)
+ *                      --pd-hover #efe8e2 (nav row hover) · --pd-shimmer #f7f1ec (skeleton highlight)
+ *   Lines              --pd-border #e2d8d1 (controls) · --pd-hairline #ece3dd (panels, dividers) · --pd-row-line #f0e8e2
+ *                      --pd-grid #e4d8d0 (chart gridlines)
+ *   Ink                --pd-ink #3a2230 · --pd-ink-soft #5a4550 · --pd-muted #6f5a64 · --pd-faint #b9a8ae
+ *   Pumpkin            --pd-pumpkin-light #f08a3c · --pd-pumpkin #e2681c · --pd-pumpkin-deep #d9601c · --pd-pumpkin-icon #c2531a
+ *   Terracotta         --pd-severe #b5441a · --pd-terracotta #a8440f · --pd-terracotta-deep #8a360a · --pd-terracotta-dark #7c2f08
+ *   Blush & amber      --pd-blush #f9e6d6 (problem insets) · --pd-blush-deep #f9dcc2 · --pd-peach #f5dccb (late chip)
+ *                      --pd-selected #fbeee2 + --pd-selected-ring #e7a67c (pressed toggles, selected rows)
+ *                      --pd-amber #f5e3cd + --pd-amber-ink #74440c (low stock) · --pd-candle #e3a047 · --pd-incoming #e9b184
+ *   Olive              --pd-olive #5f6d2c · --pd-leaf #6c7a36 · --pd-meadow #8f9a4e · --pd-olive-wash #e9ebd3
+ *                      --pd-olive-ink #46521d · --pd-olive-soft #eef0dc (ok insets)
+ *   Plum               --pd-plum #4a2638 · --pd-plum-hill #5b3445 (chart baseline) · --pd-cream #fbe3cf (ink on plum) · --pd-rose #a8667a
+ *                      --pd-sky #f8e0d3 (banner ground)
+ *   On fills           --pd-on-severe #ffffff (text on severe) · --pd-on-olive #ffffff (a glyph on an olive dot)
+ *   Washes             --pd-page-clear / --pd-surface-clear (at alpha 0, for fades) · --pd-tint / --pd-tint-strong (plum 4% / 7%: column hover, pressed)
+ *                      --pd-scrim (behind a sheet) · --pd-scrim-soft (behind a phone bottom sheet) · --pd-banner-chip (chip on the art)
+ *   Banner             --pd-banner-filter none · --pd-banner-dusk none
+ *   Glass (phones)     the floating tab bar, its round buttons, the top bar's floating pill and the bottom sheets:
+ *                      --pd-glass page at 58% behind a blur · --pd-glass-solid (no backdrop-filter) · --pd-glass-sheet 84%
+ *                      --pd-glass-edge white rim · --pd-glass-pick (the picked tab's lens) · --pd-glass-row (rows on a sheet)
+ *                      --pd-glass-shadow / --pd-glass-lift (a bar / a sheet) · --pd-fade (the page fading under them)
+ *
+ * Dark: Golden Hour at dusk. A deep plum-brown page; panels and cards are surfaces a step above it, insets and
+ * controls a little above those, and the sidebar sinks under the page. Inside a surface the page tokens are the
+ * surface (see "Surfaces" below), and the values here are tuned against the surface, #22161a. Ink is warm
+ * off-white. Pumpkin, olive, candle and rose are brightened to at least 3:1 on the surface as marks; text
+ * colours (muted, terracotta, olive-ink, amber-ink, terracotta-deep) hold 4.5:1 on it and on their washes
+ * (the page, darker, only adds contrast). Plum turns light rose-plum so plan lines and plum marks stay
+ * the strongest mark, and cream turns deep plum: it is the ink on plum fills (avatar, discs). The good, bad,
+ * low and problem fills are deep tinted washes under light text.
+ *   Ground & surfaces  page #1e1317 · surface #22161a (panels, cards, the definition card) · sidebar #170e11
+ *                      stone #2e2126 · group #291c21 · track #3a2b31 · segment #382930
+ *                      raised #4d3a42 · hover #30232a · shimmer #44343b
+ *   Lines              border #54424a · hairline #3d2e35 · row-line #33252b · grid #45353c
+ *   Ink                ink #f7ebe4 · ink-soft #dfcdc8 · muted #b9a5a8 · faint #7a666e
+ *   Pumpkin            pumpkin-light #f8a060 · pumpkin #f0823a · pumpkin-deep #ea7634 · pumpkin-icon #f59a5c
+ *   Terracotta         severe #c44f28 · terracotta #ee8a68 · terracotta-deep #ffc6a6 · terracotta-dark #ffb08a
+ *   Blush & amber      blush #36201d · blush-deep #47271f · peach #45251d · selected #3e2a26 + selected-ring #b8714d
+ *                      amber #3f2f1c + amber-ink #f2c98d · candle #e9ad5c · incoming #e8b088
+ *   Olive              olive #b0bf68 · leaf #a3b35d · meadow #8e9a52 · olive-wash #2f3419 · olive-ink #cfdb95 · olive-soft #262b17
+ *   Plum               plum #dcb3c6 · plum-hill #9d7a8b · cream #2a1820 · rose #cf8aa0 · sky #3b2830
+ *   On fills           on-severe #ffffff · on-olive #22161a
+ *   Banner             the art a little dimmer (brightness .86, saturate 1.05) under a plum dusk gradient, darkest at the top
+ *   Glass              deep plum at 60% behind the blur, a faint warm rim, a darker drop
+ *
+ *   Radii              --pd-r-banner 20px · --pd-r-panel 16px · --pd-r-inset 12px · --pd-r-control 10px · --pd-r-pill 999px
+ *   Type               --pd-serif "Young Serif": titles only (the brand, a page's h1, its digits lining) · --pd-sans "Hanken Grotesk": the rest
+ *                      numeral: Hanken 600, lining tabular digits, -0.02em, never the serif (its old-style digits read as
+ *                      different sizes; base.css .pd-num) · 64–40 Business glance · 34 Business tile · 28/25/23/21 in panels
+ *                      and Stat tiles (default 23) · a unit word after the digits .pd-unit, .64em/500
+ *                      h1 26/1.15 · panel title 15/700 · body 14/1.45 · control 13.5/600
+ *                      label 13 · table head 12/600 · chip 12/700 · small chip 11.5/700
+ *   Layout             --pd-gutter clamp(16px, 2.6vw, 32px) · --pd-content 1180px · --pd-sidebar-w 236px
+ *                      --pd-tabbar-h 62px (the floating glass bar) · --pd-tabbar-space (what it covers at the foot)
+ *                      breakpoints 900px (sidebar → floating tab bar) and 600px (phone)
+ *   No drop shadows, except the raised option of the segmented control (--pd-shadow-segment) and the glass that
+ *   floats over the page under 900px (--pd-glass-shadow, --pd-glass-lift).
+ */
+
+/* ── Light (the default, and any part pinned to it) ──────── */
+.pd-app, .pd-app [data-theme="light"] {
+  color-scheme: light;
+  --pd-page: #fdfbf9; --pd-surface: #fdfbf9; --pd-sidebar: #f6f1ed; --pd-stone: #f6f1ed; --pd-group: #f8f4f0; --pd-track: #f0e8e2; --pd-segment: #e9e0d9;
+  --pd-raised: #fdfbf9; --pd-hover: #efe8e2; --pd-shimmer: #f7f1ec;
+  --pd-border: #e2d8d1; --pd-hairline: #ece3dd; --pd-row-line: #f0e8e2; --pd-grid: #e4d8d0;
+  --pd-ink: #3a2230; --pd-ink-soft: #5a4550; --pd-muted: #6f5a64; --pd-faint: #b9a8ae;
+  --pd-pumpkin-light: #f08a3c; --pd-pumpkin: #e2681c; --pd-pumpkin-deep: #d9601c; --pd-pumpkin-icon: #c2531a;
+  --pd-severe: #b5441a; --pd-terracotta: #a8440f; --pd-terracotta-deep: #8a360a; --pd-terracotta-dark: #7c2f08;
+  --pd-blush: #f9e6d6; --pd-blush-deep: #f9dcc2; --pd-peach: #f5dccb;
+  --pd-selected: #fbeee2; --pd-selected-ring: #e7a67c;
+  --pd-amber: #f5e3cd; --pd-amber-ink: #74440c; --pd-candle: #e3a047; --pd-incoming: #e9b184;
+  --pd-olive: #5f6d2c; --pd-leaf: #6c7a36; --pd-meadow: #8f9a4e; --pd-olive-wash: #e9ebd3;
+  --pd-olive-ink: #46521d; --pd-olive-soft: #eef0dc;
+  --pd-plum: #4a2638; --pd-plum-hill: #5b3445; --pd-cream: #fbe3cf; --pd-rose: #a8667a;
+  --pd-sky: #f8e0d3;
+  --pd-on-severe: #ffffff; --pd-on-olive: #ffffff;
+  --pd-page-clear: rgba(253, 251, 249, 0); --pd-surface-clear: rgba(253, 251, 249, 0); --pd-tint: rgba(74, 38, 56, .04); --pd-tint-strong: rgba(74, 38, 56, .07);
+  --pd-scrim: rgba(58, 34, 48, .22); --pd-scrim-soft: rgba(58, 34, 48, .16); --pd-banner-chip: rgba(253, 251, 249, .9);
+  --pd-banner-filter: none; --pd-banner-dusk: none;
+  --pd-shadow-segment: 0 1px 2px rgba(74, 38, 56, .08), 0 6px 14px -8px rgba(74, 38, 56, .35);
+  --pd-glass: rgba(253, 251, 249, .58); --pd-glass-solid: rgba(253, 251, 249, .9); --pd-glass-sheet: rgba(253, 251, 249, .84);
+  --pd-glass-edge: rgba(255, 255, 255, .8); --pd-glass-pick: rgba(74, 38, 56, .08); --pd-glass-row: rgba(255, 255, 255, .62);
+  --pd-glass-shadow: 0 12px 32px -12px rgba(58, 34, 48, .32), 0 2px 6px -2px rgba(58, 34, 48, .1), inset 0 1px 1px rgba(255, 255, 255, .95), inset 0 -1px 1px rgba(58, 34, 48, .05);
+  --pd-glass-lift: 0 24px 60px -20px rgba(58, 34, 48, .45), inset 0 1px 1px rgba(255, 255, 255, .95);
+  --pd-fade: rgba(253, 251, 249, .78);
+}
+
+/* ── Dark: Golden Hour at dusk ───────────────────────────── */
+.pd-app[data-theme="dark"], .pd-app [data-theme="dark"] {
+  color-scheme: dark;
+  --pd-page: #1e1317; --pd-surface: #22161a; --pd-sidebar: #170e11; --pd-stone: #2e2126; --pd-group: #291c21; --pd-track: #3a2b31; --pd-segment: #382930;
+  --pd-raised: #4d3a42; --pd-hover: #30232a; --pd-shimmer: #44343b;
+  --pd-border: #54424a; --pd-hairline: #3d2e35; --pd-row-line: #33252b; --pd-grid: #45353c;
+  --pd-ink: #f7ebe4; --pd-ink-soft: #dfcdc8; --pd-muted: #b9a5a8; --pd-faint: #7a666e;
+  --pd-pumpkin-light: #f8a060; --pd-pumpkin: #f0823a; --pd-pumpkin-deep: #ea7634; --pd-pumpkin-icon: #f59a5c;
+  --pd-severe: #c44f28; --pd-terracotta: #ee8a68; --pd-terracotta-deep: #ffc6a6; --pd-terracotta-dark: #ffb08a;
+  --pd-blush: #36201d; --pd-blush-deep: #47271f; --pd-peach: #45251d;
+  --pd-selected: #3e2a26; --pd-selected-ring: #b8714d;
+  --pd-amber: #3f2f1c; --pd-amber-ink: #f2c98d; --pd-candle: #e9ad5c; --pd-incoming: #e8b088;
+  --pd-olive: #b0bf68; --pd-leaf: #a3b35d; --pd-meadow: #8e9a52; --pd-olive-wash: #2f3419;
+  --pd-olive-ink: #cfdb95; --pd-olive-soft: #262b17;
+  --pd-plum: #dcb3c6; --pd-plum-hill: #9d7a8b; --pd-cream: #2a1820; --pd-rose: #cf8aa0;
+  --pd-sky: #3b2830;
+  --pd-on-severe: #ffffff; --pd-on-olive: #22161a;
+  --pd-page-clear: rgba(30, 19, 23, 0); --pd-surface-clear: rgba(34, 22, 26, 0); --pd-tint: rgba(255, 236, 226, .05); --pd-tint-strong: rgba(255, 236, 226, .09);
+  --pd-scrim: rgba(12, 6, 9, .55); --pd-scrim-soft: rgba(12, 6, 9, .45); --pd-banner-chip: rgba(34, 22, 26, .82);
+  --pd-banner-filter: brightness(.86) saturate(1.05);
+  --pd-banner-dusk: linear-gradient(180deg, rgba(70, 26, 62, .28) 0%, rgba(70, 26, 62, .04) 60%, rgba(24, 12, 18, .2) 100%);
+  --pd-shadow-segment: 0 1px 2px rgba(0, 0, 0, .35), 0 6px 14px -8px rgba(0, 0, 0, .7);
+  --pd-glass: rgba(44, 29, 35, .6); --pd-glass-solid: rgba(38, 25, 30, .94); --pd-glass-sheet: rgba(38, 25, 30, .9);
+  --pd-glass-edge: rgba(255, 236, 226, .13); --pd-glass-pick: rgba(255, 236, 226, .11); --pd-glass-row: rgba(255, 236, 226, .05);
+  --pd-glass-shadow: 0 14px 34px -12px rgba(0, 0, 0, .75), 0 2px 6px -2px rgba(0, 0, 0, .4), inset 0 1px 1px rgba(255, 236, 226, .16), inset 0 -1px 1px rgba(0, 0, 0, .25);
+  --pd-glass-lift: 0 24px 60px -20px rgba(0, 0, 0, .8), inset 0 1px 1px rgba(255, 236, 226, .14);
+  --pd-fade: rgba(30, 19, 23, .8);
+}
+
+/*
+ * Surfaces (dark): panels and cards sit a step above the page. Inside one, the page tokens are the surface, so
+ * every cut-out drawn in page colour (hollow dots, rings, fades, sticky columns) matches it, and the insets on
+ * it keep the steps they were tuned to. The fill itself: base.css (panel, card Stat), stores.css (city card);
+ * the definition card already fills with --pd-page. Light needs none of this: its panels have no fill.
+ */
+.pd-app[data-theme="dark"] :is(.pd-panel, .pd-stat.is-card, .pd-stores-card, .pd-define-card):not([data-theme="light"] *) {
+  --pd-page: var(--pd-surface); --pd-page-clear: var(--pd-surface-clear);
+}
+
+/* A part pinned to a theme sets its own ink: color inherits as a computed value, so it would keep the root's. */
+.pd-app [data-theme] { color: var(--pd-ink); }
+
+/* ── Shape, type and layout (the same in both themes) ────── */
+.pd-app {
+  --pd-r-banner: 20px; --pd-r-panel: 16px; --pd-r-inset: 12px; --pd-r-control: 10px; --pd-r-pill: 999px;
+  --pd-serif: "Young Serif", Georgia, "Times New Roman", serif;
+  --pd-sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pd-gutter: clamp(16px, 2.6vw, 32px);
+  --pd-content: 1180px;
+  --pd-sidebar-w: 236px;
+  --pd-tabbar-h: 62px;
+  /* What the floating tab bar covers at the screen's foot: the bar, its gap to the edge and the home indicator. */
+  --pd-tabbar-space: calc(var(--pd-tabbar-h) + max(14px, env(safe-area-inset-bottom, 0px)));
+}

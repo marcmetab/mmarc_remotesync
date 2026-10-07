@@ -1,0 +1,73 @@
+/*
+ * The floating glass tab bar (TabBar.tsx) and, from the shell, the floating top (region pill and avatar, once the
+ * top bar has scrolled away) and the fades the page slips under. Under 900px only: from 900px up the sidebar
+ * navigates and none of this shows. Scoped to .pd-app, classes pd-tabbar-*, pd-tab*, pd-floattop*.
+ *
+ *   bar        62px tall, 14px (or the home indicator) above the screen's foot, 14px in from its sides, at most 520px
+ *              wide, centred. A capsule of four tabs on glass; the picked tab sits in a lens (--pd-glass-pick) in
+ *              --pd-pumpkin-icon. Explore: a 62px glass circle beside it.
+ *   compact    54px: the current tab's circle, the accessory (a dot and two lines) and Explore. It grows out of the
+ *              bar's foot as the full bar shrinks into it.
+ * Stacking: the fades and the floating top are 19, the bar 20 (the region menu is 30/31, sheets 40).
+ */
+
+.pd-app .pd-tabbar, .pd-app .pd-tabbar-fade, .pd-app .pd-floattop { display: none; }
+
+@media (max-width: 899.98px) {
+  .pd-app .pd-tabbar { position: fixed; z-index: 20; left: 0; right: 0; bottom: max(14px, env(safe-area-inset-bottom, 0px)); display: block; width: min(calc(100% - 28px), 520px); height: var(--pd-tabbar-h); margin: 0 auto; pointer-events: none; }
+
+  /* ── Full: the capsule and Explore ── */
+  .pd-app .pd-tabbar-full { position: absolute; inset: 0; display: flex; align-items: center; gap: 10px; transform-origin: 0 100%; }
+  .pd-app .pd-tabbar-tabs { flex: 1 1 auto; min-width: 0; display: flex; height: 100%; padding: 4px; border-radius: 31px; pointer-events: auto; }
+  .pd-app .pd-tab { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 27px; color: var(--pd-ink); font-size: 11px; font-weight: 600; line-height: 1.2; text-decoration: none; white-space: nowrap; }
+  .pd-app .pd-tab:hover { color: var(--pd-ink); background: var(--pd-tint); }
+  .pd-app .pd-tab[aria-current="page"] { background: var(--pd-glass-pick); color: var(--pd-pumpkin-icon); font-weight: 700; }
+  .pd-app .pd-tab:focus-visible { outline-offset: -3px; }
+  .pd-app .pd-tab-icon { position: relative; display: flex; }
+  .pd-app .pd-tab-icon > .pd-nav-dot { position: absolute; top: -1px; right: -5px; box-shadow: 0 0 0 2px var(--pd-page); }
+  /* Four share the capsule: a label that still does not fit ends in an ellipsis rather than spilling into the next tab. */
+  .pd-app .pd-tab-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .pd-app .pd-tabbar-full > .pd-tabbar-explore { width: var(--pd-tabbar-h); height: var(--pd-tabbar-h); }
+
+  /* ── Compact: the current tab, the accessory, Explore ── */
+  .pd-app .pd-tabbar-mini { position: absolute; left: 0; right: 0; bottom: 4px; display: flex; align-items: center; gap: 8px; height: 54px; transform-origin: 50% 100%; }
+  .pd-app .pd-tabbar-mini > .pd-round { width: 54px; height: 54px; pointer-events: auto; }
+  .pd-app .pd-tabbar-mini > .is-current { position: relative; color: var(--pd-pumpkin-icon); }
+  .pd-app .pd-tabbar-mini > .is-current > .pd-nav-dot { position: absolute; top: 13px; right: 13px; box-shadow: 0 0 0 2px var(--pd-page); }
+  .pd-app .pd-tabbar-accessory { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 18px; border-radius: 27px; color: var(--pd-ink); text-align: left; pointer-events: auto; }
+  .pd-app .pd-tabbar-accessory > span { min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+  .pd-app .pd-tabbar-accessory b, .pd-app .pd-tabbar-accessory span > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-variant-numeric: lining-nums tabular-nums; }
+  .pd-app .pd-tabbar-accessory b { font-size: 13.5px; font-weight: 700; }
+  .pd-app .pd-tabbar-accessory span > span { font-size: 12px; color: var(--pd-muted); }
+  .pd-app .pd-tabbar-accessory:focus-visible { outline-offset: -3px; }
+  .pd-app .pd-tabbar-pulse { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--pd-olive); box-shadow: 0 0 0 4px var(--pd-olive-wash); }
+  .pd-app .pd-tabbar-pulse.is-shifted { background: var(--pd-pumpkin); box-shadow: 0 0 0 4px var(--pd-blush); }
+  .pd-app .pd-tabbar-pulse.is-alert { background: var(--pd-severe); box-shadow: 0 0 0 4px var(--pd-peach); }
+
+  /* ── Switching: the hidden state fades and shrinks, then leaves the Tab order (visibility, after the move) ── */
+  .pd-app :is(.pd-tabbar-full, .pd-tabbar-mini) { transition: opacity .22s ease, transform .42s cubic-bezier(.2, .9, .25, 1), visibility 0s linear 0s; }
+  .pd-app .pd-tabbar-mini, .pd-app .pd-tabbar.is-compact .pd-tabbar-full { opacity: 0; visibility: hidden; transition-delay: 0s, 0s, .42s; }
+  .pd-app .pd-tabbar-mini { transform: translateY(10px) scale(.94); }
+  .pd-app .pd-tabbar.is-compact .pd-tabbar-full { transform: translateY(8px) scale(.9); }
+  .pd-app .pd-tabbar.is-compact .pd-tabbar-mini { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+
+  /* ── The page fades under the bar ── */
+  .pd-app .pd-tabbar-fade { position: fixed; z-index: 19; left: 0; right: 0; bottom: 0; display: block; height: calc(var(--pd-tabbar-space) + 36px); background: linear-gradient(180deg, var(--pd-page-clear), var(--pd-fade)); pointer-events: none; }
+
+  /* ── The floating top: the region pill and the avatar, once the top bar has gone ── */
+  .pd-app .pd-floattop { position: fixed; z-index: 19; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: max(10px, env(safe-area-inset-top, 0px)) var(--pd-gutter) 26px; background: linear-gradient(180deg, var(--pd-fade) 45%, var(--pd-page-clear)); pointer-events: none; opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity .2s ease, transform .35s cubic-bezier(.2, .9, .25, 1), visibility 0s linear .35s; }
+  .pd-app .pd-floattop.is-on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  .pd-app .pd-floattop > * { pointer-events: auto; }
+  /* Only the avatar (a drill-down page has no region to show): it keeps to the right. */
+  .pd-app .pd-floattop > .pd-me:only-child { margin-left: auto; }
+  .pd-app .pd-floattop-region { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 72%; height: 44px; padding: 0 14px 0 16px; border-radius: 22px; color: var(--pd-ink); font-size: 14px; font-weight: 700; }
+  .pd-app .pd-floattop-region > span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .pd-app .pd-floattop-region > svg { color: var(--pd-ink-soft); }
+  .pd-app .pd-floattop-region:focus-visible { outline-offset: 2px; }
+  .pd-app .pd-floattop > .pd-me > .pd-avatar { box-shadow: 0 8px 20px -10px var(--pd-scrim); }
+}
+
+@media (max-width: 899.98px) and (prefers-reduced-motion: no-preference) {
+  .pd-app .pd-tabbar-pulse:not(.is-shifted) { animation: pd-pulse 2.4s ease-in-out infinite; }
+}
+@keyframes pd-pulse { 50% { box-shadow: 0 0 0 6px transparent; } }

@@ -1,0 +1,124 @@
+/*
+ * City page (/stores/city/:cityKey): the period's chart and the Stores table. Scoped to .pd-app, named pd-city-*.
+ * Shared pieces (panels, the chart frame, table rows, the .pd-num numeral) are in styles/base.css, the band under
+ * the title in components/drill-band.css (shared with the Store page), the chart's card in components/chart-tip.css.
+ * Colours are tokens (styles/tokens.css), so the page follows the theme; the one the tokens lack is below.
+ */
+
+/* ── Theme: the page's own colour, in light and dark ─────── */
+/* Text that says a shelf is out. Severe is a fill in dark (white on it holds 4.5:1, as text on the page it
+   does not), so dark prints out in terracotta, the red that does. */
+.pd-app, .pd-app [data-theme="light"] { --pd-city-out-ink: var(--pd-severe); }
+.pd-app[data-theme="dark"], .pd-app [data-theme="dark"] { --pd-city-out-ink: var(--pd-terracotta); }
+
+/* ── The period's chart ──────────────────────────────────── */
+/* The labels under the columns (periodAxis, chart-tip.css) answer to the panel's width. */
+.pd-app .pd-city-chart-panel { container: pd-period-chart / inline-size; }
+/* Columns 4px apart (2px when there are 30); each is a full-height button, its marks on the baseline. */
+.pd-app .pd-city-bars { position: absolute; inset: 0; display: flex; gap: 4px; touch-action: pan-y; }
+.pd-app .pd-city-chart .pd-chart-x { gap: 4px; padding-top: 9px; }
+.pd-app .pd-city-chart.is-dense :is(.pd-city-bars, .pd-chart-x) { gap: 2px; }
+.pd-app .pd-city-col { position: relative; flex: 1 1 0; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 10px 10px 0 0; background: transparent; cursor: default; }
+.pd-app .pd-city-col.is-on { background: var(--pd-tint); }
+.pd-app .pd-city-col > span { position: absolute; left: 50%; width: 56%; max-width: 48px; transform: translateX(-50%); border-radius: 6px 6px 0 0; }
+.pd-app .pd-city-bar-sold { bottom: 0; background: var(--pd-olive); }
+.pd-app .pd-city-bar-sold.is-capped { border-radius: 0; }
+.pd-app .pd-city-bar-lost { background: var(--pd-pumpkin); }
+/* Still filling: the running hour, today's bar. */
+.pd-app .pd-city-col.is-current > span { opacity: .55; }
+/* An hour not reached yet: a faint stub just over the baseline. */
+.pd-app .pd-city-col > .pd-city-stub { bottom: 3px; height: 2px; border-radius: 2px; background: var(--pd-track); }
+/* Where the column's card is placed (ChartTip measures against it): the plot and a strip above it (top is inline). */
+.pd-app .pd-city-tip-room { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; pointer-events: none; }
+/* The stockout stretch on Today: shaded from its start to now, named in the legend. */
+.pd-app .pd-city-out { position: absolute; top: 0; bottom: 0; border-left: 1.5px dashed var(--pd-pumpkin); background: var(--pd-blush); }
+
+/* ── Stores table ────────────────────────────────────────── */
+.pd-app .pd-city-inset { padding: 0 20px 14px; }
+.pd-app .pd-city-table { --pd-cols: minmax(140px, 1.1fr) minmax(180px, 1.4fr) 128px 56px 76px 64px 72px minmax(150px, 1.2fr); --pd-table-min: 990px; }
+.pd-app .pd-city-table .pd-thead { row-gap: 4px; border-bottom: 0; }
+.pd-app .pd-city-table .pd-tr { min-height: 60px; border-top: 1px solid var(--pd-hairline); border-bottom: 0; }
+/* Cell labels: read out always, shown on phones where the header rows are gone. */
+.pd-app .pd-city-k { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* The Sales line in the Stores head names the period on phones, where the group headings are gone. */
+.pd-app .pd-city-stores-when { display: none; }
+
+/*
+ * Two header rows: the group headings (Pumpkins on hand over the shelves; the period's name over Sold, Lost,
+ * Revenue and vs plan), each centred between thin rules, then the column names. The store spans both.
+ */
+.pd-app .pd-city-th-store { grid-row: 1 / 3; grid-column: 1; }
+.pd-app .pd-city-table .pd-thead > :not(.pd-city-th-store, .pd-city-th-group) { grid-row: 2; }
+.pd-app .pd-city-th-group { grid-row: 1; display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 700; color: var(--pd-ink-soft); white-space: nowrap; }
+.pd-app .pd-city-th-group::before, .pd-app .pd-city-th-group::after { content: ""; flex: 1 1 0; height: 1px; background: var(--pd-border); }
+.pd-app .pd-city-th-group.is-stock { grid-column: 2; }
+.pd-app .pd-city-th-group.is-period { grid-column: 4 / 8; }
+.pd-app .pd-city-th-stock { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pd-app .pd-city-th-van { padding-left: 12px; }
+/* The store column stays put while the row scrolls sideways: it reaches the row's edges so nothing shows past it. */
+.pd-app .pd-city-th-store { align-self: stretch; display: flex; align-items: flex-end; margin: -8px 0 -8px -20px; padding: 8px 0 8px 20px; }
+.pd-app .pd-city-store { align-self: stretch; display: flex; flex-direction: column; justify-content: center; min-width: 0; min-height: 44px; margin: -4px 0 -4px -20px; padding: 4px 0 4px 20px; color: var(--pd-ink); text-decoration: none; }
+.pd-app .pd-city-store:hover { color: var(--pd-ink); }
+/* What scrolls under the store column fades out at its edge. The fade lies in the column gap, so at rest it covers nothing. */
+.pd-app .pd-city-th-store::after, .pd-app .pd-city-store::after { content: ""; position: absolute; top: 0; bottom: 0; left: 100%; width: 12px; background: linear-gradient(90deg, var(--pd-page), var(--pd-page-clear)); pointer-events: none; }
+/* The link starts at the scroll box's edge, where an outer ring would be cut off. */
+.pd-app .pd-city-store:focus-visible { outline-offset: -2px; border-radius: 8px; }
+.pd-app .pd-city-store-name { display: flex; align-items: center; gap: 3px; font-size: 14px; font-weight: 700; }
+.pd-app .pd-city-store-name > svg { color: var(--pd-terracotta); transition: transform .16s ease; }
+.pd-app .pd-city-store:hover .pd-city-store-name > svg { transform: translateX(2px); }
+.pd-app .pd-city-store-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 12.5px; color: var(--pd-muted); }
+
+/* Numerals in the rows: Hanken 600 with lining, fixed-width digits, as everywhere in the app. */
+.pd-app .pd-city-table :is(.pd-city-shelf > strong, .pd-city-num, .pd-city-lost > strong) { font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+
+/* Pumpkins on hand: units over a thin share-of-shelf bar, one per variety. */
+.pd-app .pd-city-stock { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pd-app .pd-city-shelf { min-width: 0; }
+.pd-app .pd-city-shelf > strong { display: block; margin-bottom: 4px; font-size: 12.5px; line-height: 1.3; }
+.pd-app .pd-city-shelf.is-short > strong { color: var(--pd-terracotta); }
+.pd-app .pd-city-shelf.is-empty > strong { color: var(--pd-city-out-ink); }
+.pd-app .pd-city-shelf.is-empty .pd-meter-track { background: var(--pd-selected); box-shadow: inset 0 0 0 1px var(--pd-severe); }
+
+.pd-app .pd-city-cover { display: flex; flex-direction: column; min-width: 0; }
+.pd-app .pd-city-cover > strong { font-size: 14px; font-weight: 600; }
+.pd-app .pd-city-cover.is-out > strong { color: var(--pd-city-out-ink); }
+.pd-app .pd-city-cover.is-low > strong { color: var(--pd-amber-ink); }
+.pd-app .pd-city-cover > small, .pd-app .pd-city-lost > small { font-size: 12px; color: var(--pd-muted); }
+.pd-app .pd-city-lost { display: flex; flex-direction: column; align-items: flex-end; }
+.pd-app .pd-city-lost > strong { color: var(--pd-muted); }
+.pd-app .pd-city-lost.is-some > strong { color: var(--pd-terracotta); }
+
+/*
+ * Next van: the van and its ETA (on the city's clock) link to the truck. The viewer's own time sits on a small
+ * line under the ETA, and a late chip under that, so the column never runs past the panel edge.
+ */
+.pd-app .pd-city-van { min-width: 0; padding-left: 12px; font-size: 13.5px; font-weight: 600; }
+.pd-app .pd-city-van > a { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 1px 8px; min-height: 44px; text-decoration: none; }
+.pd-app .pd-city-van > a > .pd-chip { margin-top: 3px; }
+.pd-app .pd-city-van-yours { flex: 1 0 100%; font-size: 12px; font-weight: 500; line-height: 1.35; color: var(--pd-muted); white-space: nowrap; }
+.pd-app .pd-city-van-plan { display: flex; flex-direction: column; color: var(--pd-ink-soft); }
+
+/* ── Phone ───────────────────────────────────────────────── */
+@media (max-width: 599.98px) {
+  .pd-app .pd-city-stores-when { display: inline; font-size: 12.5px; }
+
+  /* Each store is a stacked block: name, shelves, cover and next van, then the period's numbers. */
+  .pd-app .pd-city-inset { padding: 0 16px 12px; }
+  .pd-app .pd-city-table { --pd-table-min: 0px; }
+  .pd-app .pd-city-fade { display: none; }
+  .pd-app .pd-city-table .pd-thead { display: none; }
+  .pd-app .pd-city-table .pd-tr {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-areas: "store store store store" "stock stock stock stock" "cover cover van van" "sold lost rev plan";
+    align-items: start; gap: 12px; padding: 6px 16px 16px;
+  }
+  .pd-app .pd-city-k { position: static; display: block; width: auto; height: auto; overflow: visible; clip-path: none; margin-bottom: 2px; font-size: 12px; font-weight: 600; color: var(--pd-muted); white-space: nowrap; }
+  .pd-app .pd-city-store { grid-area: store; position: static; align-self: start; margin: 0 0 -6px; padding: 0; }
+  .pd-app .pd-city-store::after { display: none; }
+  .pd-app .pd-city-stock { grid-area: stock; }
+  .pd-app .pd-city-cover { grid-area: cover; }
+  .pd-app .pd-city-van { grid-area: van; padding-left: 0; white-space: normal; }
+  .pd-app .pd-city-van > a { min-height: 44px; margin: -6px 0 -8px; }
+  .pd-app .pd-city-table .pd-tr > .pd-right { justify-self: start; text-align: left; }
+  .pd-app .pd-city-lost { align-items: flex-start; }
+}

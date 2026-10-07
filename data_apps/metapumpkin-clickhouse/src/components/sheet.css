@@ -1,0 +1,73 @@
+/*
+ * The glass bottom sheet (Sheet.tsx) and what the phone shell puts in it: the Me sheet (MeSheet.tsx) and the
+ * Region sheet (RegionSheet.tsx). Scoped to .pd-app, classes pd-sheet-*, pd-me-*, pd-regionsheet-*.
+ * The sheet floats 8px in from the screen's sides and foot, 32px corners, on --pd-glass-sheet over a blur, lifted
+ * by --pd-glass-lift; the page under it dims (--pd-scrim-soft). On wider screens it keeps a phone's width, centred.
+ * Stacking: the layer is 40 (over the tab bar, 20, and the region menu, 31).
+ * Motion (no-preference only): the sheet rises 24px as it fades in, the scrim fades in.
+ */
+
+.pd-app .pd-sheet-layer { position: fixed; inset: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center; padding: 8px 8px max(8px, env(safe-area-inset-bottom, 0px)); }
+.pd-app .pd-sheet-scrim { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: var(--pd-scrim-soft); cursor: default; }
+.pd-app .pd-sheet {
+  position: relative; display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 480px; max-height: calc(100% - 32px); overflow-y: auto; overscroll-behavior: contain;
+  padding: 8px 12px 18px; border: 1px solid var(--pd-glass-edge); border-radius: 32px; background: var(--pd-glass-sheet); box-shadow: var(--pd-glass-lift); color: var(--pd-ink);
+  -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .pd-app .pd-sheet { background: var(--pd-glass-solid); } }
+.pd-app .pd-sheet:focus-visible { outline: none; }
+.pd-app .pd-sheet-grabber { flex: none; align-self: center; width: 36px; height: 5px; border-radius: 3px; background: var(--pd-faint); opacity: .5; }
+.pd-app .pd-sheet-head { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 2px 0 8px; }
+.pd-app .pd-sheet-title { flex: 1 1 auto; min-width: 0; font-size: 19px; font-weight: 700; line-height: 1.25; }
+.pd-app .pd-sheet-head > .pd-round { width: 40px; height: 40px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pd-app .pd-sheet { animation: pd-sheet-in .38s cubic-bezier(.2, .9, .25, 1) both; }
+  .pd-app .pd-sheet-scrim { animation: pd-sheet-fade .25s ease both; }
+}
+@keyframes pd-sheet-in { from { opacity: 0; transform: translateY(24px); } }
+@keyframes pd-sheet-fade { from { opacity: 0; } }
+
+/* ── A group of rows on a sheet (inset, rounded, hairlines between) ── */
+.pd-app .pd-sheet-group { display: flex; flex-direction: column; border: 1px solid var(--pd-hairline); border-radius: 22px; background: var(--pd-glass-row); }
+.pd-app .pd-sheet-row { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; }
+.pd-app .pd-sheet-row + .pd-sheet-row { border-top: 1px solid var(--pd-hairline); }
+.pd-app .pd-sheet-tile { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex: none; border-radius: 10px; background: var(--pd-stone); color: var(--pd-ink-soft); }
+.pd-app .pd-sheet-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.pd-app .pd-sheet-text > b { font-size: 15px; font-weight: 700; }
+.pd-app .pd-sheet-text > span { font-size: 13px; color: var(--pd-muted); }
+/* A row that navigates: the whole row is one link, ending in a chevron. */
+.pd-app a.pd-sheet-row.is-link { border-radius: 21px; color: var(--pd-ink); text-decoration: none; }
+.pd-app a.pd-sheet-row.is-link:hover { background: var(--pd-tint); color: var(--pd-ink); }
+.pd-app a.pd-sheet-row.is-link > svg { flex: none; color: var(--pd-muted); }
+.pd-app .pd-sheet-foot { align-self: center; font-size: 12.5px; color: var(--pd-muted); }
+
+/* ── Me ──────────────────────────────────────────────────── */
+.pd-app .pd-me-who { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 12px; }
+.pd-app .pd-me-who > .pd-avatar { width: 48px; height: 48px; font-size: 15px; }
+.pd-app .pd-me-who > span { min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.pd-app .pd-me-who b { font-size: 17px; font-weight: 700; }
+.pd-app .pd-me-who small { font-size: 13.5px; color: var(--pd-muted); }
+/* The Halloween card fills the sheet's width at its sidebar height: the art covers it (in the sidebar the card is
+   narrower than the art and crops its sky; here it is wider, so the art scales to the width and crops its sky instead). */
+.pd-app .pd-sheet > .pd-halloween { border-radius: 22px; }
+.pd-app .pd-sheet > .pd-halloween .pd-halloween-scene { width: 100%; height: auto; }
+.pd-app .pd-me-live { width: 9px; height: 9px; border-radius: 50%; background: var(--pd-olive); box-shadow: 0 0 0 4px var(--pd-olive-wash); }
+.pd-app .pd-me-live.is-shifted { background: var(--pd-pumpkin); box-shadow: 0 0 0 4px var(--pd-blush); }
+.pd-app .pd-me-time { flex: none; font-size: 15px; font-weight: 600; font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; }
+.pd-app .pd-sheet-row > .pd-segmented { flex: none; }
+.pd-app .pd-sheet-row > .pd-segmented > button > span { padding: 0 14px; }
+
+/* ── Region: the four regions, then the picked region's countries ── */
+.pd-app .pd-regionsheet-regions { display: flex; }
+.pd-app .pd-regionsheet-regions > .pd-segmented { display: flex; width: 100%; }
+.pd-app .pd-regionsheet-regions > .pd-segmented > button { flex: 1 1 auto; min-width: 0; }
+.pd-app .pd-regionsheet-regions > .pd-segmented > button > span { justify-content: center; width: 100%; padding: 0 6px; }
+.pd-app .pd-regionsheet-list { display: flex; flex-direction: column; gap: 4px; }
+.pd-app .pd-regionsheet-item { display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 0 16px 0 12px; border: 0; border-radius: 20px; background: transparent; color: var(--pd-ink); text-align: left; }
+.pd-app .pd-regionsheet-item:hover { background: var(--pd-glass-row); }
+.pd-app .pd-regionsheet-item[aria-checked="true"] { background: var(--pd-glass-pick); }
+.pd-app .pd-regionsheet-item:focus-visible { outline-offset: -2px; }
+.pd-app .pd-regionsheet-item > .pd-sheet-tile { font-size: 12.5px; font-weight: 700; letter-spacing: .03em; }
+.pd-app .pd-regionsheet-item[aria-checked="true"] > .pd-sheet-tile { background: var(--pd-selected); color: var(--pd-pumpkin-icon); }
+.pd-app .pd-regionsheet-item > svg { color: var(--pd-pumpkin-icon); }

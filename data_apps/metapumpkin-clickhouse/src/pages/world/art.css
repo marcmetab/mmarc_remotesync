@@ -1,0 +1,182 @@
+/*
+ * The World map's art: colour tokens (--pdw-*, light and dark) and the classes that the generated markup uses
+ * (src/pages/world/geo.ts and art.ts, written by scripts/world/gen_world.py from scripts/world/art.py). This file is
+ * kept by hand: a new class or colour token in art.py needs its rule here. Every rule is scoped to the map (.pd-world).
+ * The shapes the terrain repeats through <use> (trees, flowers, hills, mountains, waves: SHARED_PAINT in gen_world.py)
+ * are painted inline with their --pdw-* token, as no selector reaches a <use> copy: their colours come from the tokens.
+ */
+
+.pd-app .pd-world, .pd-app [data-theme="light"] .pd-world {
+  --pdw-yard: #ebdfc9; --pdw-bay: rgba(255,255,255,.8); --pdw-track: #a77b4e;
+  --pdw-card: #fdfbf9; --pdw-sea: #3f9ed3; --pdw-wave: rgba(255,255,255,.55); --pdw-shallow: #62c3e2;
+  --pdw-shallow2: #9fe0ee; --pdw-cliff1: #b49674; --pdw-cliff2: #9c8064; --pdw-sand: #f1e0b6;
+  --pdw-land: #a8c466; --pdw-land-hi: #bfd57a; --pdw-desert: #e6d494; --pdw-trunk: #7a5a40; --pdw-crown: #5f9a38; --pdw-crown2: #79b043;
+  --pdw-crown-hi: #97c95a; --pdw-conifer: #3f7a34; --pdw-conifer-hi: #559444; --pdw-rock: #b7a48c;
+  --pdw-rock-shade: #97836b; --pdw-snow: #fbf8f2; --pdw-road-edge: #b8a68c; --pdw-road: #efe8dc;
+  --pdw-road-dash: #ffffff; --pdw-night: #172152; --pdw-night-a: .58; --pdw-fog: #5aa7d6; --pdw-fog-a: .9; --pdw-dusk: #c0607e; --pdw-dusk-a: .3; --pdw-pk: #e2681c; --pdw-pk-hi: #f08a3c;
+  --pdw-pk-pale: #f9dcc2; --pdw-stem: #5f6d2c; --pdw-out: #b5441a; --pdw-wall: #fbefe1; --pdw-wall-low: #f5e3cd; --pdw-glint-a: 1;
+  --pdw-wall-side: #e8cfb9; --pdw-roof: #e2681c; --pdw-awning: #fbefe1;
+  --pdw-stripe: #e2681c; --pdw-door: #4a2638; --pdw-win: #cfe4ea; --pdw-barn: #b5441a;
+  --pdw-barn-side: #8a360a; --pdw-barn-roof-side: #5b3445; --pdw-silo: #f1e8de;
+  --pdw-silo-side: #d9cabc; --pdw-trim: #fbefe1; --pdw-g-wall: #e7dbd2; --pdw-g-side: #c9b8ad;
+  --pdw-g-roof: #5b3445; --pdw-g-door: #b9a8ae; --pdw-g-slat: #8f7c86; --pdw-g-badge: #e3a047;
+  --pdw-g-wrench: #4a2638; --pdw-v-cab: #4a2638; --pdw-v-glass: #f6e4cb; --pdw-v-bed: #8a4b2a; --pdw-v-slat: #6e3a20; --pdw-soil: #b9824f; --pdw-soil-row: #9a6a3e; --pdw-cast: rgba(110,60,30,.2);
+  --pdw-gable: #fff6ec; --pdw-tile: #c2531a; --pdw-trim-o: #d9601c; --pdw-chim: #a8440f;
+  --pdw-chim-top: #7c2f08; --pdw-sign: #fbefe1; --pdw-frame: #8f7c86; --pdw-step: #d9cabc;
+  --pdw-knob: #e3a047; --pdw-bush: #6c8f3a; --pdw-bush-hi: #93b552; --pdw-awning-side: #c2531a;
+  --pdw-dome-hi: #7a4a5e; --pdw-roof-up: #5b3445; --pdw-roof-line: rgba(255,255,255,.12); --pdw-board: rgba(60,10,0,.16);
+  --pdw-hay: #e7bd62; --pdw-hay-end: #c9973e; --pdw-vane: #4a2638; --pdw-g-roof-top: #6e4a5c;
+  --pdw-g-tyre: #3a2230;
+  --pdw-t-shadow: rgba(90,55,20,.2); --pdw-hill: #93c74f; --pdw-hill-hi: #b6dc72; --pdw-fl-a: #f2a3b8;
+  --pdw-fl-b: #f7c35f; --pdw-fl-c: #fff4e6; --pdw-lake: #7cc3d4; --pdw-lake-hi: #d2f0f2;
+  --pdw-fence: #9a6a3e; --pdw-road-shadow: rgba(60,45,30,.22); --pdw-land-lit: #a6d35a; --pdw-land-mid: #8cc04a;
+  --pdw-land-shade: #74a83f; --pdw-foam: rgba(255,255,255,.85); --pdw-cliff3: #856c56; --pdw-cliff4: #6e5a49;
+  --pdw-cliff-line: rgba(60,40,25,.28); --pdw-dirt: #8a6e4c; --pdw-rim: #6f9d3c; --pdw-islet: #8cc04a;
+}
+
+.pd-app[data-theme="dark"] .pd-world, .pd-app [data-theme="dark"] .pd-world {
+  --pdw-yard: #4a4034; --pdw-bay: rgba(255,255,255,.32); --pdw-track: #6e5238;
+  --pdw-card: #2e2126; --pdw-sea: #1f3e5a; --pdw-wave: rgba(255,255,255,.14); --pdw-shallow: #2a5672;
+  --pdw-shallow2: #356a82; --pdw-cliff1: #5e4b3a; --pdw-cliff2: #4e3e31; --pdw-sand: #7a6748;
+  --pdw-land: #4e6430; --pdw-land-hi: #5b733a; --pdw-desert: #7a6a42; --pdw-trunk: #4a3628; --pdw-crown: #36552a; --pdw-crown2: #41632e;
+  --pdw-crown-hi: #557a3a; --pdw-conifer: #2c4a26; --pdw-conifer-hi: #3a5c30; --pdw-rock: #6e6170;
+  --pdw-rock-shade: #55495a; --pdw-snow: #c9c4d2; --pdw-road-edge: #5a4c40; --pdw-road: #9a8c7a;
+  --pdw-road-dash: #c9bca8; --pdw-night: #04061a; --pdw-night-a: .55; --pdw-fog: #17304a; --pdw-fog-a: .92; --pdw-dusk: #7a3a62; --pdw-dusk-a: .3; --pdw-pk: #f0823a; --pdw-pk-hi: #f8a060;
+  --pdw-pk-pale: #47271f; --pdw-stem: #a3b35d; --pdw-out: #ee8a68; --pdw-wall: #d9c6b6; --pdw-wall-low: #d9b98f; --pdw-glint-a: .18;
+  --pdw-wall-side: #a99484; --pdw-roof: #d4652a; --pdw-awning: #d9c6b6;
+  --pdw-stripe: #d4652a; --pdw-door: #2a1820; --pdw-win: #ffcf6e; --pdw-barn: #a8442a;
+  --pdw-barn-side: #7a2f18; --pdw-barn-roof-side: #4a2c3a; --pdw-silo: #c9bcb0;
+  --pdw-silo-side: #9e9084; --pdw-trim: #e8d8c8; --pdw-g-wall: #a99a92; --pdw-g-side: #857670;
+  --pdw-g-roof: #3a2230; --pdw-g-door: #7a6a70; --pdw-g-slat: #5a4a52; --pdw-g-badge: #e9ad5c;
+  --pdw-g-wrench: #2a1820; --pdw-v-cab: #6a3a52; --pdw-v-glass: #ffcf6e; --pdw-v-bed: #7a4428; --pdw-v-slat: #5a2e18; --pdw-soil: #6e4a2c; --pdw-soil-row: #563820; --pdw-cast: rgba(0,0,0,.3);
+  --pdw-gable: #e2cfbe; --pdw-tile: #8a3a14; --pdw-trim-o: #b5501a; --pdw-chim: #7a3412;
+  --pdw-chim-top: #4a1f0a; --pdw-sign: #d9c6b6; --pdw-frame: #5a4a52; --pdw-step: #7a6a62;
+  --pdw-knob: #e9ad5c; --pdw-bush: #36552a; --pdw-bush-hi: #4a6a34; --pdw-awning-side: #8a3a14;
+  --pdw-dome-hi: #5a3446; --pdw-roof-up: #4a2c3a; --pdw-roof-line: rgba(255,255,255,.06); --pdw-board: rgba(0,0,0,.25);
+  --pdw-hay: #9a7a3a; --pdw-hay-end: #7a5e2a; --pdw-vane: #cfb3c6; --pdw-g-roof-top: #4a3240;
+  --pdw-g-tyre: #140c10;
+  --pdw-t-shadow: rgba(0,0,0,.28); --pdw-hill: #4a6a2c; --pdw-hill-hi: #5a7c38; --pdw-fl-a: #a86478;
+  --pdw-fl-b: #b08a3a; --pdw-fl-c: #a99a8c; --pdw-lake: #2f5a6e; --pdw-lake-hi: #4f7f8e;
+  --pdw-fence: #5a4030; --pdw-road-shadow: rgba(0,0,0,.3); --pdw-land-lit: #5c7a34; --pdw-land-mid: #4c672c;
+  --pdw-land-shade: #3e5626; --pdw-foam: rgba(255,255,255,.25); --pdw-cliff3: #403328; --pdw-cliff4: #33291f;
+  --pdw-cliff-line: rgba(0,0,0,.35); --pdw-dirt: #4a3a2a; --pdw-rim: #3a5226; --pdw-islet: #4c672c;
+}
+
+.pd-world .w-sea { fill:var(--pdw-sea) }
+.pd-world .w-shallow { fill:none; stroke:var(--pdw-shallow) }
+.pd-world .w-shallow2 { fill:none; stroke:var(--pdw-shallow2) }
+.pd-world .w-sand { fill:var(--pdw-sand); stroke:var(--pdw-sand) }
+.pd-world .w-land { fill:var(--pdw-land) }
+.pd-world .w-road-edge { stroke:var(--pdw-road-edge) }
+.pd-world .w-road { stroke:var(--pdw-road) }
+.pd-world .w-road-dash { stroke:var(--pdw-road-dash) }
+.pd-world .s-shadow { fill:rgba(40,28,20,.2) }
+.pd-world .s-wall { fill:var(--pdw-wall) }
+.pd-world .s-wall-side { fill:var(--pdw-wall-side) }
+.pd-world .s-roof { fill:var(--pdw-roof) }
+.pd-world .s-awning { fill:var(--pdw-awning) }
+.pd-world .s-stripe { fill:var(--pdw-stripe) }
+.pd-world .s-door { fill:var(--pdw-door) }
+.pd-world .win { fill:var(--pdw-win) }
+.pd-world .s-pk { fill:var(--pdw-pk-hi) }
+.pd-world .s-stem { stroke:var(--pdw-stem) }
+.pd-world .is-night .win { fill:#ffcf6e }
+.pd-world .h-silo { fill:var(--pdw-silo) }
+.pd-world .h-silo-side { fill:var(--pdw-silo-side) }
+.pd-world .h-dome { fill:var(--pdw-barn-roof-side) }
+.pd-world .h-band { stroke:var(--pdw-silo-side) }
+.pd-world .h-side { fill:var(--pdw-barn-side) }
+.pd-world .h-barn { fill:var(--pdw-barn) }
+.pd-world .h-roof-side { fill:var(--pdw-barn-roof-side) }
+.pd-world .h-door { fill:var(--pdw-barn-side) }
+.pd-world .h-trim { stroke:var(--pdw-trim) }
+.pd-world .g-side { fill:var(--pdw-g-side) }
+.pd-world .g-wall { fill:var(--pdw-g-wall) }
+.pd-world .g-roof { fill:var(--pdw-g-roof) }
+.pd-world .g-door { fill:var(--pdw-g-door) }
+.pd-world .g-slat { stroke:var(--pdw-g-slat) }
+.pd-world .g-badge { fill:var(--pdw-g-badge) }
+.pd-world .g-wrench { stroke:var(--pdw-g-wrench) }
+.pd-world .v-cab { fill:var(--pdw-v-cab) }
+.pd-world .v-glass { fill:var(--pdw-v-glass) }
+.pd-world .f-soil { fill:var(--pdw-soil) }
+.pd-world .f-row { stroke:var(--pdw-soil-row) }
+.pd-world .f-pk circle { fill:var(--pdw-pk) }
+.pd-world .w-plaza { fill:var(--pdw-road); stroke:var(--pdw-road-edge); stroke-width:3 }
+.pd-world .w-plaza-in { fill:var(--pdw-hill) }
+.pd-world .w-lot { fill:var(--pdw-road); stroke:var(--pdw-road-edge); stroke-width:1.5 }
+.pd-world .s-cast { fill:var(--pdw-cast) }
+.pd-world .s-gable { fill:var(--pdw-gable) }
+.pd-world .s-tile { stroke:var(--pdw-tile); opacity:.55 }
+.pd-world .s-trim { stroke:var(--pdw-trim-o) }
+.pd-world .s-chim { fill:var(--pdw-chim) }
+.pd-world .s-chim-top { fill:var(--pdw-chim-top) }
+.pd-world .s-sign { fill:var(--pdw-sign) }
+.pd-world .s-frame { stroke:var(--pdw-frame) }
+.pd-world .s-step { fill:var(--pdw-step) }
+.pd-world .s-knob { fill:var(--pdw-knob) }
+.pd-world .s-bush { fill:var(--pdw-bush) }
+.pd-world .s-bush-hi { fill:var(--pdw-bush-hi) }
+.pd-world .s-awning-side { fill:var(--pdw-awning-side) }
+.pd-world .h-dome-hi { fill:var(--pdw-dome-hi) }
+.pd-world .h-roof-up { fill:var(--pdw-roof-up) }
+.pd-world .h-roof-line { stroke:var(--pdw-roof-line) }
+.pd-world .h-board { stroke:var(--pdw-board) }
+.pd-world .h-hay { fill:var(--pdw-hay) }
+.pd-world .h-hay-end { fill:var(--pdw-hay-end) }
+.pd-world .h-vane { stroke:var(--pdw-vane) }
+.pd-world .g-roof-top { fill:var(--pdw-g-roof-top) }
+.pd-world .g-tyre { fill:var(--pdw-g-tyre) }
+.pd-world .w-lake { fill:var(--pdw-lake) }
+.pd-world .w-lake-hi { fill:var(--pdw-lake-hi); opacity:.7 }
+.pd-world .w-fence { stroke:var(--pdw-fence) }
+.pd-world .w-road-shadow { fill:none; stroke:var(--pdw-road-shadow) }
+.pd-world .w-land-grad { fill:url(#pdw-landgrad) }
+.pd-world .lg-lit { stop-color:var(--pdw-land-lit) }
+.pd-world .lg-mid { stop-color:var(--pdw-land-mid) }
+.pd-world .lg-shade { stop-color:var(--pdw-land-shade) }
+.pd-world .lh-glow { fill:#ffd67a; opacity:.12 }
+.pd-app[data-theme="dark"] .pd-world .lh-glow { opacity:.45 }
+.pd-app[data-theme="dark"] .pd-world .pd-world-landmark svg { filter:brightness(.78) saturate(.9) }
+.pd-world .w-foam { fill:none; stroke:var(--pdw-foam) }
+.pd-world .w-cliff1 { fill:var(--pdw-cliff1); stroke:var(--pdw-cliff-line) }
+.pd-world .w-cliff2 { fill:var(--pdw-cliff2); stroke:var(--pdw-cliff-line) }
+.pd-world .w-cliff3 { fill:var(--pdw-cliff3); stroke:var(--pdw-cliff-line) }
+.pd-world .w-cliff4 { fill:var(--pdw-cliff4); stroke:var(--pdw-cliff-line) }
+.pd-world .w-dirt { fill:var(--pdw-dirt) }
+.pd-world .w-rim { stroke:var(--pdw-rim) }
+.pd-world .w-islet { fill:var(--pdw-islet) }
+.pd-world .w-cliff-fill { fill:var(--pdw-cliff3) }
+.pd-world .w-shallow2-fill { fill:var(--pdw-shallow2) }
+/* The low sun's glint on the sea: faint at dusk (--pdw-glint-a). */
+.pd-world .w-glint { opacity:var(--pdw-glint-a) }
+
+/* A hub's yard: gravel inside its fence, the lot's bay lines; a farm track out to the fields. */
+.pd-world .w-yard { fill:var(--pdw-yard) }
+.pd-world .w-bay { stroke:var(--pdw-bay) }
+.pd-world .w-track { fill:none; stroke:var(--pdw-track) }
+
+.pd-world .gd-a { stop-color:var(--pdw-desert); stop-opacity:1 }
+.pd-world .gd-b { stop-color:var(--pdw-desert); stop-opacity:.8 }
+.pd-world .gd-c { stop-color:var(--pdw-desert); stop-opacity:0 }
+.pd-world .gm-a { stop-color:var(--pdw-land-hi); stop-opacity:.9 }
+.pd-world .gm-b { stop-color:var(--pdw-land-hi); stop-opacity:0 }
+
+/* Vans, the pumpkin truck: the bed's frame takes the status colour (color); loaded with pumpkins, or bare slats when
+   empty (heading back, parked, in the workshop). */
+.pd-world .v-bed { fill:var(--pdw-v-bed) }
+.pd-world .v-slats { display:none; fill:none; stroke:var(--pdw-v-slat); stroke-width:.8 }
+.pd-world .is-empty .v-slats { display:inline }
+.pd-world .is-empty .v-load { display:none }
+.pd-world .v-pk { fill:var(--pdw-pk); stroke:#8a3a10; stroke-width:.4 }
+.pd-world .v-pk-hi { fill:var(--pdw-pk-hi) }
+.pd-world .v-stem { fill:none; stroke:var(--pdw-stem); stroke-width:.6; stroke-linecap:round }
+.pd-world .v-halo { fill:#fff; opacity:.92 }
+.pd-world .v-beam { stroke:#ffd67a }
+.pd-world .v-puff { fill:#fff; opacity:0; transform-box:fill-box; transform-origin:center }
+@media (prefers-reduced-motion: no-preference) {
+  .pd-world .is-moving .v-puff { animation:pdw-puff 1.2s linear infinite }
+  .pd-world .is-moving .p2 { animation-delay:.4s }
+  .pd-world .is-moving .p3 { animation-delay:.8s }
+}
+@keyframes pdw-puff { 0% { opacity:.85; transform:translateX(3px) scale(.5) } 100% { opacity:0; transform:translateX(-5px) scale(1.5) } }

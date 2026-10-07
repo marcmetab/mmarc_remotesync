@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1444" height="696" viewBox="0 0 1444 696" fill="none" role="img" aria-labelledby="mpbg-title mpbg-desc">
+  <title id="mpbg-title">MetaPumpkin Halloween landscape</title>
+  <desc id="mpbg-desc">A text-free peach Halloween background with a cream moon, three clouds, two separately grouped bats, layered autumn hills, a haunted house, bare trees, and a small orange pumpkin. Rounded card with transparent outside corners. No large flying MetaBot is included.</desc>
+  <defs>
+    <linearGradient id="mpbg-sky-fill" x1="140" y1="0" x2="1200" y2="696" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBD6B7"/><stop offset="0.5" stop-color="#FDD8B8"/><stop offset="1" stop-color="#FBD4B2"/>
+    </linearGradient>
+    <linearGradient id="mpbg-moon-fill" x1="1100" y1="42" x2="1205" y2="397" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCECD9"/><stop offset="1" stop-color="#FBE7CF"/>
+    </linearGradient>
+    <linearGradient id="mpbg-far-fill" x1="0" y1="510" x2="1444" y2="647" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D49D97"/><stop offset="1" stop-color="#CE9891"/>
+    </linearGradient>
+    <linearGradient id="mpbg-mid-fill" x1="0" y1="555" x2="1444" y2="674" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#BF6244"/><stop offset="0.55" stop-color="#C56847"/><stop offset="1" stop-color="#B95C40"/>
+    </linearGradient>
+    <linearGradient id="mpbg-front-fill" x1="0" y1="610" x2="1444" y2="696" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#603848"/><stop offset="0.6" stop-color="#5B3344"/><stop offset="1" stop-color="#613747"/>
+    </linearGradient>
+    <linearGradient id="mpbg-ridge-fill" x1="1320" y1="518" x2="1230" y2="696" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#482A39"/><stop offset="1" stop-color="#512E3E"/>
+    </linearGradient>
+    <linearGradient id="mpbg-bat-fill" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#533144"/><stop offset="1" stop-color="#3F2635"/>
+    </linearGradient>
+    <linearGradient id="mpbg-window-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#FFBA66"/><stop offset="1" stop-color="#F4A34E"/>
+    </linearGradient>
+    <linearGradient id="mpbg-pumpkin-fill" x1="-20" y1="-34" x2="28" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F28C44"/><stop offset="1" stop-color="#F49A4D"/>
+    </linearGradient>
+    <clipPath id="mpbg-card-clip"><rect width="1444" height="696" rx="72"/></clipPath>
+  </defs>
+  <!-- Left side is intentionally open for live countdown text. No text or raster images. -->
+  <g id="background" clip-path="url(#mpbg-card-clip)">
+    <g id="sky"><rect width="1444" height="696" fill="url(#mpbg-sky-fill)"/></g>
+    <g id="moon"><circle cx="1152" cy="219" r="177" fill="url(#mpbg-moon-fill)"/></g>
+    <g id="clouds" fill="#FACBA6">
+      <g id="cloud-1-anchor" transform="translate(1227 112)">
+        <g id="cloud-1"><path d="M 2 57 C 13 41 28 34 45 40 C 49 14 66 0 88 0 C 111 0 127 17 129 38 C 150 31 171 41 183 60 C 188 67 179 70 167 72 C 123 78 50 72 10 70 C 0 69 -3 65 2 57 Z"/></g>
+      </g>
+      <g id="cloud-2-anchor" transform="translate(0 441)">
+        <g id="cloud-2"><path d="M -9 46 C -1 30 12 25 32 31 C 37 11 50 0 67 0 C 83 0 95 13 98 31 C 115 26 126 35 133 47 C 138 57 111 56 97 56 C 56 56 18 56 -9 52 Z"/></g>
+      </g>
+      <g id="cloud-3-anchor" transform="translate(644 445)">
+        <g id="cloud-3"><path d="M 2 46 C 13 33 24 28 38 33 C 43 13 55 0 75 0 C 95 0 108 14 112 32 C 127 26 140 34 149 46 C 154 53 147 56 136 58 C 94 61 50 59 10 57 C 1 57 -3 54 2 46 Z"/></g>
+      </g>
+    </g>
+    <!-- Animate the inner bat groups. Their parent groups preserve their positions. -->
+    <g id="bat-1-anchor" transform="translate(850 174)">
+      <g id="bat-1" data-pivot-x="0" data-pivot-y="0">
+        <path fill="url(#mpbg-bat-fill)" stroke="#432A39" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M -59 6 C -43 -15 -24 -16 -9 -2 L -3 1 L -6 -10 L 5 -4 L 9 -15 L 17 -2 C 25 -8 21 -27 33 -35 C 42 -42 55 -45 61 -42 C 46 -33 45 -24 52 -12 C 38 -10 34 -3 38 7 C 21 7 20 19 17 29 C 6 23 1 13 -7 17 C -15 19 -17 25 -18 25 C -22 17 -25 11 -33 14 C -37 5 -49 3 -59 6 Z"/>
+      </g>
+    </g>
+    <g id="bat-2-anchor" transform="translate(1370 300)">
+      <g id="bat-2" data-pivot-x="0" data-pivot-y="0">
+        <path fill="url(#mpbg-bat-fill)" stroke="#432A39" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="M -46 -25 C -24 -27 -15 -17 -16 -5 L -8 -8 L -2 0 L 1 -12 L 7 0 C 17 -11 27 -9 43 0 C 29 -4 26 1 24 10 C 14 7 7 15 7 21 C -2 14 -7 13 -12 18 C -14 9 -18 5 -24 8 C -23 -3 -30 -8 -37 -7 C -32 -15 -37 -22 -46 -25 Z"/>
+      </g>
+    </g>
+    <g id="hills-distant"><path fill="#E7B5A1" d="M 1040 573 C 1104 551 1156 492 1200 497 C 1268 494 1301 539 1378 532 C 1404 530 1424 526 1444 530 L 1444 696 H 1040 Z"/></g>
+    <g id="hills-far"><path fill="url(#mpbg-far-fill)" d="M 0 541 C 142 493 259 478 416 511 C 550 535 656 571 785 562 C 938 552 1030 535 1158 532 C 1279 529 1355 518 1444 545 L 1444 696 H 0 Z"/></g>
+    <g id="hills-mid"><path fill="url(#mpbg-mid-fill)" d="M 0 622 C 149 581 308 555 465 571 C 615 586 735 608 881 584 C 1036 559 1212 545 1444 554 L 1444 696 H 0 Z"/></g>
+    <g id="hills-house-ridge"><path fill="url(#mpbg-ridge-fill)" d="M 876 696 C 999 659 1128 613 1248 570 C 1305 549 1337 536 1380 544 C 1403 539 1425 541 1444 550 L 1444 696 Z"/></g>
+    <g id="trees" fill="none" stroke="#4A2C3B" stroke-linecap="round" stroke-linejoin="round">
+      <g id="tree-left">
+        <path stroke-width="10" d="M 1288 550 C 1290 523 1282 505 1273 482"/>
+        <path stroke-width="5.5" d="M 1285 520 L 1265 504 L 1253 480 M 1276 490 L 1268 470 L 1260 456 M 1276 490 L 1284 474 L 1287 458 M 1266 478 L 1252 473 M 1274 513 L 1260 507 L 1250 499 M 1286 525 L 1298 508 L 1301 493"/>
+        <path stroke-width="3.1" d="M 1268 470 L 1261 456 M 1252 473 L 1251 463 M 1287 458 L 1288 454 M 1260 507 L 1255 493"/>
+      </g>
+      <g id="tree-right">
+        <path stroke-width="7" d="M 1418 555 L 1424 532 L 1430 525"/>
+        <path stroke-width="3.8" d="M 1423 536 L 1414 522 L 1412 511 M 1427 529 L 1434 509 M 1430 525 L 1441 516 M 1434 509 L 1436 506"/>
+      </g>
+    </g>
+    <g id="house-anchor" transform="translate(1294 359)">
+      <g id="house">
+        <path id="house-silhouette" fill="#452A38" stroke="#452A38" stroke-width="3.2" stroke-linejoin="round" d="M 1 113 C 19 97 29 76 34 55 C 38 77 46 97 64 112 L 64 61 L 57 60 C 68 43 75 18 81 0 C 84 24 92 45 100 62 L 93 62 L 93 131 C 101 119 108 102 112 80 C 116 101 122 118 130 132 L 124 132 L 124 197 L 8 197 L 8 113 Z"/>
+        <g id="house-windows" fill="url(#mpbg-window-fill)">
+          <path d="M 75 91 L 75 76 C 75 69 84 69 84 76 L 84 91 Z"/>
+          <path d="M 29 135 L 29 122 C 29 113 42 113 42 122 L 42 135 Z"/>
+          <path d="M 72 173 L 72 156 C 72 145 86 145 86 156 L 86 173 Z"/>
+          <path d="M 108 154 L 108 143 C 108 137 115 137 115 143 L 115 154 Z"/>
+        </g>
+        <g id="window-frames" stroke="#452A38" stroke-width="2.4">
+          <path d="M 73 81 H 86 M 35.5 114 V 137 M 27 124 H 44 M 79 146 V 175 M 70 159 H 88"/>
+        </g>
+        <path id="house-door" fill="url(#mpbg-window-fill)" d="M 28 197 L 28 170 C 28 155 47 151 47 170 L 47 197 Z"/>
+      </g>
+    </g>
+    <g id="hills-front"><path fill="url(#mpbg-front-fill)" d="M 0 626 C 104 643 250 615 393 629 C 529 652 672 632 817 614 C 959 596 1049 602 1167 632 C 1269 654 1367 680 1444 696 H 0 Z"/></g>
+    <g id="grass-left" fill="#603848">
+      <path d="M 8 655 C 0 639 -8 624 -9 616 C 4 617 14 631 21 639 C 21 625 21 610 27 596 C 34 593 38 629 37 637 C 41 619 49 599 60 592 C 68 586 64 608 50 636 C 60 622 73 614 83 616 C 87 618 70 633 65 645 C 75 637 89 631 96 634 C 100 636 83 653 77 660 Z"/>
+    </g>
+    <g id="grass-right" fill="#653D4F">
+      <path d="M 1327 658 C 1320 642 1311 626 1313 618 C 1318 615 1334 636 1337 646 C 1337 621 1344 604 1356 596 C 1366 588 1361 614 1351 648 C 1363 635 1377 629 1385 630 C 1394 630 1372 653 1365 661 Z"/>
+    </g>
+    <g id="small-pumpkin-anchor" transform="translate(1089 576)">
+      <g id="small-pumpkin">
+        <path id="small-pumpkin-stem" fill="#61463C" d="M -9 -25 C -9 -43 1 -61 18 -68 C 29 -73 24 -61 25 -57 C 15 -51 11 -40 12 -26 Z"/>
+        <path fill="#DF6C2D" d="M -21 -38 C -47 -44 -60 -23 -59 0 C -58 23 -42 47 -21 45 C -4 42 6 22 4 3 C 4 -17 -3 -34 -21 -38 Z"/>
+        <path fill="#DF702F" d="M 18 -38 C 42 -41 61 -20 61 3 C 60 26 45 47 24 46 C 7 43 -4 21 -2 0 C -1 -20 5 -33 18 -38 Z"/>
+        <path fill="url(#mpbg-pumpkin-fill)" d="M 0 -39 C -20 -40 -33 -19 -33 6 C -33 32 -21 49 -5 50 C 16 52 28 31 29 6 C 30 -18 19 -38 0 -39 Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

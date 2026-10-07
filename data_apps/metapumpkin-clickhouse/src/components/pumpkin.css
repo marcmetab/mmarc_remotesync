@@ -1,0 +1,25 @@
+/*
+ * The pumpkin mark (Pumpkin.tsx). Scoped to .pd-app, named pd-pumpkin-*; colours from the theme tokens only,
+ * so it follows dark mode. The stock pumpkin (StockPumpkin) is pd-pk-*.
+ */
+
+.pd-app .pd-pumpkin { display: block; flex: none; overflow: visible; }
+.pd-app .pd-pumpkin-stem { fill: var(--pd-leaf); }
+.pd-app .pd-pumpkin-side { fill: var(--pd-pumpkin-deep); }
+.pd-app .pd-pumpkin-mid { fill: var(--pd-pumpkin-light); }
+
+/*
+ * Ghost: a dashed outline in the faint ink (1.5px at 20px wide; it scales with the mark). Filled with the page,
+ * so a line it sits on stops at its edge and the middle hides the sides' inner curves.
+ */
+.pd-app .pd-pumpkin.is-ghost :is(.pd-pumpkin-side, .pd-pumpkin-mid) { fill: var(--pd-page); stroke: var(--pd-faint); stroke-width: 2.4; stroke-dasharray: 3.2 2.6; }
+.pd-app .pd-pumpkin.is-ghost .pd-pumpkin-stem { fill: var(--pd-faint); }
+
+/* The stock pumpkin's parts: whole (stocked), a pale ghost filled to half (low), a dashed outline (out). */
+.pd-app .pd-pk { display: block; flex: none; overflow: visible; }
+.pd-app .pd-pk .pd-pk-side { fill: var(--pd-pumpkin-deep); }
+.pd-app .pd-pk .pd-pk-mid { fill: var(--pd-pumpkin-light); }
+.pd-app .pd-pk .pd-pk-stem { fill: var(--pd-leaf); }
+.pd-app .pd-pk .pd-pk-ghost .pd-pk-side, .pd-app .pd-pk .pd-pk-ghost .pd-pk-mid { fill: var(--pd-track); }
+.pd-app .pd-pk.is-out .pd-pk-side, .pd-app .pd-pk.is-out .pd-pk-mid { fill: none; stroke: var(--pd-severe); stroke-width: 1.6; stroke-dasharray: 2.4 2; }
+.pd-app .pd-pk.is-out .pd-pk-stem { fill: var(--pd-severe); }

@@ -1,0 +1,375 @@
+/*
+ * World (WorldPage.tsx, world/)
+ * The counters strip, then the stage: the map's viewport (a plane of terrain, roads and sprites under a camera,
+ * the controls floating over it, the region callouts and the card) with Live activity over its foot. The art's
+ * colours and the classes the generated markup uses are world/art.css; this file places things.
+ * Under 900px Live activity moves under the map. Under 600px (a phone) the counters scroll sideways, the callouts,
+ * the Live pill and the minimap go and the card becomes a sheet at the map's foot.
+ */
+
+/*
+ * Map colours with no shared token, in both themes (the same selectors as art.css). The vans' status colours
+ * follow the app's (pumpkin on the road, candle loading, olive unloading, rose heading back, muted at the hub,
+ * amber-ink in the workshop); a stopped van is severe, brighter in dark so it reads on the night-blue sea. The
+ * golden light over the map, and the shadows that lift the floating panels off the map.
+ */
+.pd-app .pd-world, .pd-app [data-theme="light"] .pd-world {
+  --pdw-van-drive: var(--pd-pumpkin); --pdw-van-load: var(--pd-candle); --pdw-van-unload: var(--pd-olive); --pdw-van-return: var(--pd-rose);
+  --pdw-van-stop: var(--pd-severe); --pdw-van-hub: var(--pd-muted); --pdw-van-ws: var(--pd-amber-ink);
+  --pdw-gold-a: rgba(255, 206, 140, .4); --pdw-gold-b: rgba(255, 176, 120, .14);
+  --pdw-float-shadow: 0 4px 14px rgba(58, 34, 48, .14), 0 1px 2px rgba(58, 34, 48, .1);
+  --pdw-card-shadow: 0 12px 32px rgba(58, 34, 48, .18), 0 1px 3px rgba(58, 34, 48, .12);
+  --pdw-label-shadow: 0 1px 2px rgba(58, 34, 48, .25);
+}
+.pd-app[data-theme="dark"] .pd-world, .pd-app [data-theme="dark"] .pd-world {
+  --pdw-van-stop: #ff7a52;
+  --pdw-gold-a: rgba(255, 170, 120, .12); --pdw-gold-b: rgba(120, 80, 160, .1);
+  --pdw-float-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+  --pdw-card-shadow: 0 12px 32px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .4);
+  --pdw-label-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+}
+
+.pd-app .pd-world { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Counters ────────────────────────────────────────────── */
+/* One row of eight where the labels fit beside their icons ("Heading back" needs about 73px), else two rows of four. */
+.pd-app .pd-world { container: pd-world / inline-size; }
+.pd-app .pd-world-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+@container pd-world (min-width: 1090px) { .pd-app .pd-world-stats { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+.pd-app .pd-world-stat { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px; border: 1px solid var(--pd-border); border-radius: 14px; background: var(--pd-surface); color: var(--pd-ink); text-align: left; transition: background-color .15s ease, border-color .15s ease; }
+.pd-app .pd-world-stat:hover { background: var(--pd-hover); }
+/* Pressed: the house toggle's fill and ring (.pd-pill, .pd-stat). */
+.pd-app .pd-world-stat[aria-pressed="true"] { background: var(--pd-selected); border-color: var(--pd-selected-ring); }
+.pd-app .pd-world-stat-icon { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: 9px; }
+.pd-app .pd-world-stat-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.pd-app .pd-world-stat-label { overflow: hidden; font-size: 11px; font-weight: 500; color: var(--pd-muted); white-space: nowrap; text-overflow: ellipsis; }
+.pd-app .pd-world-stat-value { font-size: 22px; font-weight: 700; line-height: 1.15; font-variant-numeric: lining-nums tabular-nums; letter-spacing: -0.01em; }
+
+/* ── The stage and the viewport ──────────────────────────── */
+/* The stage stacks on its own, so the card rises over Live activity but never over the shell's tab bar. */
+.pd-app .pd-world-stage { position: relative; z-index: 0; }
+/*
+ * Full view: the stage fills the window, over the sidebar and the tab bar (20; under the menus' 30), the map edge to
+ * edge with Live activity over its foot (under 900px, a strip under it). The sandbox blocks the Fullscreen API, so
+ * this is the window, not the screen; if the host ever puts the app in a transformed box, it fills that box.
+ */
+.pd-app .pd-world-stage.is-full { position: fixed; inset: 0; z-index: 25; display: flex; flex-direction: column; background: var(--pd-page); outline: none; }
+.pd-app .pd-world-stage.is-full > .pd-world-vp { flex: 1 1 auto; height: auto; min-height: 0; border: 0; border-radius: 0; }
+/* A card taller than the full view's map scrolls inside it. */
+.pd-app .pd-world-stage.is-full .pd-world-card { max-height: calc(100% - 16px); overflow-y: auto; overscroll-behavior: contain; }
+/* The counters in the full view: small, in a bar over the map's top, between the zoom and "Show on map": one row of
+   eight (about 790px) where it fits, else two of four; under 900px a row over the map's foot that scrolls sideways. */
+.pd-app .pd-world-stats.pd-world-statbar {
+  left: 50%; top: 14px; transform: translateX(-50%); display: grid; grid-template-columns: repeat(8, auto); justify-content: center; gap: 2px;
+  width: max-content; margin: 0; padding: 4px; border-radius: 14px; overflow: visible;
+}
+@media (max-width: 1259.98px) { .pd-app .pd-world-stats.pd-world-statbar { grid-template-columns: repeat(4, auto); } }
+.pd-app .pd-world-statbar .pd-world-stat { flex: none; gap: 7px; padding: 4px 10px 4px 4px; border: 0; border-radius: 10px; background: transparent; }
+.pd-app .pd-world-statbar .pd-world-stat:hover { background: var(--pd-hover); }
+.pd-app .pd-world-statbar .pd-world-stat[aria-pressed="true"] { background: var(--pd-selected); box-shadow: inset 0 0 0 1px var(--pd-selected-ring); }
+.pd-app .pd-world-statbar .pd-world-stat-icon { width: 26px; height: 26px; border-radius: 7px; }
+.pd-app .pd-world-statbar .pd-world-stat-icon > svg { width: 18px; height: 18px; }
+.pd-app .pd-world-statbar .pd-world-stat-label { font-size: 10.5px; line-height: 1.2; }
+.pd-app .pd-world-statbar .pd-world-stat-value { font-size: 15px; line-height: 1.15; }
+/*
+ * The viewport looks straight down at the sea. It clips the plane but is no scroll container (`clip`, `hidden` where clip is unknown), so focus on a sprite off screen cannot scroll it away.
+ */
+.pd-app .pd-world-vp {
+  position: relative; height: clamp(560px, 74vh, 800px); overflow: hidden; overflow: clip;
+  border: 1px solid var(--pd-border); border-radius: var(--pd-r-banner); background: var(--pdw-sea);
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.pd-app .pd-world-scene { position: absolute; inset: 0; }
+.pd-app .pd-world-vp.is-drag { cursor: grabbing; }
+
+/* The plane: the camera's moves (a button, a region, the minimap) ease over .45s; a drag, the wheel or a pinch and the
+   first measurement move it at once, frame by frame, so it follows the hand with no lag. */
+.pd-app .pd-world-plane { position: absolute; left: 50%; top: 50%; transform-origin: 50% 50%; transition: transform .45s cubic-bezier(.25, .8, .25, 1); }
+.pd-app .pd-world-vp:is(.is-drag, .is-still) .pd-world-plane { transition: none; }
+.pd-app .pd-world-vp.is-zoom .pd-world-plane { transition: none; }
+.pd-app .pd-world-art, .pd-app .pd-world-night, .pd-app .pd-world-fog { position: absolute; left: 0; top: 0; pointer-events: none; }
+.pd-app .pd-world-art > :is(svg, img) { display: block; max-width: none; }
+.pd-app .pd-world-night, .pd-app .pd-world-fog { display: block; overflow: visible; }
+.pd-app :is(.pd-world-roads, .pd-world-layer).is-off { display: none; }
+
+/*
+ * A sprite stands on its foot (left/top) and stacks by it (z-index).
+ */
+.pd-app .pd-world-sp {
+  position: absolute; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; line-height: 0;
+  transform-origin: 50% 100%; transform: translate(-50%, -100%); transition: filter .15s;
+}
+.pd-app :is(.pd-world-sp, .pd-world-van):is(:hover, .is-hot) { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 5px var(--pdw-pk)); }
+.pd-app :is(.pd-world-sp, .pd-world-van, .pd-world-field):focus-visible { outline: 2px solid var(--pd-pumpkin-icon); outline-offset: 2px; border-radius: 4px; }
+.pd-app .pd-world-decor { pointer-events: none; }
+/* Fields lie flat on the ground, centred on their point. */
+.pd-app .pd-world-field { position: absolute; margin: 0; padding: 0; border: 0; background: none; line-height: 0; transform: translate(-50%, -50%); transition: filter .15s; }
+.pd-app .pd-world-field:is(:hover, .is-hot) { filter: drop-shadow(0 0 4px var(--pdw-pk)); }
+/* Stores: a flagship stands taller, an express smaller; the stock badge sits over the roof's right. */
+.pd-app .pd-world-store-art { display: block; transform-origin: 50% 100%; transform: scale(1.12); }
+.pd-app .pd-world-store.is-flagship .pd-world-store-art { transform: scale(1.3); }
+.pd-app .pd-world-store.is-express .pd-world-store-art { transform: scale(.94); }
+.pd-app .pd-world-badge { position: absolute; right: -4px; top: -8px; }
+.pd-app .pd-world-landmark > svg { transform: scale(1.3); transform-origin: 50% 100%; }
+/* Names: a small pill over everything on the plane, kept about 11px on screen (its size is set inline); it clicks like its sprite. */
+.pd-app .pd-world-labels { display: contents; }
+.pd-app .pd-world-label { font-size: var(--pdw-ls, 11px); line-height: calc(var(--pdw-ls, 11px) * 1.45); padding: 0 calc(var(--pdw-ls, 11px) * .65); border-radius: var(--pd-r-pill); background: var(--pdw-card); box-shadow: var(--pdw-label-shadow); color: var(--pd-ink); font-weight: 500; white-space: nowrap; cursor: pointer; }
+.pd-app .pd-world-label.is-hub { font-weight: 700; }
+
+/*
+ * Far out and close in. The full map's sprites (.pd-world-detail) and the overview (.pd-world-ov) cross-fade by the
+ * zoom (--pdw-ov on the viewport: 1 far out, 0 close in); the one that is mostly hidden takes no pointer.
+ */
+.pd-app :is(.pd-world-detail, .pd-world-ov) { position: absolute; left: 0; top: 0; width: 100%; height: 100%; isolation: isolate; transition: opacity .3s; }
+.pd-app .pd-world-detail { opacity: calc(1 - var(--pdw-ov, 0)); }
+.pd-app .pd-world-ov { opacity: var(--pdw-ov, 0); }
+.pd-app .pd-world-vp.is-overview .pd-world-detail, .pd-app .pd-world-vp:not(.is-overview) .pd-world-ov { pointer-events: none; }
+/* The overview's marks stand on their point at screen size: scaled by 1 / zoom (--pdw-k, on a box of its own round
+   the overview that adds nothing to the layout). */
+.pd-app .pd-world-ov-k { display: contents; }
+.pd-app .pd-world-ov-m {
+  position: absolute; box-sizing: border-box; transform-origin: 50% 50%; cursor: pointer;
+  transform: translate(-50%, -50%) scale(var(--pdw-k, 1));
+}
+.pd-app .pd-world-ov-m.is-hot { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px var(--pdw-pk)); }
+.pd-app .pd-world-ov-trails { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.pd-app .pd-world-ov-trails path { fill: none; stroke-width: calc(3.5px * var(--pdw-k, 1)); stroke-linecap: round; }
+/* The roads from far out: a cream line with a soft edge, the stores' driveways thinner. */
+.pd-app .pd-world-ov-trails .ov-road-edge { stroke: var(--pdw-road-edge); stroke-width: calc(5px * var(--pdw-k, 1)); opacity: .7; }
+.pd-app .pd-world-ov-trails .ov-road { stroke: var(--pdw-road); stroke-width: calc(3px * var(--pdw-k, 1)); }
+.pd-app .pd-world-ov-trails .ov-drive { stroke: var(--pdw-road); stroke-width: calc(1.6px * var(--pdw-k, 1)); opacity: .9; }
+/* The marks' art (layers.tsx) stands round its spot and may spill out of its box (a shadow, a flag). A town's and a
+   hub's box is mostly empty round the art, so only the art and the words take the pointer there: the shops and vans
+   just next to them stay pickable. */
+.pd-app .pd-world-ov-m > svg { display: block; overflow: visible; }
+.pd-app :is(.pd-world-ov-city, .pd-world-ov-hub), .pd-app :is(.pd-world-ov-city, .pd-world-ov-hub) > svg { pointer-events: none; }
+.pd-app :is(.pd-world-ov-city, .pd-world-ov-hub) > svg > *, .pd-app :is(.pd-world-ov-name, .pd-world-ov-sign) { pointer-events: auto; }
+.pd-app .pd-world-ov .ov-shadow { fill: rgba(40, 25, 20, .22); }
+.pd-app .pd-world-ov .ov-pole { fill: none; stroke: var(--pdw-vane); stroke-width: 1; stroke-linecap: round; }
+.pd-app .pd-world-ov .ov-flag { fill: var(--pdw-van-stop); }
+/* A store: a little shop; cream walls and a pumpkin roof when stocked, a candle roof when low, all red when out. */
+.pd-app .pd-world-ov-store { width: 10px; height: 10px; }
+.pd-app .pd-world-ov .ov-shop-wall { fill: var(--pdw-wall); stroke: rgba(58, 34, 48, .55); stroke-width: .6; stroke-linejoin: round; }
+.pd-app .pd-world-ov .ov-shop-roof { fill: none; stroke: var(--pdw-roof); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.pd-app .pd-world-ov .ov-shop-door { fill: var(--pdw-door); }
+.pd-app .pd-world-ov-store.is-low .ov-shop-wall { fill: var(--pdw-wall-low); }
+.pd-app .pd-world-ov-store.is-low .ov-shop-roof { stroke: var(--pd-candle); }
+.pd-app .pd-world-ov-store.is-out .ov-shop-wall { fill: var(--pdw-van-stop); }
+.pd-app .pd-world-ov-store.is-out .ov-shop-roof { stroke: var(--pdw-barn-side); }
+.pd-app .pd-world-ov-store.is-out .ov-shop-door { fill: var(--pdw-card); }
+/* A city: a town of two houses and a tower, a flag on the tower when a store is low (candle) or out (red); its name
+   beside it, on the side away from its hub. */
+.pd-app .pd-world-ov-city { width: 26px; height: 38px; }
+.pd-app .pd-world-ov .ov-town-wall { fill: var(--pdw-wall); stroke: rgba(58, 34, 48, .35); stroke-width: .6; }
+.pd-app .pd-world-ov .ov-town-tower { fill: var(--pdw-silo); stroke: rgba(58, 34, 48, .35); stroke-width: .6; }
+.pd-app .pd-world-ov .ov-town-tile { fill: var(--pdw-tile); }
+.pd-app .pd-world-ov .ov-town-roof { fill: var(--pdw-roof-up); }
+.pd-app .pd-world-ov .ov-town-door { fill: var(--pdw-door); }
+.pd-app .pd-world-ov-city.is-low .ov-flag { fill: var(--pd-candle); }
+.pd-app .pd-world-ov-name {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); white-space: nowrap; font-size: 12px; font-weight: 700; line-height: 1;
+  color: var(--pd-ink); text-shadow: 0 0 3px var(--pdw-card), 0 0 3px var(--pdw-card), 0 0 2px var(--pdw-card);
+}
+/* A van on the road: an arrow the way it drives, in its status colour; hollow on the way back; stopped, a red square
+   with a pause sign in a soft red halo. Between ticks it glides (a second, linear); it turns with the road without
+   easing (a tick turns it a degree at most, and an eased turn would spin it round where the heading wraps at 180°). */
+.pd-app .pd-world-ov-van { width: 14px; height: 14px; transition: left 1s linear, top 1s linear, opacity .3s; }
+.pd-app .pd-world-ov-van > svg { transform: rotate(var(--pdw-r, 0deg)); }
+.pd-app .pd-world-ov .ov-arrow { fill: currentColor; stroke: var(--pdw-card); stroke-width: 1.7; stroke-linejoin: round; }
+.pd-app .pd-world-ov-van.is-empty .ov-arrow { fill: var(--pdw-card); stroke: currentColor; stroke-width: 1.9; }
+.pd-app .pd-world-ov .ov-stop { fill: currentColor; stroke: var(--pdw-card); stroke-width: 1.6; }
+.pd-app .pd-world-ov .ov-pause { fill: var(--pdw-card); }
+.pd-app .pd-world-ov-van.is-stopped::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; background: color-mix(in srgb, currentColor 26%, transparent); }
+.pd-app .pd-world-vp:is(.is-drag, .is-zoom) .pd-world-ov-van { transition: none; }
+/* A hub: its barn on the yard (the full map's art; a red flag on the vane when one of its vans is stopped), and its
+   wooden sign planted at the yard's front edge: the name, then a tick per van (pumpkin: out; red: stopped; pale: at
+   the hub). Kept small and close, as the hub's nearest towns sit just under it from far out. */
+.pd-app .pd-world-ov-hub { width: 62px; height: 72px; }
+.pd-app .pd-world-ov-hub .s-cast { display: none; }
+.pd-app .pd-world-ov .ov-yard { fill: var(--pdw-yard); stroke: rgba(110, 80, 50, .25); stroke-width: .8; }
+.pd-app .pd-world-ov-sign {
+  position: absolute; left: 50%; top: calc(50% + 15px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2.5px;
+  padding: 3px 5px 3.5px; border: 1px solid var(--pdw-v-slat); border-radius: 3px; background: var(--pdw-v-bed); box-shadow: 0 1.5px 0 rgba(40, 25, 20, .25);
+  color: var(--pdw-wall); font-size: 10px; font-weight: 800; line-height: 1; white-space: nowrap;
+}
+.pd-app .pd-world-ov-sign::before, .pd-app .pd-world-ov-sign::after { content: ""; position: absolute; top: 100%; width: 2px; height: 6px; background: var(--pdw-v-slat); }
+.pd-app .pd-world-ov-sign::before { left: 6px; }
+.pd-app .pd-world-ov-sign::after { right: 6px; }
+.pd-app .pd-world-ov-ticks { display: flex; gap: .7px; }
+.pd-app .pd-world-ov-ticks > i { width: 2px; height: 4px; border-radius: .5px; background: rgba(251, 239, 225, .32); }
+.pd-app .pd-world-ov-ticks > .is-out { background: var(--pdw-pk-hi); }
+.pd-app .pd-world-ov-ticks > .is-stopped { background: var(--pdw-van-stop); }
+/* Vans: centred on their spot and turned the way they go; between ticks they glide (a second, linear). */
+.pd-app .pd-world-van {
+  position: absolute; margin: 0; padding: 0; border: 0; background: none; line-height: 0;
+  transition: left 1s linear, top 1s linear, transform .6s ease, opacity .3s, filter .15s;
+}
+.pd-app .pd-world-vp:is(.is-drag, .is-zoom) .pd-world-van { transition: none; }
+/* Loading, stopped or unloading: a ring pulses round the van, in its colour. */
+.pd-app .pd-world-van.is-pulse::after { content: ""; position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 2px solid currentColor; border-radius: 50%; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .pd-app .pd-world-van.is-pulse::after { animation: pd-world-ring 1.8s ease-out infinite; }
+}
+@keyframes pd-world-ring { 0% { opacity: .8; transform: scale(.5); } 100% { opacity: 0; transform: scale(1.6); } }
+
+/* The light over the map: a golden glow from the top right. */
+.pd-app .pd-world-gold { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 75% at 86% -10%, var(--pdw-gold-a) 0%, var(--pdw-gold-b) 40%, rgba(0, 0, 0, 0) 66%); }
+
+/* ── Floating controls ───────────────────────────────────── */
+/* They come before the plane in the DOM (the keyboard reaches them first) and stack over it. */
+.pd-app .pd-world-float { position: absolute; z-index: 1; margin: 0; border-radius: 14px; background: var(--pdw-card); box-shadow: var(--pdw-float-shadow); color: var(--pd-ink); cursor: default; }
+/* The controls, the minimap and the feed stay above the region callouts, which can drift under them as the map moves. */
+.pd-app :is(.pd-world-zoom, .pd-world-live, .pd-world-layers, .pd-world-mini, .pd-world-feed, .pd-world-statbar) { z-index: 2; }
+.pd-app .pd-world-zoom { left: 14px; top: 14px; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; }
+.pd-app .pd-world-iconbtn { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; background: transparent; color: var(--pd-ink); }
+.pd-app .pd-world-iconbtn + .pd-world-iconbtn { border-top: 1px solid var(--pd-hairline); }
+.pd-app .pd-world-iconbtn:hover { background: var(--pd-hover); }
+.pd-app .pd-world-iconbtn:focus-visible { outline-offset: -3px; }
+.pd-app .pd-world-live { left: 66px; top: 14px; display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: var(--pd-r-pill); font-size: 13px; font-weight: 600; }
+.pd-app .pd-world-live > i { width: 8px; height: 8px; border-radius: 50%; background: var(--pdw-van-unload); }
+/* Show on map */
+.pd-app .pd-world-layers { right: 14px; top: 14px; width: 188px; padding: 6px 14px 8px; }
+.pd-app .pd-world-layers-head { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 36px; padding: 0; border: 0; background: transparent; color: var(--pd-ink); font-size: 14px; font-weight: 700; }
+.pd-app .pd-world-layers-head > svg { transition: transform .2s ease; }
+.pd-app .pd-world-layers-head[aria-expanded="true"] > svg { transform: rotate(180deg); }
+.pd-app .pd-world-layers-list { display: flex; flex-direction: column; padding-bottom: 2px; }
+.pd-app .pd-world-check { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 13px; color: var(--pd-ink); cursor: pointer; }
+.pd-app .pd-world-check > input { width: 16px; height: 16px; margin: 0; accent-color: var(--pd-pumpkin); cursor: pointer; }
+.pd-app .pd-world-check > i { width: 10px; height: 10px; border-radius: 3px; }
+
+/* The minimap: the land on the sea, the viewport's frame in pumpkin. */
+.pd-app .pd-world-mini { right: 14px; bottom: 14px; padding: 6px; border-radius: 12px; }
+.pd-app .pd-world-mini > button { position: relative; display: block; padding: 0; border: 0; border-radius: 8px; overflow: hidden; background: var(--pdw-sea); cursor: crosshair; }
+.pd-app .pd-world-mini svg { display: block; }
+.pd-app .pd-world-mini rect { fill: none; stroke: var(--pd-pumpkin); stroke-width: 1.8; }
+
+.pd-app .pd-world-loading { left: 50%; bottom: 14px; display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border-radius: var(--pd-r-pill); transform: translateX(-50%); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.pd-app .pd-world-loading > i { width: 8px; height: 8px; border-radius: 50%; background: var(--pd-faint); }
+@media (prefers-reduced-motion: no-preference) {
+  .pd-app .pd-world-loading > i { animation: pd-world-blink 1.2s ease-in-out infinite; }
+}
+@keyframes pd-world-blink { 50% { opacity: .3; } }
+
+/* ── Region callouts ─────────────────────────────────────── */
+/* Each points down at its region; it follows the camera as the plane does. */
+.pd-app .pd-world-callout {
+  display: block; padding: 10px 14px; border: 0; text-align: left; transform: translate(-50%, -100%); cursor: pointer;
+  transition: left .45s cubic-bezier(.25, .8, .25, 1), top .45s cubic-bezier(.25, .8, .25, 1), opacity .3s, transform .15s ease;
+}
+.pd-app .pd-world-callout::after { content: ""; position: absolute; left: calc(50% + var(--pdw-arrow, 0px)); bottom: -6px; width: 12px; height: 12px; margin-left: -6px; background: var(--pdw-card); transform: rotate(45deg); }
+.pd-app .pd-world-callout:hover { transform: translate(-50%, -100%) translateY(-2px); }
+.pd-app .pd-world-vp:is(.is-drag, .is-still) .pd-world-callout { transition: opacity .3s, transform .15s ease; }
+.pd-app .pd-world-vp.is-zoom .pd-world-callout { transition: opacity .3s; }
+.pd-app .pd-world-callout-head { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.pd-app .pd-world-callout-head > b { font-size: 14px; font-weight: 700; }
+.pd-app .pd-world-callout-time { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--pd-muted); font-variant-numeric: tabular-nums; }
+.pd-app .pd-world-callout-time > span { display: flex; }
+.pd-app .pd-world-callout-time > .is-day { color: var(--pdw-van-load); }
+.pd-app .pd-world-callout-time > .is-night { color: var(--pdw-van-return); }
+.pd-app .pd-world-callout-figs { display: flex; align-items: center; gap: 14px; margin-top: 6px; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pd-app .pd-world-callout-figs > span { display: flex; align-items: center; gap: 5px; }
+.pd-app .pd-world-callout-figs svg { color: var(--pd-pumpkin-icon); }
+.pd-app .pd-world-callout-figs > .is-alerts svg { color: var(--pd-faint); }
+.pd-app .pd-world-callout-figs > .has-alerts svg { color: var(--pdw-van-stop); }
+
+/* From far out, a region is lettered on the map: its name, then its local time, stores, vans out and alerts. */
+.pd-app .pd-world-callout.is-lettered {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0; background: none; box-shadow: none; border-radius: 0;
+  color: #fffaf2; text-shadow: 0 1px 2px rgba(20, 30, 50, .55), 0 0 10px rgba(16, 40, 76, .6), 0 2px 22px rgba(16, 40, 76, .45);
+}
+.pd-app .pd-world-callout.is-lettered::after { display: none; }
+.pd-app .pd-world-callout-name { font-family: var(--pd-serif); font-size: 30px; line-height: 1; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.pd-app .pd-world-callout-line { display: flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pd-app .pd-world-callout-line > b { font-weight: 600; opacity: .7; }
+.pd-app .pd-world-callout.is-lettered:hover .pd-world-callout-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+@media (max-width: 1100px) {
+  .pd-app .pd-world-callout-name { font-size: 22px; }
+  .pd-app .pd-world-callout-line { font-size: 12px; gap: 5px; }
+}
+@media (max-width: 600px) {
+  .pd-app .pd-world-callout.is-lettered { display: none; }
+}
+
+/* ── Live activity ───────────────────────────────────────── */
+.pd-app .pd-world-feed { left: 14px; bottom: 14px; width: 330px; padding: 12px 16px 8px; }
+.pd-app .pd-world-feed-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.pd-app .pd-world-feed-head > h2 { font-size: 14px; font-weight: 700; }
+.pd-app .pd-world-feed-head > span { font-size: 12px; font-weight: 500; color: var(--pd-muted); }
+.pd-app .pd-world-feed ul { margin: 0; padding: 0; list-style: none; }
+.pd-app .pd-world-feed-row { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; align-items: baseline; gap: 8px; padding: 5px 0; border-top: 1px solid var(--pd-hairline); font-size: 12.5px; }
+.pd-app .pd-world-feed-row:first-child { border-top: 0; }
+.pd-app .pd-world-feed-row > i { width: 8px; height: 8px; border-radius: 50%; }
+.pd-app .pd-world-feed-text { overflow: hidden; color: var(--pd-ink-soft); white-space: nowrap; text-overflow: ellipsis; }
+.pd-app .pd-world-feed-time { color: var(--pd-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pd-app .pd-world-feed-note { padding: 5px 0 6px; font-size: 12.5px; color: var(--pd-muted); }
+@media (prefers-reduced-motion: no-preference) {
+  .pd-app .pd-world-feed-row { animation: pd-world-in .5s ease-out; }
+}
+@keyframes pd-world-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ── The card ────────────────────────────────────────────── */
+/* Beside its sprite, over Live activity; the pointer can rest on it, and a click pins it. A van's card keeps pace with the van. */
+.pd-app .pd-world-card {
+  position: absolute; z-index: 30; width: 268px; padding: 14px 16px 12px; border-radius: 16px; background: var(--pdw-card); box-shadow: var(--pdw-card-shadow);
+  color: var(--pd-ink); cursor: pointer; transition: left .45s cubic-bezier(.25, .8, .25, 1), top .45s cubic-bezier(.25, .8, .25, 1);
+}
+.pd-app .pd-world-card.is-pinned { cursor: default; }
+.pd-app .pd-world-card.is-following { transition: left 1s linear, top 1s linear; }
+.pd-app .pd-world-vp:is(.is-drag, .is-zoom) .pd-world-card { transition: none; }
+.pd-app .pd-world-card-head { display: flex; align-items: flex-start; gap: 8px; }
+.pd-app .pd-world-card-head > div { flex: 1; min-width: 0; }
+.pd-app .pd-world-card-kind { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--pd-muted); }
+.pd-app .pd-world-card-title { margin-top: 2px; font-family: var(--pd-serif); font-size: 19px; line-height: 1.2; }
+.pd-app .pd-world-card-sub { margin-top: 2px; font-size: 12px; color: var(--pd-muted); }
+.pd-app .pd-world-card-close { display: grid; place-items: center; width: 32px; height: 32px; flex: none; margin: -4px -6px 0 0; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--pd-muted); }
+.pd-app .pd-world-card-close:hover { background: var(--pd-hover); color: var(--pd-ink); }
+.pd-app .pd-world-card-pill { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; margin-top: 10px; padding: 4px 10px; border-radius: var(--pd-r-pill); background: var(--pd-track); font-size: 12px; font-weight: 600; }
+.pd-app .pd-world-card-pill > i { width: 8px; height: 8px; flex: none; border-radius: 50%; }
+.pd-app .pd-world-card-bar { margin-top: 12px; }
+.pd-app .pd-world-card-bar > div { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--pd-muted); }
+.pd-app .pd-world-card-bar > div > span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pd-app .pd-world-card-track { display: block; height: 6px; margin-top: 5px; overflow: hidden; border-radius: var(--pd-r-pill); background: var(--pd-track); }
+.pd-app .pd-world-card-track > span { display: block; height: 100%; border-radius: var(--pd-r-pill); }
+.pd-app .pd-world-card-rows { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; margin-top: 12px; font-size: 13px; }
+.pd-app .pd-world-card-rows > div { display: contents; }
+.pd-app .pd-world-card-rows dt { color: var(--pd-muted); }
+.pd-app .pd-world-card-rows dd { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+.pd-app .pd-world-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--pd-hairline); font-size: 13px; }
+.pd-app .pd-world-card-foot > a { font-weight: 600; text-decoration: none; color: var(--pd-pumpkin-icon); }
+.pd-app .pd-world-card-foot > a:hover { color: var(--pd-ink); }
+.pd-app .pd-world-card-foot > span { font-size: 11px; color: var(--pd-faint); }
+
+/* ── Under 900px: Live activity under the map ────────────── */
+@media (max-width: 899.98px) {
+  .pd-app .pd-world-feed { position: static; width: auto; margin-top: 14px; padding: 14px 16px 8px; border: 1px solid var(--pd-hairline); border-radius: var(--pd-r-panel); background: var(--pd-surface); box-shadow: none; }
+  .pd-app .pd-world-stage.is-full > .pd-world-feed { flex: none; max-height: 30vh; overflow-y: auto; margin: 0; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); border-width: 1px 0 0; border-radius: 0; }
+  .pd-app .pd-world-stats.pd-world-statbar {
+    left: 10px; right: 10px; top: auto; bottom: 10px; transform: none; display: flex; width: auto; justify-content: flex-start;
+    overflow-x: auto; touch-action: pan-x; scrollbar-width: none;
+  }
+  .pd-app .pd-world-stats.pd-world-statbar::-webkit-scrollbar { display: none; }
+  /* the minimap and the loading pill sit over the counters' row */
+  .pd-app .pd-world-stage.is-full :is(.pd-world-mini, .pd-world-loading) { bottom: 66px; }
+}
+/* A short window (a phone held sideways): the full view is all map, without Live activity. */
+@media (max-width: 899.98px) and (max-height: 520px) {
+  .pd-app .pd-world-stage.is-full > .pd-world-feed { display: none; }
+}
+
+/* ── Under 600px: phone ──────────────────────────────────── */
+@media (max-width: 599.98px) {
+  /* The counters scroll sideways in one row, to the screen's edges. */
+  .pd-app .pd-world-stats {
+    grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 136px; overflow-x: auto;
+    margin: 0 calc(-1 * var(--pd-gutter)); padding: 0 var(--pd-gutter) 2px; scroll-padding: 0 var(--pd-gutter); scroll-snap-type: x proximity; scrollbar-width: none;
+  }
+  .pd-app .pd-world-stats::-webkit-scrollbar { display: none; }
+  .pd-app .pd-world-stat { scroll-snap-align: start; }
+  .pd-app .pd-world-vp { height: clamp(420px, 66vh, 620px); border-radius: 16px; }
+  .pd-app :is(.pd-world-callout, .pd-world-live, .pd-world-mini) { display: none; }
+  .pd-app .pd-world-zoom { left: 10px; top: 10px; }
+  .pd-app .pd-world-layers { right: 10px; top: 10px; width: 160px; padding: 4px 12px 6px; }
+  .pd-app .pd-world-loading { left: auto; right: 10px; bottom: 10px; transform: none; }
+  /* The card is a sheet at the map's foot, over the view switch. */
+  .pd-app .pd-world-card { left: 8px !important; right: 8px; top: auto !important; bottom: 8px; width: auto; transform: none !important; transition: none; }
+}

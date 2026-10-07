@@ -1,0 +1,13 @@
+/*
+ * The top bar's time switch on the City and Store pages (Shell.tsx): Today · Yesterday · 7 days · 30 days, in the
+ * region control's place. The segmented look is base.css (.pd-segmented); this box only lays it out. Scoped to .pd-app.
+ */
+.pd-app .pd-period { display: flex; min-width: 0; max-width: 100%; }
+
+/* Phones: the four share the width evenly, full labels, all in view down to 320px. */
+@media (max-width: 599.98px) {
+  .pd-app .pd-period { flex: 1 1 100%; }
+  .pd-app .pd-period .pd-segmented { display: flex; width: 100%; }
+  .pd-app .pd-period .pd-segmented > button { flex: 1 1 auto; min-width: 0; }
+  .pd-app .pd-period .pd-segmented > button > span { justify-content: center; width: 100%; padding: 0 8px; }
+}

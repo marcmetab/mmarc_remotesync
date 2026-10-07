@@ -1,0 +1,120 @@
+/*
+ * Business page: Daily revenue (with its event marks), Lost sales and costs, Mix. Everything is scoped to
+ * .pd-app and named pd-business-*; shared pieces (panels, rows, meters, the chart frame) come from
+ * styles/base.css. Breakdown has its own file (breakdown.css).
+ */
+
+/* ── Page colours, per theme ─────────────────────────────── */
+/*
+ * The few colours of the Business page that are not shared tokens (tokens.css), each with a light and a dark
+ * value, on the same selectors as the tokens (so a part pinned to a theme follows it too).
+ *   --pd-business-bar*          the vine chart's day columns: cream in light, a warm brown a step above the page in dark
+ *   --pd-business-plum-block    a large plum fill (season bar, Plan and Actual in Plan to actual, In store): plum in
+ *                               light; in dark the softer plum-hill, as plum (a light rose-plum there) glares in a block
+ *   --pd-business-storm*        the storm mark: dark amber in light; in dark a pale parchment with an amber glyph,
+ *                               lighter than the candle of a hub shortage so the two stay apart
+ *   --pd-business-hub-ink       the glyph on the candle hub-shortage mark: plum in light, deep plum-brown in dark
+ *   --pd-business-breakdown-ink the glyph on the peach breakdown mark: severe in light, terracotta in dark (4.5:1+)
+ */
+.pd-app, .pd-app [data-theme="light"] {
+  --pd-business-bar: #f4ead8; --pd-business-bar-weekend: #f6e0c9; --pd-business-bar-on: #f3d0b0; --pd-business-bar-dash: #c9a888;
+  --pd-business-plum-block: var(--pd-plum);
+  --pd-business-storm: var(--pd-amber-ink); --pd-business-storm-ink: var(--pd-cream);
+  --pd-business-hub-ink: var(--pd-plum); --pd-business-breakdown-ink: var(--pd-severe);
+}
+.pd-app[data-theme="dark"], .pd-app [data-theme="dark"] {
+  --pd-business-bar: #3b2b25; --pd-business-bar-weekend: #452d27; --pd-business-bar-on: #5c3d2e; --pd-business-bar-dash: #8a6d5c;
+  --pd-business-plum-block: var(--pd-plum-hill);
+  --pd-business-storm: #f6dfb6; --pd-business-storm-ink: #5a3510;
+  --pd-business-hub-ink: #2a1820; --pd-business-breakdown-ink: var(--pd-terracotta);
+}
+
+/* ── Daily revenue: the vine chart ───────────────────────── */
+.pd-app .pd-business-pending { margin-top: 14px; }
+.pd-app .pd-business-key-bar { width: 10px; height: 12px; border-radius: 3px 3px 0 0; background: var(--pd-business-bar); box-shadow: inset 0 -6px 0 var(--pd-meadow); }
+.pd-app .pd-business-readout { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 12px 0 14px; font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-business-readout > strong { font-weight: 700; color: var(--pd-ink); }
+/* The picked day's revenue: the numeral at a size that sits in this line of text, so a little less tight. */
+.pd-app .pd-business-readout > .pd-num { font-size: 18px; line-height: 1.2; letter-spacing: -0.01em; }
+
+/* One column per day; the whole column is the button. A finger slides along them (pan-y keeps the page's scroll). */
+.pd-app .pd-business-days { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 3px; touch-action: pan-y; }
+.pd-app .pd-business-day { position: relative; flex: 1 1 0; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 9px 9px 0 0; background: transparent; }
+.pd-app .pd-business-bar { position: absolute; left: 50%; bottom: 0; width: 70%; max-width: 30px; transform: translateX(-50%); border-radius: 9px 9px 0 0; background: var(--pd-business-bar); }
+.pd-app .pd-business-day.is-weekend > .pd-business-bar { background: var(--pd-business-bar-weekend); }
+.pd-app .pd-business-day:hover > .pd-business-bar, .pd-app .pd-business-day[aria-pressed="true"] > .pd-business-bar { background: var(--pd-business-bar-on); }
+/* Today, still running: a dashed outline and a faded pumpkin. */
+.pd-app .pd-business-day.is-partial > .pd-business-bar { border: 1.5px dashed var(--pd-business-bar-dash); background: transparent; }
+.pd-app .pd-business-day.is-partial:hover > .pd-business-bar, .pd-app .pd-business-day.is-partial[aria-pressed="true"] > .pd-business-bar { background: var(--pd-blush); }
+.pd-app .pd-business-stem { position: absolute; left: 50%; bottom: 0; width: 4px; transform: translateX(-50%); border-radius: 2px 2px 0 0; background: var(--pd-meadow); }
+.pd-app .pd-business-day > svg { position: absolute; left: 50%; transform: translate(-50%, 40%); }
+.pd-app .pd-business-day.is-partial > :is(.pd-business-stem, svg) { opacity: .55; }
+.pd-app .pd-business-plan { position: absolute; left: 12%; right: 12%; height: 2px; border-radius: 1px; background: var(--pd-plum); }
+.pd-app .pd-business-ly { position: absolute; left: 50%; width: 8px; height: 8px; transform: translate(-50%, 50%); border-radius: 50%; background: var(--pd-page); box-shadow: inset 0 0 0 2.5px var(--pd-rose); }
+
+/* Under the axis: a dot on weekends, a date once a week (counted back from today) */
+.pd-app .pd-business-x { flex: 1 1 auto; min-width: 0; display: flex; gap: 3px; }
+.pd-app .pd-business-x > span { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; white-space: nowrap; }
+.pd-app .pd-business-x i { width: 5px; height: 5px; flex: none; border-radius: 50%; }
+.pd-app .pd-business-x .is-weekend > i { background: var(--pd-rose); }
+
+/* ── Daily revenue: event marks ──────────────────────────── */
+/* A row above the plot, laid out like the chart frame (38px axis + 10px gap), one cell per day. */
+.pd-app .pd-business-evrow { display: grid; grid-template-columns: 38px minmax(0, 1fr); column-gap: 10px; margin-bottom: 6px; }
+.pd-app .pd-business-evdays { grid-column: 2; display: flex; gap: 3px; }
+.pd-app .pd-business-evdays > * { flex: 1 1 0; min-width: 0; }
+/* The marks of a day stack upwards from the plot. Pressing them picks the day, like its column. */
+.pd-app .pd-business-evday { display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; min-height: 22px; padding: 0; border: 0; border-radius: 9px; background: transparent; }
+.pd-app .pd-business-evday:hover, .pd-app .pd-business-evday[aria-pressed="true"] { background: var(--pd-stone); }
+.pd-app .pd-business-mark { position: relative; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: none; border-radius: 50%; }
+/* Storms in a dark amber: plum is the plan in this chart. */
+.pd-app .pd-business-mark.is-storm { background: var(--pd-business-storm); color: var(--pd-business-storm-ink); }
+/* Breakdowns are frequent and cost little: a tint, where storms and hub shortages are solid. */
+.pd-app .pd-business-mark.is-breakdown { background: var(--pd-peach); color: var(--pd-business-breakdown-ink); }
+.pd-app .pd-business-mark.is-hub_shortage { background: var(--pd-candle); color: var(--pd-business-hub-ink); }
+.pd-app .pd-business-mark.is-ventilation { background: var(--pd-hairline); color: var(--pd-ink-soft); }
+/* Several of a kind on one day: a small count on the mark's shoulder, kept within its own day's column. */
+/* The event key under the chart (marks a little smaller than on the chart). */
+.pd-app .pd-business-evlegend { margin-top: 12px; padding-left: 48px; }
+.pd-app .pd-business-evlegend .pd-business-mark { width: 16px; height: 16px; }
+.pd-app .pd-business-evlegend .pd-business-mark > svg { width: 10px; height: 10px; }
+.pd-app .pd-business-mark > b { position: absolute; top: -7px; right: -3px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 8px; background: var(--pd-page); box-shadow: inset 0 0 0 1px var(--pd-border); color: var(--pd-ink); font-size: 12px; font-weight: 700; line-height: 15px; text-align: center; font-variant-numeric: tabular-nums; }
+
+/* The picked day's events, under the chart: each opens where it is worked on. */
+.pd-app .pd-business-events { margin-top: 16px; }
+.pd-app .pd-business-event { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pd-app .pd-business-event > span:last-child { display: flex; flex-direction: column; min-width: 0; }
+.pd-app .pd-business-event strong { font-size: 14px; font-weight: 600; }
+.pd-app .pd-business-event small { font-size: 12.5px; color: var(--pd-muted); text-wrap: pretty; }
+.pd-app .pd-business-event-lost { font-size: 13px; font-weight: 700; color: var(--pd-terracotta); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-events-state { margin-top: 14px; }
+
+/* ── Lost sales and costs · Mix (the two rails) ──────────── */
+.pd-app .pd-business-rail { padding-bottom: 12px; }
+.pd-app .pd-business-lost { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; color: var(--pd-ink-soft); }
+.pd-app .pd-business-lost > .pd-num { font-size: 28px; line-height: 1; color: var(--pd-terracotta); }
+.pd-app .pd-business-cause { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+.pd-app .pd-business-cause > span > span { font-weight: 500; color: var(--pd-muted); }
+.pd-app .pd-business-amount { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-subtitle { margin-top: 6px; }
+.pd-app .pd-business-cost { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 12px; padding: 9px 0; border-top: 1px solid var(--pd-hairline); font-size: 14px; }
+.pd-app .pd-business-cost > span { font-weight: 600; }
+.pd-app .pd-business-cost > small { flex: 1 1 100%; font-size: 12.5px; color: var(--pd-muted); }
+
+.pd-app .pd-business-mix { display: flex; flex-direction: column; gap: 10px; }
+.pd-app .pd-business-mix .pd-keyrow > span { font-weight: 600; }
+.pd-app .pd-business-mix .pd-keyrow > strong { font-weight: 700; font-variant-numeric: tabular-nums; }
+.pd-app .pd-business-mix .pd-keyrow > .pd-business-key-note { min-width: 96px; font-weight: 400; text-align: right; color: var(--pd-muted); font-variant-numeric: tabular-nums; }
+/* A variety's share against last season's, under its name. */
+.pd-app .pd-business-mix-name { display: flex; flex-direction: column; min-width: 0; }
+.pd-app .pd-business-mix-name > small { font-size: 12px; font-weight: 500; color: var(--pd-muted); font-variant-numeric: tabular-nums; }
+
+/* ── Phone ───────────────────────────────────────────────── */
+@media (max-width: 599.98px) {
+  /* The last 14 days, on a shorter plot, with smaller pumpkins so neighbours do not touch. */
+  .pd-app :is(.pd-business-days, .pd-business-x, .pd-business-evdays) > :nth-last-child(n + 15) { display: none; }
+  .pd-app .pd-business-daily :is(.pd-chart-axis, .pd-chart-plot) { height: 260px !important; }
+  .pd-app .pd-business-day > svg { width: 18px; height: 17px; }
+  .pd-app .pd-business-mark { width: 18px; height: 18px; }
+  .pd-app .pd-business-mark > svg { width: 11px; height: 11px; }
+}

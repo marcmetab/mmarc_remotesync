@@ -1,0 +1,100 @@
+/*
+ * Business page · Live sales: the newest sales as a table under the tiles. Columns on a grid
+ * (--pd-business-ls-cols) while the panel is 660px or wider; below that each sale is a stacked row of three
+ * lines (store and amount, place and age, variety and channel with the store's clock time). A sale that
+ * arrives slides in (its row grows from nothing) under an olive wash that fades. Everything is scoped to .pd-app
+ * and named pd-business-ls-*; colours are tokens only, so both themes follow. The live dot is glance.css's.
+ */
+
+/* ── Title ───────────────────────────────────────────────── */
+.pd-app .pd-business-ls-title { display: inline-flex; align-items: center; gap: 10px; }
+.pd-app .pd-business-ls-state { padding: 10px 20px 8px; }
+
+/* ── Table ───────────────────────────────────────────────── */
+/* The size container wraps the table only: the title's definition card must not be laid out inside it. */
+.pd-app .pd-business-ls-wrap { container: pd-business-ls / inline-size; margin-top: 8px; }
+.pd-app .pd-business-ls-table {
+  --pd-business-ls-cols: minmax(150px, .8fr) minmax(140px, 1.5fr) minmax(104px, 1fr) minmax(32px, .4fr) minmax(84px, .8fr) minmax(92px, .7fr);
+  font-variant-numeric: tabular-nums;
+}
+.pd-app :is(.pd-business-ls-head, .pd-business-ls-cells) { display: grid; grid-template-columns: var(--pd-business-ls-cols); align-items: center; column-gap: 12px; padding: 0 20px; }
+.pd-app .pd-business-ls-head { min-height: 34px; border-bottom: 1px solid var(--pd-hairline); font-size: 12px; font-weight: 600; color: var(--pd-muted); white-space: nowrap; }
+/* The amount's heading ends where the amount does, before the chevron. */
+.pd-app .pd-business-ls-amount-head { padding-right: 18px; }
+
+/*
+ * A row is a one-track grid around a clip, so it can grow from 0fr to 1fr when it arrives; the cells inside
+ * carry the padding (a padded clip could not shrink to nothing).
+ */
+.pd-app .pd-business-ls-row { position: relative; display: grid; grid-template-rows: 1fr; border-bottom: 1px solid var(--pd-row-line); }
+.pd-app .pd-business-ls-clip { min-height: 0; overflow: hidden; }
+.pd-app .pd-business-ls-cells { position: relative; min-height: 56px; padding-top: 8px; padding-bottom: 8px; font-size: 14px; color: var(--pd-ink); }
+.pd-app .pd-business-ls-cells > * { min-width: 0; }
+.pd-app .pd-business-ls-row:hover { background: var(--pd-stone); }
+/* The quiet "In store" tag is stone too: on a hovered row it steps up to the hairline so it stays visible. */
+.pd-app .pd-business-ls-row:hover .pd-tag.is-stone { background: var(--pd-hairline); }
+
+.pd-app .pd-business-ls-time, .pd-app .pd-business-ls-store { display: flex; flex-direction: column; line-height: 1.3; }
+.pd-app .pd-business-ls-time > strong { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.pd-app :is(.pd-business-ls-time, .pd-business-ls-store) > small { overflow: hidden; font-size: 12px; color: var(--pd-muted); text-overflow: ellipsis; white-space: nowrap; }
+.pd-app .pd-business-ls-store strong { display: block; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.pd-app .pd-business-ls-variety { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.pd-app .pd-business-ls-variety > span { overflow: hidden; text-overflow: ellipsis; }
+.pd-app .pd-business-ls-pumpkin { flex: none; }
+.pd-app .pd-business-ls-qty-inline { display: none; }
+.pd-app .pd-business-ls-qty { color: var(--pd-ink-soft); }
+/* A little air between the right-aligned count and the channel tag. */
+.pd-app :is(.pd-business-ls-channel, .pd-business-ls-channel-head) { padding-left: 10px; }
+.pd-app .pd-business-ls-amount { display: flex; align-items: center; justify-content: flex-end; gap: 2px; font-weight: 600; white-space: nowrap; }
+.pd-app .pd-business-ls-amount > svg { flex: none; color: var(--pd-terracotta); }
+.pd-app .pd-business-ls-row:hover .pd-business-ls-amount > svg { transform: translateX(2px); transition: transform .16s ease; }
+
+/* The store's name is the row's link; its hit area stretches over the whole row. */
+.pd-app .pd-business-ls-hit { display: block; min-width: 0; color: var(--pd-ink); text-decoration: none; }
+.pd-app .pd-business-ls-hit:hover { color: var(--pd-ink); }
+.pd-app .pd-business-ls-hit::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.pd-app .pd-business-ls-hit:focus-visible { outline: none; }
+.pd-app .pd-business-ls-hit:focus-visible::after { outline: 2px solid var(--pd-terracotta); outline-offset: -2px; }
+
+/* ── Arrival ─────────────────────────────────────────────── */
+.pd-app .pd-business-ls-row.is-new { animation: pd-business-ls-grow .5s cubic-bezier(.2, .7, .3, 1) backwards, pd-business-ls-wash 3s ease-out backwards; }
+@keyframes pd-business-ls-grow { from { grid-template-rows: 0fr; opacity: 0; } to { grid-template-rows: 1fr; opacity: 1; } }
+@keyframes pd-business-ls-wash { 0%, 35% { background-color: var(--pd-olive-wash); } to { background-color: transparent; } }
+
+/* "Show 12 more": a full-width row under the table. */
+.pd-app .pd-business-ls-more { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 44px; padding: 0 20px; border: 0; border-top: 1px solid var(--pd-row-line); background: transparent; color: var(--pd-terracotta); font-size: 13.5px; font-weight: 700; text-align: left; }
+.pd-app .pd-business-ls-more:hover { color: var(--pd-terracotta-dark); }
+/* The panel's own border closes the table; "Show more" draws the line above itself. */
+.pd-app .pd-business-ls-row:last-child { border-bottom: 0; }
+
+/* ── Narrow: stacked rows ────────────────────────────────── */
+/*
+ *   Old City                       $16.47 ›
+ *   Philadelphia · United States  4 s ago
+ *   (pumpkin) 3 Cooking  In store  14:19 EDT
+ * The store and the time span two lines each on the row's own lines (subgrid), so the three lines align; the
+ * time keeps clear of the amount's chevron.
+ */
+@container pd-business-ls (max-width: 659.98px) {
+  .pd-app .pd-business-ls-head { display: none; }
+  .pd-app .pd-business-ls-cells { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto auto auto; row-gap: 2px; column-gap: 10px; min-height: 0; padding-top: 10px; padding-bottom: 10px; }
+  .pd-app .pd-business-ls-store { grid-column: 1 / 3; grid-row: 1 / 3; display: grid; grid-template-rows: subgrid; }
+  .pd-app .pd-business-ls-amount { grid-column: 3; grid-row: 1; }
+  .pd-app .pd-business-ls-time { grid-column: 3; grid-row: 2 / 4; display: grid; grid-template-rows: subgrid; justify-items: end; align-items: center; padding-right: 18px; }
+  .pd-app .pd-business-ls-time > strong { font-size: 13px; font-weight: 500; color: var(--pd-ink-soft); }
+  .pd-app .pd-business-ls-variety { grid-column: 1; grid-row: 3; font-size: 13px; color: var(--pd-ink-soft); }
+  .pd-app .pd-business-ls-channel { grid-column: 2; grid-row: 3; padding-left: 0; }
+  .pd-app .pd-business-ls-qty { display: none; }
+  .pd-app .pd-business-ls-qty-inline { display: inline; }
+}
+
+/* ── Phone ───────────────────────────────────────────────── */
+@media (max-width: 599.98px) {
+  .pd-app :is(.pd-business-ls-head, .pd-business-ls-cells) { padding-left: 16px; padding-right: 16px; }
+  .pd-app .pd-business-ls-state { padding: 10px 16px 8px; }
+  .pd-app .pd-business-ls-more { padding: 0 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-app .pd-business-ls-row.is-new { animation: none; }
+}

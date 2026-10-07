@@ -1,0 +1,151 @@
+/*
+ * The Halloween countdown card (HalloweenCard.tsx), in the sidebar above the profile. Scoped to .pd-app, named
+ * pd-halloween-* (the card), pd-scene-* (the landscape, halloween/HalloweenScene.tsx) and pd-metabot-* (the
+ * flying MetaBot, halloween/FlyingMetabot.tsx). The art keeps its own colours; the text takes the theme
+ * tokens, pinned to light (the card is light art in both themes, like the page banners). No border, no shadow.
+ * Numbers are Hanken Grotesk with lining, tabular digits; units are Young Serif.
+ * Motion, only where it is welcome (prefers-reduced-motion: no-preference): the MetaBot bobs, flaps and
+ * blinks, the bats flutter and the clouds drift, all the time it is on screen (browsers pause it in a hidden
+ * tab); the MetaBot's loop waits, paused at its start, until HalloweenCard plays it (a pointer, a tap). Every moving
+ * part is its own HTML-level layer (an <svg> or a box) moved by transform or opacity only, so the compositor
+ * runs it all and the art is never repainted for it.
+ */
+
+/* ── The card ────────────────────────────────────────────── */
+/*
+ * The section stays in the app's theme and reads its banner treatment (none in light; in dark, the dimming
+ * and the dusk) before the card inside pins the light theme, so the art darkens with the banners while the
+ * text keeps the light ink it was tuned to.
+ */
+.pd-app .pd-halloween { position: relative; flex: none; border-radius: 14px; --pd-halloween-dim: var(--pd-banner-filter); --pd-halloween-dusk: var(--pd-banner-dusk); }
+/* At the sidebar's foot: the card takes the free space above it, so the profile under it drops its own. */
+.pd-app .pd-sidebar > .pd-halloween { margin-top: auto; }
+.pd-app .pd-sidebar > .pd-halloween + .pd-profile { margin-top: 0; }
+
+.pd-app .pd-halloween-card { position: relative; isolation: isolate; height: 152px; overflow: hidden; border-radius: inherit; color: var(--pd-ink); }
+/*
+ * The landscape: a box at the art's ratio (1444:696), as tall as the card and anchored bottom right, so the card
+ * (taller than the art) crops empty sky on its left. The moving parts sit in it in % of the art.
+ */
+.pd-app .pd-halloween-scene { position: absolute; right: 0; bottom: 0; height: 100%; aspect-ratio: 1444 / 696; filter: var(--pd-halloween-dim); }
+/* Dark: the banners' dusk, over the hills only (below the countdown's lines, so the text keeps its contrast). */
+.pd-app .pd-halloween-scene::after { content: ""; position: absolute; inset: 0; background: var(--pd-halloween-dusk); -webkit-mask-image: linear-gradient(180deg, transparent 58%, #000 78%); mask-image: linear-gradient(180deg, transparent 58%, #000 78%); pointer-events: none; }
+.pd-app .pd-scene-art { display: block; width: 100%; height: 100%; }
+.pd-app .pd-scene-sprite { position: absolute; }
+.pd-app .pd-scene-sprite > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/*
+ * The MetaBot: right of the count, in front of the moon, its wings ~90px across on the 216px card. Its box
+ * (572:304, the bot fills it) is a share of the card's width, and never wider than the room right of the text
+ * (the count ends by 101px; the last day's widest line, "23 h 59 m", by 128px), so it keeps clear of the
+ * number on a narrower card too. Wide (the last day, three-figure days, the day itself): smaller, further right.
+ */
+.pd-app .pd-halloween-flight { position: absolute; z-index: 1; top: 30px; right: 4px; width: min(44%, calc(100% - 114px)); aspect-ratio: 572 / 304; filter: var(--pd-halloween-dim); }
+.pd-app .pd-halloween.is-wide .pd-halloween-flight { top: 34px; right: 3px; width: min(33%, calc(100% - 142px)); }
+.pd-app .pd-halloween-loop, .pd-app .pd-halloween-bot { display: block; width: 100%; height: 100%; }
+/* The loop turns about the pumpkin's middle (332,195 in the character's box, 40 40 572 304). */
+.pd-app .pd-halloween-loop { transform-origin: 51% 51%; }
+/* The character's layers, stacked on its box; the wings turn about their shoulders (220,212 and 452,254), the eyes blink about their middle (328,232). */
+.pd-app .pd-metabot { position: relative; }
+.pd-app .pd-metabot > svg, .pd-app .pd-metabot-hush > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; }
+.pd-app .pd-metabot-hush { position: absolute; inset: 0; }
+.pd-app .pd-metabot-wing.is-left { transform-origin: 31.47% 56.58%; }
+.pd-app .pd-metabot-wing.is-right { transform-origin: 72.03% 70.39%; }
+.pd-app .pd-metabot-eyes { transform-origin: 50.39% 63.16%; }
+
+/* ── The countdown ───────────────────────────────────────── */
+/* Over the art; the pointer passes through to the MetaBot under it. */
+.pd-app .pd-halloween-body { position: relative; z-index: 2; padding: 14px 16px 0; pointer-events: none; }
+/* The label: terracotta taken 30% towards the deep one, as the plain one is a hair under 4.5:1 on the art's sky. */
+.pd-app .pd-halloween-label { height: 14px; font-size: 11.5px; font-weight: 700; line-height: 14px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; color: color-mix(in srgb, var(--pd-terracotta) 70%, var(--pd-terracotta-deep)); }
+
+/* The large line: "26 days", "2 h 59 m". Numbers large, each unit in the serif on their baseline. */
+.pd-app .pd-halloween-big { display: flex; align-items: baseline; gap: 10px; height: 34px; margin-top: 6px; line-height: 34px; white-space: nowrap; }
+.pd-app .pd-halloween-big > span { display: flex; align-items: baseline; gap: 5px; }
+/* The last day's pair ("23 h 59 m") sits a little closer, so the MetaBot keeps its distance. */
+.pd-app .pd-halloween.is-wide .pd-halloween-big { gap: 7px; }
+.pd-app .pd-halloween.is-wide .pd-halloween-big > span { gap: 4px; }
+.pd-app .pd-halloween-big b { font-size: 32px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-halloween-big i { font-family: var(--pd-serif); font-size: 17px; font-style: normal; }
+
+/*
+ * The small line: "03 h 12 m 29 s", or "58 s to midnight", in the soft ink; the units and the note smaller and
+ * lighter in weight (the muted ink sits too near 4.5:1 on the art's sky).
+ */
+.pd-app .pd-halloween-timer { display: flex; align-items: baseline; gap: 7px; height: 16px; margin-top: 4px; font-size: 13px; line-height: 16px; white-space: nowrap; color: var(--pd-ink-soft); font-variant-numeric: lining-nums tabular-nums; }
+.pd-app .pd-halloween-timer > span { display: flex; align-items: baseline; gap: 2px; }
+.pd-app .pd-halloween-timer b { font-weight: 600; }
+.pd-app .pd-halloween-timer i, .pd-app .pd-halloween-timer em { font-style: normal; font-size: 11.5px; font-weight: 500; }
+.pd-app .pd-halloween-timer em { font-size: 12.5px; }
+
+/*
+ * Dark: the art under the text is dimmed, so the small text steps darker to keep a margin over 4.5:1 on it: the
+ * label to the darkest terracotta, the small line halfway to the full ink (the card's tokens are the light theme's).
+ */
+.pd-app[data-theme="dark"] .pd-halloween-label { color: var(--pd-terracotta-dark); }
+.pd-app[data-theme="dark"] .pd-halloween-timer { color: color-mix(in srgb, var(--pd-ink-soft) 50%, var(--pd-ink)); }
+
+/* On the day: "Happy" over "Halloween", in the serif. */
+.pd-app .pd-halloween-here { margin-top: 6px; font-family: var(--pd-serif); font-size: 20px; line-height: 24px; white-space: nowrap; }
+.pd-app .pd-halloween-here > span { display: block; width: fit-content; }
+
+/* ── Motion ──────────────────────────────────────────────── */
+/* Every idle part loops; none alternates, so each cycle starts and ends on the same pose. */
+@media (prefers-reduced-motion: no-preference) {
+  /* The MetaBot bobs (the outer box) and flaps from the shoulders, mirrored; the whoosh breathes; it blinks. */
+  .pd-app .pd-halloween-flight { animation: pd-halloween-bob 3.8s ease-in-out infinite both; }
+  .pd-app .pd-metabot-wing { animation: pd-halloween-flap-left 1.2s ease-in-out infinite both; }
+  .pd-app .pd-metabot-wing.is-right { animation-name: pd-halloween-flap-right; }
+  .pd-app .pd-metabot-whoosh { animation: pd-halloween-whoosh 2.2s ease-in-out infinite both; }
+  .pd-app .pd-metabot-eyes { animation: pd-halloween-blink 5s ease-in-out infinite both; }
+  /* The loop, paused at its start until a pointer plays it: a wind-up, a tucked turn with a small hop, a soft landing. The whoosh steps out meanwhile. */
+  .pd-app .pd-halloween-loop { animation: pd-halloween-spin .9s both paused; }
+  .pd-app .pd-metabot-hush { animation: pd-halloween-hush .9s both paused; }
+
+  /* The bats drift about their place, wings beating slowly; the clouds drift a few px and back. */
+  .pd-app .pd-scene-bat { animation: pd-halloween-flutter 3.8s ease-in-out infinite both; }
+  .pd-app .pd-scene-bat.is-2 { animation-duration: 4.6s; animation-direction: reverse; }
+  .pd-app .pd-scene-bat > svg { animation: pd-halloween-wingbeat 1.3s ease-in-out infinite both; }
+  .pd-app .pd-scene-bat.is-2 > svg { animation-duration: 1.45s; animation-delay: -.5s; }
+  .pd-app .pd-scene-cloud { animation: pd-halloween-drift 15s ease-in-out infinite both; }
+  .pd-app .pd-scene-cloud.is-3 { animation-direction: reverse; }
+
+  /* On the day: a happier flight, two hops and a rest, round and round, with quicker wings. */
+  .pd-app .pd-halloween.is-today .pd-halloween-flight { animation: pd-halloween-hop 2.6s ease-in-out infinite both; }
+  .pd-app .pd-halloween.is-today .pd-metabot-wing { animation-duration: .9s; }
+}
+
+@keyframes pd-halloween-bob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-3px) rotate(1deg); } }
+@keyframes pd-halloween-flap-left { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(11deg); } }
+@keyframes pd-halloween-flap-right { 0%, 100% { transform: rotate(7deg); } 50% { transform: rotate(-11deg); } }
+@keyframes pd-halloween-whoosh { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+@keyframes pd-halloween-blink { 0%, 94%, 100% { transform: scaleY(1); } 96.5% { transform: scaleY(.12); } }
+/*
+ * The loop, in the separate transform properties so the turn eases on its own while the tuck and the hop
+ * take their own keyframes. Tucked to .8 and nudged right for the turn, so the wings sweep clear of the label
+ * and of the card's top edge.
+ */
+@keyframes pd-halloween-spin {
+  0% { rotate: 0deg; translate: 0 0; scale: 1; animation-timing-function: cubic-bezier(.3, 0, .6, 1); }
+  12% { rotate: -14deg; translate: 0 2px; scale: 1.03 .96; animation-timing-function: cubic-bezier(.45, 0, .3, 1); }
+  27% { translate: 8px 0; scale: .78; animation-timing-function: ease-in-out; }
+  60% { translate: 7px -4px; scale: .78; animation-timing-function: cubic-bezier(.4, 0, .6, 1); }
+  84% { rotate: 360deg; translate: 0 1px; scale: 1.02 .95; animation-timing-function: ease-out; }
+  100% { rotate: 360deg; translate: 0 0; scale: 1; }
+}
+@keyframes pd-halloween-hush { 0%, 100% { opacity: 1; } 10%, 84% { opacity: 0; } }
+@keyframes pd-halloween-flutter { 0%, 100% { transform: translate(0, 0) rotate(-5deg); } 50% { transform: translate(-3px, -2.5px) rotate(6deg); } }
+@keyframes pd-halloween-wingbeat { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.76); } }
+@keyframes pd-halloween-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+@keyframes pd-halloween-hop {
+  0%, 100% { transform: translateY(0); }
+  14% { transform: translateY(-7px); animation-timing-function: ease-in; }
+  28% { transform: translateY(0); animation-timing-function: ease-out; }
+  40% { transform: translateY(-4px); animation-timing-function: ease-in; }
+  52% { transform: translateY(0); }
+}
+
+/* Where the sidebar shows (900px and up) the card holds the countdown, so the banner's chip steps aside. */
+@media (min-width: 900px) {
+  .pd-app .pd-banner-top { display: none; }
+}
