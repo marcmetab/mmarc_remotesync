@@ -90,6 +90,15 @@ export function matchRoute(pathname: string): Route {
   if (/^\/data-flow(\/|$)/.test(path)) return { page: "DataFlow", tab: "lines" };
   return { page: "Business" };
 }
+/**
+ * The banner a page shows (Shell.tsx, components/Banner.tsx): its tab's art, the van page the fleet's. None on the Fleet
+ * overview (its stage card has its own scene) or on World (the map is the page).
+ */
+export function bannerOf(route: Route): Exclude<TabId, "world"> | null {
+  const tab = tabOf(route.page);
+  return route.page === "Fleet" || tab === "world" ? null : tab;
+}
+
 /** The pathname of a route (the inverse of matchRoute). */
 export function routePath(route: Route): string {
   switch (route.page) {

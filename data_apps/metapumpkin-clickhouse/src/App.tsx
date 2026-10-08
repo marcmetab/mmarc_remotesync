@@ -9,7 +9,7 @@ import { useCityData, useStoreData, useStoresData } from "./data/useStoresData";
 import { useTruckData } from "./data/useTruckData";
 import { useWorldData } from "./data/useWorldData";
 import { warmIntent, Warmup } from "./data/warm";
-import { pageOnScreen, PageMotionContext, usePageStage } from "./motion";
+import { pageMotionKey, pageOnScreen, PageMotionContext, usePageStage } from "./motion";
 import { DataAppNav, useNav } from "./nav";
 import { BusinessPage } from "./pages/BusinessPage";
 import { Explore } from "./pages/business/Explore";
@@ -204,7 +204,7 @@ function Root() {
   // Each page in its own wrapper (display: contents: its rows are the content column's), keyed by its path, so the
   // page being left stays mounted as the next one mounts beside it (base.css plays both ways).
   const page = (path: string, role: "leaving" | "waiting" | "shown") => <div key={path} className={cx("pd-page", `is-${role}`, `is-${stage.motion}`)}>
-    <PageMotionContext.Provider value={`${stage.motion}:${role}`}>
+    <PageMotionContext.Provider value={pageMotionKey(stage.motion, role, role === "leaving" ? null : stage.from)}>
       <PageRouteContext.Provider value={routeFor(path)}><PageBoundary><LivePage/></PageBoundary></PageRouteContext.Provider>
     </PageMotionContext.Provider>
   </div>;

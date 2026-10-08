@@ -130,8 +130,8 @@
 .pd-app .is-scene.at-stores.is-sale.is-q3 .sc-sold.sc-n4 { animation: none; }
 .pd-app .is-scene.at-stores.is-sale .sc-tag { animation: pd-sc-tag 2.2s cubic-bezier(.2, .9, .25, 1) 2.85s forwards; }
 
-/* ── Back down from World: the field rises into view as the night lifts ── */
-.pd-app .is-landing > .pd-scene { animation: pd-sc-rise 1s cubic-bezier(.2, .9, .25, 1) both; }
+/* ── Back down from World: the field rises into view as the night lifts (the still banners too: Banner.tsx) ── */
+.pd-app .is-landing > :is(.pd-scene, img) { animation: pd-sc-rise 1s cubic-bezier(.2, .9, .25, 1) both; }
 .pd-app .pd-scene-night { position: absolute; inset: 0; background: linear-gradient(180deg, #0f1b2e 0%, #1d3150 45%, #4a4a6e 80%, #8c6a78 100%); pointer-events: none; animation: pd-sc-dawn .9s ease .15s both; }
 
 /* ── The way back to a sale's row ────────────────────────── */

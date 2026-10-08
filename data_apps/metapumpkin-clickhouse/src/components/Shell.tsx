@@ -5,7 +5,7 @@ import "../styles/base.css";
 import { clockLabel, dayLabel, timeTz } from "../format";
 import { Link, useNav } from "../nav";
 import { type PageMotion, setSalePhase, useSaleHandoff } from "../motion";
-import { type Route, routes, TABS, type TabId, tabOf } from "../routes";
+import { bannerOf, type Route, routes, TABS, type TabId } from "../routes";
 import { ThemeContext, type ThemeName } from "../theme";
 import { type Clock, countryName, DRILL_PERIOD, DRILL_PERIODS, type Scope, scopeLabel, TRUCK_PERIOD, TRUCK_PERIODS, type TruckPeriod } from "../types";
 import { useViewerZone } from "../viewer";
@@ -143,7 +143,7 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
   // The banner: the page being left keeps its own while it plays out; a store page opened from a Live sales row plays
   // the sale (and offers the way back to it); Business back from World lands.
   const banner = bannerRoute ?? route;
-  const bannerTab = tabOf(banner.page);
+  const bannerArt = bannerOf(banner);
   const handoff = useSaleHandoff();
   const saleHere = handoff && handoff.phase !== "return" && banner.page === "Store" && handoff.path === pathname ? handoff : null;
   const shifted = clock?.mode === "shifted";
@@ -190,9 +190,9 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
       <AccessoryProvider value={setPageLine}><div className="pd-content">
         {/* The Fleet overview has no banner: its stage card opens with its own scene (FleetPage). The Truck page keeps it.
             World has none either: the map is the page. */}
-        {banner.page !== "Fleet" && bannerTab !== "world" && <Banner variant={bannerTab} chip={seasonChip(bannerTab, tz, clock)}
+        {bannerArt && <Banner variant={bannerArt} chip={seasonChip(bannerArt, tz, clock)}
           sale={saleHere && { key: saleHere.sale.id, qty: saleHere.sale.units, amount: saleHere.sale.amount }}
-          onBack={saleHere ? () => setSalePhase("closing") : undefined} landing={motion === "land" && banner.page === "Business"}/>}
+          onBack={saleHere ? () => setSalePhase("closing") : undefined} landing={motion === "land"}/>}
         {children}
       </div></AccessoryProvider>
     </main>

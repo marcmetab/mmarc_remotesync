@@ -1,16 +1,16 @@
 import "./liftoff.css";
-import business from "../../assets/banner-business.svg";
+import { Banner, type BannerVariant } from "../../components/Banner";
 
 /*
  * The way between Business and World (motion.ts), drawn over the World page (WorldPage.tsx), aria-hidden.
- *   up    World opening from Business. A frame starts where Business's banner was, showing its field, and grows into
- *         the map's frame. A pumpkin balloon rises out of the field and the camera follows it up: the field drops
- *         away, the sky turns to night and the stars come out, the clouds close in, then part, and under them the map
+ *   up    World opening from another page. A frame starts where that page's banner was, showing the same banner
+ *         (`from`; from a page with none, the frame grows from the top of the page), and grows into the map's frame. A
+ *         pumpkin balloon rises out of the field and the camera follows it up: the field drops away, the sky turns to night and the stars come out, the clouds close in, then part, and under them the map
  *         assembles (liftoff.css: it zooms up from far below, the land surfaces, hubs, towns and stores pop in, the
  *         roads draw out, the region names slide together, the counters drop in and count up, the controls slide in
  *         from the edges, the vans start driving). The balloon floats on in the map's corner (`Balloon`).
- *   down  World closing for Business: the map falls away under the night, the clouds pass, and the frame shrinks to
- *         the banner's place, where Business's banner takes over (it lands: its field rises as the night lifts).
+ *   down  World closing for a page with a banner: the map falls away under the night, the clouds pass, and the frame
+ *         shrinks to the banner's place, where that page's banner takes over (it lands: its art rises as the night lifts).
  * Where the frame starts and ends comes from WorldPage, measured (--lift-top, --lift-h, --lift-w on .pd-world).
  */
 
@@ -37,16 +37,16 @@ export function Balloon() {
   return <div className="pd-lift-corner" aria-hidden="true"><div className="pd-lift-bob"><BalloonArt/></div></div>;
 }
 
-export function Liftoff({ way }: { way: "up" | "down" }) {
+export function Liftoff({ way, from }: { way: "up" | "down"; from?: BannerVariant | null }) {
   const bank = (puffs: typeof LEFT, side: "left" | "right") => puffs.map(([x, y, w, h], i) =>
     <span key={i} className="pd-lift-puff" style={{ [side]: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` }}/>);
-  return <div className={`pd-lift is-${way}`} aria-hidden="true">
+  return <div className={`pd-lift is-${way}${way === "up" && !from ? " is-bare" : ""}`} aria-hidden="true">
     <div className="pd-lift-frame">
       <div className="pd-lift-day"/>
       <div className="pd-lift-night">
         {STARS.map(([x, y, d], i) => <span key={i} className="pd-lift-star" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${d}s` }}/>)}
       </div>
-      {way === "up" && <div className="pd-lift-field"><img src={business} alt=""/></div>}
+      {way === "up" && from && <div className="pd-lift-field"><Banner variant={from}/></div>}
       <div className="pd-lift-clouds is-left">{bank(LEFT, "left")}</div>
       <div className="pd-lift-clouds is-right">{bank(RIGHT, "right")}</div>
       <div className="pd-lift-wisp"/>

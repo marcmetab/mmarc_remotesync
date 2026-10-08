@@ -3,6 +3,7 @@ import "./world/art.css";
 import "./world.css";
 import { Panel, PanelState } from "../components/ui";
 import { usePageMotion } from "../motion";
+import { bannerOf, matchRoute } from "../routes";
 import type { PageProps } from "../types";
 import { countWorld } from "./world/model";
 import type { WorldStat, WorldState, WorldViewModel } from "./world/types";
@@ -17,8 +18,8 @@ export type { WorldViewModel };
  * what they are doing, stores low and out); each one picked keeps only those vans or stores bright. The map
  * (world/WorldMap.tsx) shows every hub, city, store, field, workshop and van, and dims what lies outside the
  * shell's region; hovering a sprite shows its card, clicking pins it. The Shell skips the banner here: the map is
- * the page's picture. Opened from Business it lifts off (world/Liftoff.tsx): it rises out of Business's banner and the
- * map assembles under the clouds; going back to Business it comes down again. Presentational: the view model comes
+ * the page's picture. Opened from another page it lifts off (world/Liftoff.tsx): it rises out of that page's banner and
+ * the map assembles under the clouds; leaving for a page with a banner it comes down into it again. Presentational: the view model comes
  * in through props (src/data/useWorldData.ts live, fixtures/world.ts in the static preview). Styles: world.css
  * (layout) over world/art.css (the art), world/liftoff.css (the way up and down).
  */
@@ -41,10 +42,11 @@ export function WorldPage({ vm, scope, onScope, clock, initial, refreshing, onRe
   }
   const counts = useMemo(() => countWorld(vm.vans, vm.stores, scope), [vm.vans, vm.stores, scope]);
 
-  // Opened from Business, it lifts off once it shows (it may mount unseen while Business plays its way out); leaving
-  // for Business, it lands. The balloon stays in the corner for as long as the page is open.
-  const { motion, role } = usePageMotion();
+  // Opened from another page, it lifts off once it shows (it mounts unseen while that page plays its way out), out of
+  // that page's banner; leaving for a page with a banner, it lands. The balloon stays in the corner while it is open.
+  const { motion, role, from } = usePageMotion();
   const lifted = useRef(motion === "liftoff").current;
+  const origin = useRef(lifted && from ? bannerOf(matchRoute(from)) : null).current;
   const [lift, setLift] = useState<"sky" | "map" | "done">(lifted ? "sky" : "done");
   const [countFrom, setCountFrom] = useState<number | null>(null);
   const shown = role === "shown";
@@ -68,7 +70,7 @@ export function WorldPage({ vm, scope, onScope, clock, initial, refreshing, onRe
 
   return <div ref={ref} className={`pd-world${lift !== "done" ? " is-liftoff" : ""}${landing ? " is-landing" : ""}`}>
     <h1 className="pd-sr">World</h1>
-    {lift === "sky" && <Liftoff way="up"/>}
+    {lift === "sky" && <Liftoff way="up" from={origin}/>}
     {landing && <Liftoff way="down"/>}
     {lifted && <Balloon/>}
     <WorldStats counts={counts} focus={focus} onFocus={setFocus} countFrom={countFrom}/>

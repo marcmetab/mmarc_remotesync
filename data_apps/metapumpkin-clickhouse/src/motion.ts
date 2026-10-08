@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
-import type { Route } from "./routes";
+import { bannerOf, type Route } from "./routes";
 
 /*
  * Motion between pages, and the one thing a page hands to the next: the sale a Live sales row opened.
@@ -7,9 +7,10 @@ import type { Route } from "./routes";
  * Pages (App.tsx Root): most open with the short fade (base.css). A few pairs play their own way across:
  *   right / left   Business ↔ Stores (and the city and store pages, which share the Stores banner): the banner's
  *                  camera pans across one world (banner/HarvestScene.tsx) and the page slides the way it went.
- *   liftoff        Business → World: the Business rows fall away, then the World page rises out of the banner
- *                  (world/Liftoff.tsx): a balloon, the night, the clouds, and the map assembles under them.
- *   land           World → Business: the way back down, and the Business rows drop in.
+ *   liftoff        any page → World: its rows fall away, then the World page rises out of its banner (or the top of
+ *                  the page, from one without) (world/Liftoff.tsx): a balloon, the night, the clouds, and the map
+ *                  assembles under them.
+ *   land           World → a page with a banner: the way back down into it, and its rows drop in.
  *   sale / return  a Live sales row opened as its store, and back (below).
  * The page being left stays on screen for EXIT_MS, playing its way out, while the next one mounts unseen (its
  * queries start at once). Reduced motion: every change is the plain fade, with nothing held.
@@ -40,8 +41,8 @@ export function motionBetween(from: Route, to: Route): PageMotion {
   const a = cameraOf(from), b = cameraOf(to);
   if (a === "biz" && b === "stores") return "right";
   if (a === "stores" && b === "biz") return "left";
-  if (from.page === "Business" && to.page === "World") return "liftoff";
-  if (from.page === "World" && to.page === "Business") return "land";
+  if (to.page === "World" && from.page !== "World") return "liftoff";
+  if (from.page === "World" && to.page !== "World") return bannerOf(to) ? "land" : "fade";
   return "fade";
 }
 
@@ -77,14 +78,15 @@ export function usePageStage(path: string, routeFor: (path: string) => Route): P
 }
 
 /**
- * The change a page is part of, and its part in it: "leaving" (playing its way out), "waiting" (mounted, unseen) or
- * "shown". App.tsx gives each page its own, as "motion:role" (a string, so it only changes when they do). Outside it,
- * as in the static preview: a plain fade, shown.
+ * The change a page is part of, its part in it ("leaving": playing its way out, "waiting": mounted unseen, "shown"),
+ * and, while it plays, the path of the page it replaces. App.tsx gives each page its own, as "motion|role|from" (a
+ * string, so it only changes when they do). Outside it, as in the static preview: a plain fade, shown.
  */
-export const PageMotionContext = createContext("fade:shown");
-export function usePageMotion(): { motion: PageMotion; role: "leaving" | "waiting" | "shown" } {
-  const [motion, role] = useContext(PageMotionContext).split(":");
-  return { motion: motion as PageMotion, role: role as "leaving" | "waiting" | "shown" };
+export const PageMotionContext = createContext("fade|shown|");
+export const pageMotionKey = (motion: PageMotion, role: "leaving" | "waiting" | "shown", from: string | null) => `${motion}|${role}|${from ?? ""}`;
+export function usePageMotion(): { motion: PageMotion; role: "leaving" | "waiting" | "shown"; from: string | null } {
+  const [motion, role, from] = useContext(PageMotionContext).split("|");
+  return { motion: motion as PageMotion, role: role as "leaving" | "waiting" | "shown", from: from || null };
 }
 
 /* ── The sale hand-off ───────────────────────────────────── */

@@ -18,8 +18,8 @@
 .pd-app .pd-lift-night { opacity: 0; background: linear-gradient(180deg, #0f1b2e 0%, #1d3150 45%, #4a4a6e 80%, #8c6a78 100%); }
 .pd-app .pd-lift-star { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff6e2; opacity: 0; animation: pd-lift-star 1.6s ease-in-out both; }
 .pd-app .pd-lift-field { position: absolute; left: 0; right: 0; bottom: 0; height: var(--lift-banner); }
-.pd-app .pd-lift-field > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; filter: var(--pd-banner-filter); }
-.pd-app .pd-lift-field::after { content: ""; position: absolute; inset: 0; background: var(--pd-banner-dusk); }
+/* The banner of the page left behind, as it was (its own art, filter and dusk). */
+.pd-app .pd-lift-field > .pd-banner { height: 100%; border-radius: 0; }
 .pd-app .pd-lift-clouds { position: absolute; top: -6%; width: 72%; height: 112%; transform: translateY(-130%); }
 .pd-app .pd-lift-clouds.is-left { left: -6%; }
 .pd-app .pd-lift-clouds.is-right { right: -6%; }
@@ -33,7 +33,7 @@
 .pd-app .pd-lift-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: pd-lift-flame .35s ease-in-out infinite alternate; }
 
 /* ── Up ──────────────────────────────────────────────────── */
-.pd-app .pd-lift.is-up .pd-lift-frame { top: 0; height: var(--lift-banner); animation: pd-lift-grow .8s cubic-bezier(.65, 0, .3, 1) .1s forwards, pd-lift-hide .2s ease 2.45s forwards; }
+.pd-app .pd-lift.is-up .pd-lift-frame { top: 0; height: var(--lift-from, var(--lift-banner)); animation: pd-lift-grow .8s cubic-bezier(.65, 0, .3, 1) .1s forwards, pd-lift-hide .2s ease 2.45s forwards; }
 .pd-app .pd-lift.is-up .pd-lift-day { animation: pd-lift-out .55s ease 1.4s forwards; }
 .pd-app .pd-lift.is-up .pd-lift-night { animation: pd-lift-in 1.1s ease .35s forwards, pd-lift-out .55s ease 1.45s forwards; }
 .pd-app .pd-lift.is-up .pd-lift-field { animation: pd-lift-drop 1.15s cubic-bezier(.5, 0, .75, 0) .3s forwards; }
@@ -42,6 +42,9 @@
 .pd-app .pd-lift.is-up .pd-lift-wisp { animation: pd-lift-wisp 1.1s ease-in-out .55s both; }
 .pd-app .pd-lift.is-up .pd-lift-wisp.is-late { animation-delay: 1.55s; }
 .pd-app .pd-lift.is-up .pd-lift-balloon { animation: pd-lift-balloon 3.1s cubic-bezier(.45, 0, .3, 1) both; }
+
+/* From a page with no banner (the Fleet overview) the frame grows out of the top of the page. */
+.pd-app .pd-lift.is-up.is-bare { --lift-from: 0px; }
 
 /* The map assembles under the parting clouds. */
 .pd-app .pd-world.is-liftoff .pd-world-vp { animation: pd-lift-in .5s ease 1.3s backwards; }
