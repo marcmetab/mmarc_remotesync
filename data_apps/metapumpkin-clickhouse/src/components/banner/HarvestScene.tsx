@@ -19,14 +19,12 @@ import { DEFS, FAR, FIREFLIES, GROUND, MID, SKY, STALL, TRUCK } from "./harvestA
  * drives in from the left and parks, then the sale plays out at the stall: one pumpkin hops for each one sold (up to
  * four) and the amount rises over it. `onBack` adds the "Live sales" button.
  * `landing`: Business opening on the way down from World: the field rises into view as the night lifts.
- * The round button pauses it all (for the session); with reduced motion it starts paused and nothing plays on its
- * own: the camera jumps, the sale shows as it ends. Off screen, it rests. Styles: harvest.css.
+ * With reduced motion it stays still and nothing plays on its own: the camera jumps, the sale shows as it ends. Off
+ * screen, it rests. Styles: harvest.css.
  */
 
 export type SceneSale = { key: string; qty: number; amount: string };
 
-/** The viewer's pause, kept for the session: the banner unmounts on the pages that have none, and comes back. */
-let pausedPick: boolean | null = null;
 /** The van's drive from the hill road to the stall, or back (ms; harvest.css). */
 const DRIVE_MS = 1800;
 
@@ -36,9 +34,8 @@ const art = (name: string, markup: string) => <Fragment key={name}>{svgElement(m
 
 export function HarvestScene({ at, sale, landing, chip, onBack }: { at: Camera; sale?: SceneSale | null; landing?: boolean; chip?: ReactNode; onBack?: () => void }) {
   const ref = useRef<HTMLElement>(null);
-  const [paused, setPaused] = useState(() => pausedPick ?? reducedMotion());
-  // Plays nothing on its own while paused or with reduced motion: the camera jumps, the sale is already done.
-  const live = !paused && !reducedMotion();
+  // With reduced motion it plays nothing on its own: the loops rest, the camera jumps, the sale is already done.
+  const live = !reducedMotion();
   const [cam, setCam] = useState<Cam>({ at, still: true, dir: null, arrived: false });
   // A new camera (state adjusted while rendering, so the pan starts in the same frame as the new page's banner).
   if (cam.at !== at) {
@@ -68,11 +65,10 @@ export function HarvestScene({ at, sale, landing, chip, onBack }: { at: Camera; 
     return () => watch.disconnect();
   }, []);
 
-  const toggle = () => setPaused(p => { pausedPick = !p; return !p; });
   const playing = sale && live ? sale : null;
   const cls = ["pd-banner", "is-scene", `is-${at === "biz" ? "business" : "stores"}`, `at-${cam.at}`,
     cam.dir && "is-moving", cam.dir === "back" && "is-back", cam.arrived && live && "is-arrived", cam.still && "is-still",
-    playing && `is-sale is-q${Math.max(1, Math.min(4, playing.qty))}`, landing && live && "is-landing", paused && "is-paused", away && "is-away"];
+    playing && `is-sale is-q${Math.max(1, Math.min(4, playing.qty))}`, landing && live && "is-landing", !live && "is-still-life", away && "is-away"];
   return <section ref={ref} className={cls.filter(Boolean).join(" ")}>
     <svg className="pd-scene" viewBox="0 218 1200 170" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
       {art("defs", DEFS)}
@@ -94,8 +90,5 @@ export function HarvestScene({ at, sale, landing, chip, onBack }: { at: Camera; 
     {landing && live && <div className="pd-scene-night" aria-hidden="true"/>}
     {chip && <div className="pd-banner-top"><span className="pd-banner-chip">{chip}</span></div>}
     {onBack && <button type="button" className="pd-scene-back pd-glass" onClick={onBack}><Icon name="chevronLeft" size={18} strokeWidth={2.2}/>Live sales</button>}
-    <button type="button" className="pd-round pd-glass pd-scene-play" aria-label={paused ? "Play the banner" : "Pause the banner"} onClick={toggle}>
-      <Icon name={paused ? "play" : "pause"} size={16} strokeWidth={2.2}/>
-    </button>
   </section>;
 }

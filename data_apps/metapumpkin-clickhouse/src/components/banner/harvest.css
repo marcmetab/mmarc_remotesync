@@ -4,7 +4,7 @@
  *   at-biz / at-stores   the camera            is-moving / is-back   the van driving to the stall / back to the road
  *   is-arrived           the van just parked   is-sale, is-q1..4     a sale playing out (one hop per pumpkin sold)
  *   is-landing           back down from World  is-still              a jump: no transition this once
- *   is-paused / is-away  paused by the viewer / scrolled out of view: every loop rests
+ *   is-still-life        reduced motion        is-away               scrolled out of view: every loop rests
  * The camera pans each depth by its own distance (sky 120, far 480, mid 840, near 1200 in the art's units); on
  * narrower strips it pans a little further (--sc-x) so the parked van stays in view. Fireflies, the van's lamp and
  * the stall's lights follow the theme (--sc-ff, --sc-lamp, --sc-bulb).
@@ -134,19 +134,14 @@
 .pd-app .is-landing > .pd-scene { animation: pd-sc-rise 1s cubic-bezier(.2, .9, .25, 1) both; }
 .pd-app .pd-scene-night { position: absolute; inset: 0; background: linear-gradient(180deg, #0f1b2e 0%, #1d3150 45%, #4a4a6e 80%, #8c6a78 100%); pointer-events: none; animation: pd-sc-dawn .9s ease .15s both; }
 
-/* ── Its buttons ─────────────────────────────────────────── */
-.pd-app .pd-scene-play { position: absolute; z-index: 2; right: 12px; bottom: 12px; color: var(--pd-ink); }
+/* ── The way back to a sale's row ────────────────────────── */
 .pd-app .pd-scene-back { position: absolute; z-index: 2; top: 14px; left: 14px; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border-radius: 22px; color: var(--pd-ink); font-size: 14.5px; font-weight: 700; }
 .pd-app .pd-scene-back:focus-visible { outline-offset: 2px; }
 .pd-app .is-sale .pd-scene-back { animation: pd-sc-back .5s cubic-bezier(.34, 1.4, .5, 1) .8s backwards; }
-/* On a phone's short strip the button keeps to the sky, clear of the van. */
-@media (max-width: 599.98px) {
-  .pd-app .pd-scene-play { top: 6px; right: 6px; bottom: auto; }
-  .pd-app .pd-scene-back { top: 10px; left: 10px; }
-}
+@media (max-width: 599.98px) { .pd-app .pd-scene-back { top: 10px; left: 10px; } }
 
-/* Paused, or out of view: every loop rests where it is. */
-.pd-app .is-scene:is(.is-paused, .is-away) .pd-scene * { animation-play-state: paused !important; }
+/* Reduced motion, or out of view: every loop rests where it is. */
+.pd-app .is-scene:is(.is-still-life, .is-away) .pd-scene * { animation-play-state: paused !important; }
 @media (prefers-reduced-motion: reduce) {
   .pd-app .is-scene :is(.sc-sky, .sc-far, .sc-mid, .sc-near, .sc-truck, .sc-face) { transition-duration: .01s; }
 }
