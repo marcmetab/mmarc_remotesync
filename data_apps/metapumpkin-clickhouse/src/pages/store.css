@@ -25,6 +25,15 @@
 
 /* ── Columns ─────────────────────────────────────────────── */
 .pd-app .pd-store-wrap { container-type: inline-size; }
+
+/* "This sale": the Live sales row the page was opened from, ringed like a picked row, glowing once as it settles. */
+.pd-app .pd-store-thissale { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 32px; padding: 14px 20px; border: 1px solid var(--pd-selected-ring); border-radius: var(--pd-r-panel); background: var(--pd-selected); animation: pd-store-glow 1.6s ease-out 1.1s; }
+.pd-app .pd-store-thissale > h2 { font-size: 14.5px; font-weight: 700; line-height: 1.3; }
+.pd-app .pd-store-thissale > dl { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.pd-app .pd-store-thissale > dl > div { display: flex; flex-direction: column; gap: 1px; }
+.pd-app .pd-store-thissale dt { font-size: 12px; color: var(--pd-ink-soft); }
+.pd-app .pd-store-thissale dd { margin: 0; font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+@keyframes pd-store-glow { from { box-shadow: 0 0 0 0 rgba(240, 130, 58, .55); } to { box-shadow: 0 0 0 14px rgba(240, 130, 58, 0); } }
 .pd-app .pd-store-rail { flex-basis: 340px; }
 @container (max-width: 959.98px) {
   .pd-app .pd-store-cols { flex-direction: column; flex-wrap: nowrap; }

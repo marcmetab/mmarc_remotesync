@@ -1,7 +1,8 @@
 /**
  * Store: one store. Route /stores/store/:storeId.
  * Under the title, the band the City page has (DrillBand): the period's Sold and Lost, which follow the top bar's
- * time switch, then right now (the variety that runs out first, the next van). Left: Stock (shelf per variety,
+ * time switch, then right now (the variety that runs out first, the next van). Opened from a Live sales row, the
+ * sale stays ringed under the title ("This sale", motion.ts). Left: Stock (shelf per variety,
  * with what is on the way), the period's chart (by hour or by day, the stockouts shaded), Week and season. Right:
  * Next delivery (links to the van), Stockouts, Deliveries, Details. Stock, cover and the next delivery are always
  * right now. Every time on the page is local to the store (`tz`); van times add the viewer's clock.
@@ -14,7 +15,8 @@ import { BackTitle, ChartFrame, DeltaText, Facts, Icon, Legend, Meter, Panel, Pa
 import { localYmd } from "../data/periods";
 import { bothTimes, change, coverLabel, dayLabel, dollars, duration, int, km, localDate, minutesBetween, money, niceScale, openHoursPerDay, pct, plural, time } from "../format";
 import { useViewerZone } from "../viewer";
-import { Link } from "../nav";
+import { useSaleHandoff } from "../motion";
+import { Link, useNav } from "../nav";
 import { routes } from "../routes";
 import { palette } from "../theme";
 import { DELAY_CAUSE_LABEL, type DelayCause, DRILL_PERIOD, type DrillPeriod, type LateInfo, lateStatus, type LostCause, type PageProps, type PeriodSeries, type PeriodTotals, type ServiceStatus, type StockStatus, type StoreFormat, type TripStatus, type Variety } from "../types";
@@ -259,6 +261,7 @@ export function StorePage({ vm, clock, initial, refreshing, period: picked }: Pa
 
   return <>
     <StoreTitle store={store} now={now}/>
+    <ThisSale/>
     <StoreBand store={store} period={period} part={part} stockouts={stockouts} busy={refreshing}
       place={{ tz: tz ?? "UTC", now, yours, openHours: store ? openHoursPerDay(store) : 12 }}/>
     <div className="pd-store-wrap">
@@ -293,6 +296,24 @@ function StoreTitle({ store, now }: { store: StoreNow | null | undefined; now?: 
     ? [store.closesAt ? `open until ${time(store.closesAt, tz)}` : "open", left != null && left >= 0 && `closes in ${duration(left).replace(/ /g, "\u00a0")}`]
     : ["closed", store.opensAt && `opens ${opensDay === "Today" ? "" : opensDay === "Tomorrow" ? "tomorrow " : `${opensDay} `}${time(store.opensAt, tz)}`];
   return <BackTitle to={routes.city(store.cityKey)} backLabel={cityLabel(store)} title={store.name} chip={chip} meta={[capitalize(store.format), cityLabel(store), ...opening]}/>;
+}
+
+/** The sale a Live sales row opened this page from (motion.ts), ringed: when, what, how many, and for how much. */
+function ThisSale() {
+  const handoff = useSaleHandoff();
+  const { pathname } = useNav();
+  const sale = handoff && handoff.phase !== "return" && handoff.path === pathname ? handoff.sale : null;
+  if (!sale) return null;
+  return <section className="pd-store-thissale" aria-label="This sale">
+    <h2>This sale</h2>
+    <dl>
+      <div><dt>Time</dt><dd>{sale.local}</dd></div>
+      <div><dt>Variety</dt><dd>{sale.variety}</dd></div>
+      <div><dt>Qty</dt><dd>{int(sale.units)}</dd></div>
+      <div><dt>Channel</dt><dd>{sale.channel}</dd></div>
+      <div><dt>Amount</dt><dd>{sale.amount}</dd></div>
+    </dl>
+  </section>;
 }
 
 /* ── The band ────────────────────────────────────────────── */

@@ -1,0 +1,34 @@
+/*
+ * A Live sales row opening its store's page, and back (SaleSheet.tsx). Scoped to .pd-app, classes pd-salesnap*
+ * (the still copy of a page), pd-salesheet (the row's cells over the box) and .pd-main.is-opening (the store page
+ * opening out of the row: SaleSheet sets its clip and offset). Stacking: the copy behind is 1 under the opening
+ * column's 2; the copy over everything, on the way back, 41 (over the floating bars and the region menu); the
+ * row's cells 42.
+ */
+
+/* The store page opening: an opaque column over the copy, its clip and offset gliding to the whole window. */
+.pd-app .pd-main.is-opening { position: relative; z-index: 2; background: var(--pd-page); transition: clip-path .72s cubic-bezier(.3, .8, .25, 1), translate .72s cubic-bezier(.3, .8, .25, 1); }
+
+/* The still copy: behind (sinking back and dimming as the page opens), or over everything (closing into the row). */
+.pd-app .pd-salesnap { position: fixed; top: 0; bottom: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.pd-app .pd-salesnap:empty { display: none; }
+.pd-app .pd-salesnap.is-over, .pd-app .pd-salesnap.is-fading { z-index: 41; }
+.pd-app .pd-salesnap.is-fading { opacity: 0; transition: opacity .32s ease; }
+.pd-app .pd-salesnap::after { content: ""; position: absolute; inset: 0; background: var(--pd-scrim); opacity: 0; transition: opacity .45s ease; }
+.pd-app .pd-salesnap.is-sinking::after { opacity: 1; }
+.pd-app .pd-salesnap-page { position: absolute; left: 0; width: 100%; background: var(--pd-page); transition: transform .6s cubic-bezier(.2, .9, .25, 1), filter .6s ease; }
+.pd-app .pd-salesnap.is-sinking > .pd-salesnap-page { transform: scale(.97); filter: brightness(.8); }
+/* A still: a copied node starts its animations again (the page's fade-in, the banner's loops), so none play in it. */
+.pd-app .pd-salesnap-page *, .pd-app .pd-salesnap-page *::before, .pd-app .pd-salesnap-page *::after { animation: none !important; transition: none !important; }
+.pd-app .pd-salesnap-page.is-closing { box-shadow: var(--pd-glass-lift); transition: clip-path .54s cubic-bezier(.2, .9, .25, 1), translate .54s cubic-bezier(.2, .9, .25, 1); }
+
+/* The row's cells: they ride up with the opening box as they fade, and fade back in as the page closes into the row. */
+.pd-app .pd-salesheet { position: fixed; z-index: 42; overflow: hidden; background: var(--pd-stone); pointer-events: none; transition: top .72s cubic-bezier(.3, .8, .25, 1), opacity .24s ease .08s; }
+.pd-app .pd-salesheet.is-out { opacity: 0; }
+.pd-app .pd-salesheet.is-in { animation: pd-salesheet-in .26s ease .26s backwards; }
+@keyframes pd-salesheet-in { from { opacity: 0; } }
+.pd-app .pd-salesheet > .pd-salesheet-row { position: absolute; top: 0; left: 0; margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-app :is(.pd-main.is-opening, .pd-salesnap, .pd-salesnap::after, .pd-salesnap-page, .pd-salesheet) { transition-duration: .01s !important; animation: none !important; }
+}

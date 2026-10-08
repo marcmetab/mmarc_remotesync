@@ -1,10 +1,11 @@
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import "../fonts.css";
 import "../styles/tokens.css";
 import "../styles/base.css";
 import { clockLabel, dayLabel, timeTz } from "../format";
 import { Link, useNav } from "../nav";
-import { routes, TABS, type TabId } from "../routes";
+import { type PageMotion, setSalePhase, useSaleHandoff } from "../motion";
+import { bannerOf, type Route, routes, TABS, type TabId } from "../routes";
 import { ThemeContext, type ThemeName } from "../theme";
 import { type Clock, countryName, DRILL_PERIOD, DRILL_PERIODS, type Scope, scopeLabel, TRUCK_PERIOD, TRUCK_PERIODS, type TruckPeriod } from "../types";
 import { useViewerZone } from "../viewer";
@@ -14,12 +15,16 @@ import { Banner } from "./Banner";
 import { HalloweenCard, halloweenChip, untilHalloween } from "./HalloweenCard";
 import { MeSheet } from "./MeSheet";
 import "./period.css";
+import { FloatBar } from "./FloatBar";
 import { RegionPicker } from "./RegionPicker";
 import { RegionSheet } from "./RegionSheet";
+import { SaleSheet } from "./SaleSheet";
 import { AccessoryProvider, type BarAccessory, TAB_ICON, TabBar, useBarScroll } from "./TabBar";
 import { Icon, Segmented } from "./ui";
 
 const LATE_NOTE = "Some vans are running late";
+/** A layout effect in the browser; on the server (the static preview) nothing runs, without React's warning. */
+const useBrowserLayoutEffect = typeof document !== "undefined" ? useLayoutEffect : useEffect;
 const PERIOD_OPTIONS = DRILL_PERIODS.map(value => ({ value: value as TruckPeriod, label: DRILL_PERIOD[value].label }));
 /** The van page's switch: the same four, then Season. */
 const TRUCK_OPTIONS = TRUCK_PERIODS.map(value => ({ value, label: TRUCK_PERIOD[value].label }));
@@ -46,6 +51,13 @@ export type ShellProps = {
   onTheme?: (theme: ThemeName) => void;
   /** The page. Each top-level element becomes one row of the content column (24px apart). */
   children: ReactNode;
+  /** How the page change under way plays (App.tsx, motion.ts): the banner takes part in some. */
+  motion?: PageMotion;
+  /**
+   * The page whose banner shows (App.tsx): the page on screen, which can trail the address while the next one renders,
+   * and the page being left while it plays its way out (Business, lifting off to World). Default: the address's.
+   */
+  bannerRoute?: Route;
 };
 
 /**
@@ -89,13 +101,18 @@ function MeButton({ clock, onOpen }: { clock?: Clock; onOpen: () => void }) {
  * On the City, Store and van pages the region control gives way to the time switch: a city, a store or a van is
  * already one place. Data flow has neither: the pipeline is the same for every region. The van page's switch adds Season. The route comes from the nav context, so the static
  * preview shows the switch on those pages too.
+ * Motion (motion.ts): the sidebar's picked row glides to the next tab; from 900px up, once the top bar has scrolled
+ * away, the region control (or the time switch, on the City, Store and van pages) floats over the page as a glass
+ * capsule (FloatBar.tsx) that shrinks to the pick as you scroll down; every segmented control's pick slides (lens.tsx); the Business and Stores banners are one world the camera pans across (Banner.tsx); and a
+ * Live sales row opens its store's page out of the row (SaleSheet.tsx).
  */
-export function Shell({ active, scope, onScope, period = "today", onPeriod, clock, lateVans = 0, theme = "light", onTheme, children }: ShellProps) {
+export function Shell({ active, scope, onScope, period = "today", onPeriod, clock, lateVans = 0, theme = "light", onTheme, children, motion = "fade", bannerRoute }: ShellProps) {
   const late = lateVans > 0;
   const dark = theme === "dark";
   const { pathname, route } = useNav();
   const truck = route.page === "Truck";
   const drill = route.page === "City" || route.page === "Store" || truck;
+  const periodOptions = truck ? TRUCK_OPTIONS : PERIOD_OPTIONS;
   // A viewer who may see one country only (src/visible.ts) has no region to choose: that country is the whole app.
   const visible = useVisible();
   const only = singleCountry(visible) && visible ? [...visible][0] : null;
@@ -107,6 +124,28 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
   const [pageLine, setPageLine] = useState<BarAccessory | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const { compact, past, expand } = useBarScroll(pathname, navRef);
+  // From 900px up the top bar's control floats over the page once the top bar has gone (FloatBar.tsx); focus in it
+  // (its open menu) keeps it full.
+  const floatRef = useRef<HTMLDivElement>(null);
+  const float = useBarScroll(pathname, floatRef);
+  const mainRef = useRef<HTMLElement>(null);
+
+  // The sidebar's picked row is a lens that glides to the next tab (measured; until then, as in the static preview,
+  // the row draws its own).
+  const sideNavRef = useRef<HTMLElement>(null);
+  const [lens, setLens] = useState<{ y: number; h: number } | null>(null);
+  useBrowserLayoutEffect(() => {
+    const row = sideNavRef.current?.querySelector<HTMLElement>(":scope > [aria-current='page']");
+    const next = row?.offsetHeight ? { y: row.offsetTop, h: row.offsetHeight } : null;
+    if (next?.y !== lens?.y || next?.h !== lens?.h) setLens(next);
+  });
+
+  // The banner: the page being left keeps its own while it plays out; a store page opened from a Live sales row plays
+  // the sale (and offers the way back to it); Business back from World lands.
+  const banner = bannerRoute ?? route;
+  const bannerArt = bannerOf(banner);
+  const handoff = useSaleHandoff();
+  const saleHere = handoff && handoff.phase !== "return" && banner.page === "Store" && handoff.path === pathname ? handoff : null;
   const shifted = clock?.mode === "shifted";
   // A page's line keeps its own alert; otherwise its dot follows the clock, like the default line's.
   const accessory: BarAccessory = pageLine ? { ...pageLine, tone: pageLine.tone === "alert" ? "alert" : shifted ? "shifted" : "live" } : clockAccessory(clock, tz);
@@ -117,7 +156,8 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
     <aside className="pd-sidebar">
       {/* The brand art (src/assets/metapumpkin.svg), the same in both themes; the name beside it is the link's text. */}
       <Link to={routes.business()} className="pd-brand"><img src={logo} alt="" width={30} height={30}/><span>MetaPumpkin</span></Link>
-      <nav aria-label="Main navigation" className="pd-nav">
+      <nav ref={sideNavRef} aria-label="Main navigation" className={`pd-nav${lens ? " has-lens" : ""}`}>
+        {lens && <span className="pd-nav-lens" style={{ transform: `translateY(${lens.y}px)`, height: lens.h }} aria-hidden="true"/>}
         {TABS.map(tab => {
           const on = tab.id === active;
           return <Link key={tab.id} to={tab.to} aria-current={on ? "page" : undefined} className="pd-nav-row">
@@ -131,10 +171,10 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
       <div className="pd-profile"><span className="pd-avatar" aria-hidden="true">RM</span><span>Regional manager<small>{only ? countryName(only) : scopeLabel(scope)}</small></span></div>
     </aside>
 
-    <main className="pd-main">
+    <main ref={mainRef} className="pd-main">
       <header className="pd-topbar">
         {drill
-          ? <div className="pd-period"><Segmented label="Time" options={truck ? TRUCK_OPTIONS : PERIOD_OPTIONS} value={period} onChange={p => onPeriod?.(p)}/></div>
+          ? <div className="pd-period"><Segmented label="Time" options={periodOptions} value={period} onChange={p => onPeriod?.(p)}/></div>
           : !regionless && <RegionPicker scope={scope} onScope={onScope} onSheet={openRegion}/>}
         <div className="pd-topbar-end">
           <div className={`pd-clock${clock?.mode === "shifted" ? " is-shifted" : ""}`}>
@@ -150,7 +190,9 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
       <AccessoryProvider value={setPageLine}><div className="pd-content">
         {/* The Fleet overview has no banner: its stage card opens with its own scene (FleetPage). The Truck page keeps it.
             World has none either: the map is the page. */}
-        {route.page !== "Fleet" && active !== "world" && <Banner variant={active} chip={seasonChip(active, tz, clock)}/>}
+        {bannerArt && <Banner variant={bannerArt} chip={seasonChip(bannerArt, tz, clock)}
+          sale={saleHere && { key: saleHere.sale.id, qty: saleHere.sale.units, amount: saleHere.sale.amount }}
+          onBack={saleHere ? () => setSalePhase("closing") : undefined} landing={motion === "land"}/>}
         {children}
       </div></AccessoryProvider>
     </main>
@@ -162,10 +204,19 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
       </button>}
       <MeButton clock={clock} onOpen={openMe}/>
     </div>
+    {/* From 900px up: the region capsule floating over the page once the top bar has gone. */}
+    {drill
+      ? <FloatBar on={float.past} compact={float.compact} onExpand={float.expand} rootRef={floatRef} what="Time" label={periodOptions.find(o => o.value === period)?.label ?? ""}
+        render={mini => <div className="pd-glassbar pd-glass"><Segmented label="Time" options={periodOptions} value={period} onChange={p => onPeriod?.(p)} glass/>{mini}</div>}/>
+      : !regionless && <FloatBar on={float.past} compact={float.compact} onExpand={float.expand} rootRef={floatRef} what="Region" label={scopeLabel(scope)}
+        // Remounted each time it lifts in: a menu left open as it went does not come back open.
+        render={mini => <RegionPicker key={float.past ? "on" : "off"} scope={scope} onScope={onScope} look="glass" extra={mini}/>}/>}
     <div className="pd-tabbar-fade" aria-hidden="true"/>
     <TabBar active={active} compact={compact} onExpand={expand} accessory={accessory} lateVans={lateVans} lateNote={LATE_NOTE} navRef={navRef}/>
 
     {sheet === "me" && <MeSheet scope={scope} clock={clock} theme={theme} onTheme={onTheme} onClose={closeSheet}/>}
     {sheet === "region" && <RegionSheet scope={scope} onScope={onScope} clock={clock} onClose={closeSheet}/>}
+    {/* A Live sales row on its way to its store page and back (motion.ts). */}
+    <SaleSheet mainRef={mainRef}/>
   </div></ThemeContext.Provider>;
 }

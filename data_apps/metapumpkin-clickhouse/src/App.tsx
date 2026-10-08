@@ -9,6 +9,7 @@ import { useCityData, useStoreData, useStoresData } from "./data/useStoresData";
 import { useTruckData } from "./data/useTruckData";
 import { useWorldData } from "./data/useWorldData";
 import { warmIntent, Warmup } from "./data/warm";
+import { pageMotionKey, pageOnScreen, PageMotionContext, usePageStage } from "./motion";
 import { DataAppNav, useNav } from "./nav";
 import { BusinessPage } from "./pages/BusinessPage";
 import { Explore } from "./pages/business/Explore";
@@ -113,15 +114,18 @@ function LiveFlowParts(p: LiveProps) {
  * What the open page needs from the shell. It travels by context, not props: inside the sandbox the
  * PageBoundary class does not re-render when its children change, so props handed through it go stale
  * (the region control and the clock would never reach the page). Context updates reach the page anyway.
+ * The route is each page's own (PageRouteContext): while a change plays out, the page being left is still mounted.
  */
-const LiveContext = createContext<(LiveProps & { route: Route; period: DrillPeriod; truckPeriod: TruckPeriod; onPeriod: (period: DrillPeriod) => void }) | null>(null);
+const LiveContext = createContext<(LiveProps & { period: DrillPeriod; truckPeriod: TruckPeriod; onPeriod: (period: DrillPeriod) => void }) | null>(null);
+const PageRouteContext = createContext<Route | null>(null);
 
 function LivePage() {
   const value = useContext(LiveContext);
+  const route = useContext(PageRouteContext);
   // A viewer who may see some countries only (src/visible.ts) does not get the pipeline page.
   const limited = useVisible() != null;
-  if (!value) return null;
-  const { route, period, truckPeriod, onPeriod, ...p } = value;
+  if (!value || !route) return null;
+  const { period, truckPeriod, onPeriod, ...p } = value;
   switch (route.page) {
     case "Business": return <LiveBusiness {...p}/>;
     case "Fleet": return <LiveFleet {...p}/>;
@@ -155,6 +159,15 @@ function useTheme(): [ThemeName, (theme: ThemeName) => void] {
   return [picked ?? system, setPicked];
 }
 
+const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(" ");
+/** One route object per path, so a page's route context only changes with its path. */
+const ROUTES = new Map<string, Route>();
+const routeFor = (path: string) => {
+  let route = ROUTES.get(path);
+  if (!route) ROUTES.set(path, route = matchRoute(path));
+  return route;
+};
+
 /**
  * Routing and composition. The region, country, theme and the period live here, so they survive moving between
  * pages. The period is the City, Store and van pages' time switch and the Stores page's revenue period: one choice,
@@ -165,8 +178,10 @@ function Root() {
   const { pathname, route } = useNav();
   // The page follows the path a beat behind: a press shows at once (the tab, the shell), and the new page renders
   // after that paint, in the background, rather than inside the click.
-  const pagePath = useDeferredValue(pathname);
-  const pageRoute = useMemo(() => matchRoute(pagePath), [pagePath]);
+  // How it comes in, and whether the page it replaces plays its way out first (motion.ts).
+  const stage = usePageStage(useDeferredValue(pathname), routeFor);
+  const pagePath = stage.shown;
+  const pageRoute = routeFor(pagePath);
   const [scope, setScope] = useState<Scope>(ALL_SCOPE);
   const [period, setPeriod] = useState<DrillPeriod>("today");
   const [season, setSeason] = useState(false);
@@ -177,15 +192,32 @@ function Root() {
   }, []);
   const [theme, setTheme] = useTheme();
   const { clock, lateVans, visible } = useShellData();
-  // A new page starts at its top.
-  useEffect(() => { try { window.scrollTo(0, 0); } catch { /* not scrollable here */ } }, [pagePath]);
+  // A new page starts at its top, once it shows; back from a sale, Live sales scrolls its row into view instead.
+  const onScreen = stage.from ?? stage.shown;
+  useEffect(() => {
+    if (stage.motion !== "return") try { window.scrollTo(0, 0); } catch { /* not scrollable here */ }
+    // A sale's store page opens out of its row; left any other way than back to its row, the sale is done with.
+    pageOnScreen(onScreen, stage.motion);
+  }, [onScreen]);
 
-  const live = useMemo(() => ({ route: pageRoute, scope, onScope: setScope, clock, period, truckPeriod, onPeriod: pickPeriod }), [pageRoute, scope, clock, period, truckPeriod, pickPeriod]);
+  const live = useMemo(() => ({ scope, onScope: setScope, clock, period, truckPeriod, onPeriod: pickPeriod }), [scope, clock, period, truckPeriod, pickPeriod]);
+  // Each page in its own wrapper (display: contents: its rows are the content column's), keyed by its path, so the
+  // page being left stays mounted as the next one mounts beside it (base.css plays both ways).
+  const page = (path: string, role: "leaving" | "waiting" | "shown") => <div key={path} className={cx("pd-page", `is-${role}`, `is-${stage.motion}`)}>
+    <PageMotionContext.Provider value={pageMotionKey(stage.motion, role, role === "leaving" ? null : stage.from)}>
+      <PageRouteContext.Provider value={routeFor(path)}><PageBoundary><LivePage/></PageBoundary></PageRouteContext.Provider>
+    </PageMotionContext.Provider>
+  </div>;
+  // One list, so React matches the two by key: the page being left keeps its state as it moves in front.
+  const pages = stage.from ? [page(stage.from, "leaving"), page(pagePath, "waiting")] : [page(pagePath, "shown")];
+  // The banner follows the page on screen, not the address: a page still rendering in the background keeps the last
+  // one's. Business lifting off to World keeps its banner while its rows fall away; on the way back World keeps none.
+  const bannerPage = routeFor(stage.from && (stage.motion === "liftoff" || stage.motion === "land") ? stage.from : stage.shown);
   // The countries this viewer may see reach the shell's region control and every page (src/visible.ts).
   return <VisibleContext.Provider value={visible}><Shell active={tabOf(route.page)} scope={scope} onScope={setScope} period={route.page === "Truck" ? truckPeriod : period} onPeriod={pickPeriod}
-    clock={clock} lateVans={lateVans} theme={theme} onTheme={setTheme}>
+    clock={clock} lateVans={lateVans} theme={theme} onTheme={setTheme} motion={stage.motion} bannerRoute={bannerPage}>
     <LiveContext.Provider value={live}>
-      <PageBoundary key={pagePath}><LivePage/></PageBoundary>
+      {pages}
     </LiveContext.Provider>
   </Shell>
     {/* The pages not open yet, loaded unseen so they open at once (src/data/warm.tsx). */}

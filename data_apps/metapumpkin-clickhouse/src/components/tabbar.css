@@ -9,6 +9,7 @@
  *   compact    54px: the current tab's circle, the accessory (a dot and two lines) and Explore. It grows out of the
  *              bar's foot as the full bar shrinks into it.
  * Stacking: the fades and the floating top are 19, the bar 20 (the region menu is 30/31, sheets 40).
+ * From 900px up its counterpart is the glass capsule over the page (FloatBar.tsx, float.css).
  */
 
 .pd-app .pd-tabbar, .pd-app .pd-tabbar-fade, .pd-app .pd-floattop { display: none; }

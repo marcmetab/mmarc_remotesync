@@ -332,9 +332,10 @@ export const Overview = memo(function Overview({ scope, hot, show, vans, stores,
   const moving = show.vans ? vans.filter(p => p.spot.road) : [];
   return <div className="pd-world-ov" aria-hidden="true">
     <svg className="pd-world-ov-trails" width={GEO.w} height={GEO.h} viewBox={`0 0 ${GEO.w} ${GEO.h}`} focusable="false">
-      <path d={roads} className="ov-road-edge"/>
-      <path d={drives} className="ov-drive"/>
-      <path d={roads} className="ov-road"/>
+      {/* pathLength 1: the World page's lift-off draws them out (world/liftoff.css). */}
+      <path d={roads} className="ov-road-edge" pathLength={1}/>
+      <path d={drives} className="ov-drive" pathLength={1}/>
+      <path d={roads} className="ov-road" pathLength={1}/>
       {moving.map(({ van, frac }) => {
         const d = vanTrail(van, frac);
         return d ? <path key={van.truckId} d={d} style={{ stroke: VAN_COLOR[van.status], opacity: 0.6 * vanOpacity(van, scope, focus) }}/> : null;

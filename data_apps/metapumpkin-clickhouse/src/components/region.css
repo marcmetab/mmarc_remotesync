@@ -3,7 +3,9 @@
  * (.pd-segmented); this adds the box it scrolls in, the chevron on the selected region and its country menu.
  * The menu floats under the pill on the panels' surface with a border, no shadow, like a definition card; it
  * is a sibling of the scrolling box (which would clip it), placed by RegionPicker.tsx (--pd-region-x, -y, -w).
- * Stacking: backdrop 30, menu 31 (the tab bar is 20). No animation: it simply appears.
+ * The raised option is the segmented control's sliding lens (lens.tsx, base.css). The glass look (.is-glass) is the
+ * capsule that floats over the page from 900px up (FloatBar.tsx, float.css): here only its glass menu, which grows
+ * out of the highlight (from --pd-region-ox). Stacking: backdrop 30, menu 31 (the tab bar is 20, the floating capsule 19).
  */
 
 /* ── The control ─────────────────────────────────────────── */
@@ -19,11 +21,15 @@
 .pd-app .pd-segmented > .pd-region-pill > span { gap: 6px; padding: 0 12px 0 16px; background: var(--pd-raised); box-shadow: var(--pd-shadow-segment); }
 .pd-app .pd-region-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .pd-app .pd-region-pill svg { color: var(--pd-ink-soft); }
+.pd-app .pd-region-pill svg { transition: transform .35s cubic-bezier(.34, 1.4, .5, 1); }
 .pd-app .pd-region-pill[aria-expanded="true"] svg { transform: rotate(180deg); }
+
 
 /* ── The menu ────────────────────────────────────────────── */
 /* A click anywhere else closes it. */
 .pd-app .pd-region-backdrop { position: fixed; inset: 0; z-index: 30; display: block; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: default; }
+.pd-app .pd-region-menu { animation: pd-region-drop .2s ease-out; }
+@keyframes pd-region-drop { from { opacity: 0; transform: translateY(-4px); } }
 .pd-app .pd-region-menu { position: absolute; z-index: 31; top: var(--pd-region-y, 0); left: var(--pd-region-x, 0); display: flex; flex-direction: column; min-width: max(var(--pd-region-w, 0px), 220px); max-width: calc(100vw - 32px); padding: 6px; border: 1px solid var(--pd-border); border-radius: var(--pd-r-inset); background: var(--pd-surface); color: var(--pd-ink); }
 .pd-app .pd-region-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--pd-ink); font-size: 14px; font-weight: 500; text-align: left; white-space: nowrap; }
 .pd-app .pd-region-item:is(:hover, :focus-visible) { background: var(--pd-stone); }
@@ -32,6 +38,16 @@
 .pd-app .pd-region-item[aria-checked="true"] { font-weight: 700; }
 .pd-app .pd-region-item > svg { color: var(--pd-pumpkin-icon); }
 .pd-app .pd-region-sep { display: block; height: 1px; margin: 4px 6px; background: var(--pd-hairline); }
+
+/* ── Glass: the floating capsule's menu (FloatBar.tsx) ───── */
+/* The glass menu grows out of the highlight; its items follow one by one. */
+.pd-app .pd-region-menu.pd-glass { min-width: 240px; padding: 6px; border-radius: 22px; transform-origin: var(--pd-region-ox, 50%) -34px; animation: pd-region-grow .55s cubic-bezier(.34, 1.25, .5, 1) both; }
+.pd-app .pd-region-menu.pd-glass .pd-region-item { min-height: 44px; padding: 0 14px; border-radius: 16px; color: var(--pd-ink-soft); font-size: 14.5px; font-weight: 600; animation: pd-region-item .4s cubic-bezier(.34, 1.4, .5, 1) both; animation-delay: calc(.06s + var(--pd-i, 0) * .05s); }
+.pd-app .pd-region-menu.pd-glass .pd-region-item:is(:hover, :focus-visible) { background: var(--pd-glass-pick); color: var(--pd-ink); }
+.pd-app .pd-region-menu.pd-glass .pd-region-item[aria-checked="true"] { background: var(--pd-glass-pick); color: var(--pd-ink); font-weight: 700; }
+.pd-app .pd-region-menu.pd-glass .pd-region-sep { margin: 3px 10px; background: var(--pd-glass-edge); }
+@keyframes pd-region-grow { from { opacity: 0; transform: translateY(-10px) scale(.6, .25); border-radius: 28px; } 30% { opacity: 1; } }
+@keyframes pd-region-item { from { opacity: 0; transform: translateY(-8px); } }
 
 /* ── Under 600px: phone ──────────────────────────────────── */
 /* The control spans the width with short labels (All · N. America · Europe · APAC), all four in view. */
@@ -43,4 +59,8 @@
   .pd-app .pd-region .pd-segmented > .pd-region-pill { min-width: 0; }
   .pd-app .pd-region .pd-segmented > button > span { justify-content: center; width: 100%; padding: 0 8px; }
   .pd-app .pd-region .pd-segmented > .pd-region-pill > span { gap: 4px; padding: 0 6px 0 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-app :is(.pd-region-menu, .pd-region-item, .pd-region-pill svg) { transition-duration: .01s !important; animation: none !important; }
 }

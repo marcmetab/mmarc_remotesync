@@ -1,4 +1,4 @@
-import { createContext, type RefObject, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, type Dispatch, type RefObject, type SetStateAction, useCallback, useContext, useEffect, useRef, useState } from "react";
 import "./tabbar.css";
 import { Link } from "../nav";
 import { routes, TABS, type TabId } from "../routes";
@@ -22,7 +22,7 @@ const EXPLORE = TABS.find(t => t.id === "explore")!;
 /** The compact bar's live line: two short lines and the dot's tone (olive live, pumpkin simulated, terracotta alert). */
 export type BarAccessory = { label: string; detail?: string; tone?: "live" | "shifted" | "alert" };
 
-const AccessoryContext = createContext<((accessory: BarAccessory | null) => void) | null>(null);
+const AccessoryContext = createContext<Dispatch<SetStateAction<BarAccessory | null>> | null>(null);
 export const AccessoryProvider = AccessoryContext.Provider;
 
 /**
@@ -34,8 +34,10 @@ export function useBarAccessory(accessory: BarAccessory | null) {
   const key = accessory ? `${accessory.label}\n${accessory.detail ?? ""}\n${accessory.tone ?? ""}` : "";
   useEffect(() => {
     if (!set) return undefined;
-    set(key ? accessory : null);
-    return () => set(null);
+    const mine = key ? accessory : null;
+    set(mine);
+    // Only its own line: the next page may already have set one (a page being left goes after the next one mounts).
+    return () => set(now => now === mine ? null : now);
     // Keyed on the text: a new object with the same words does not set it again.
   }, [set, key]);
 }

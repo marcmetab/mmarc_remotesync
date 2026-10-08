@@ -1,11 +1,13 @@
-import type { CSSProperties, PointerEvent, ReactNode } from "react";
+import { type CSSProperties, type PointerEvent, type ReactNode, useRef } from "react";
 import { lateLabel, signedPct } from "../format";
 import { Link } from "../nav";
 import type { ChipStatus } from "../types";
+import { useSegmentLens } from "./lens";
 
 /**
  * Shared building blocks. Presentational only: no data hooks, no SDK imports, and nothing that
- * measures the window (the static preview renders these on the server). Styles: styles/base.css.
+ * measures the window (the static preview renders these on the server; the segmented control's sliding lens measures
+ * its own options, in an effect, so not there). Styles: styles/base.css.
  */
 
 const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(" ");
@@ -189,8 +191,12 @@ type ChoiceProps<T extends string> = {
  * draws the same look, with a country menu on its selected option.
  * An option with a `short` label prints it on phones (CSS swaps the two) and keeps the full label as its name.
  */
-export function Segmented<T extends string>({ label, options, value, onChange }: ChoiceProps<T>) {
-  return <div role="group" aria-label={label} className="pd-segmented">
+/** A segmented control: the picked option is a raised lens that slides to the next pick (lens.tsx). `glass`: in a glass capsule (FloatBar.tsx). */
+export function Segmented<T extends string>({ label, options, value, onChange, glass }: ChoiceProps<T> & { glass?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { lens, className, style } = useSegmentLens(ref, options.findIndex(o => o.value === value), glass);
+  return <div ref={ref} role="group" aria-label={label} className={`pd-segmented${className}`} style={style}>
+    {lens}
     {options.map(o => <button type="button" key={o.value} aria-pressed={o.value === value} aria-label={o.short ? o.label : undefined} onClick={() => onChange(o.value)}>
       <span>{o.short ? <><span className="pd-segmented-full">{o.label}</span><span className="pd-segmented-short">{o.short}</span></> : o.label}</span>
     </button>)}
