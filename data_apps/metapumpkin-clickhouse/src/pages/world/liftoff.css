@@ -1,0 +1,114 @@
+/*
+ * World's lift-off from Business and its way back down (Liftoff.tsx, WorldPage.tsx). Scoped to .pd-app, classes
+ * pd-lift-*; the map's own parts are animated here only while .pd-world.is-liftoff is on (the first seconds of a
+ * World page opened from Business). WorldPage measures where the frame ends: --lift-top and --lift-h (the map's
+ * frame in the page), --lift-w (the page's width); --lift-banner is the banner's height it starts from.
+ * Timeline up (s): the frame grows .1–.9 · the field drops .3–1.45 · night .35–1.45 · clouds close .7–1.4 and part
+ * to 2.45 · the sky clears and the map zooms up 1.3–2.7 · hubs, towns, stores and roads 2.05–2.9 · counters 2.1 ·
+ * controls 2.7 · vans 3 · the balloon settles in the corner by 2.4. Down: the night covers the map as it falls away,
+ * the clouds pass, and the frame shrinks to the banner's place (.12–.74).
+ */
+.pd-app .pd-world { position: relative; --lift-banner: 148px; }
+@media (max-width: 599.98px) { .pd-app .pd-world { --lift-banner: 104px; } }
+
+.pd-app .pd-lift { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.pd-app .pd-lift-frame { position: absolute; left: 0; right: 0; overflow: hidden; border-radius: var(--pd-r-banner); }
+.pd-app .pd-lift-day, .pd-app .pd-lift-night { position: absolute; inset: 0; }
+.pd-app .pd-lift-day { background: linear-gradient(180deg, #f8e0d3, #fbd3ae 55%, #f8b77f); }
+.pd-app .pd-lift-night { opacity: 0; background: linear-gradient(180deg, #0f1b2e 0%, #1d3150 45%, #4a4a6e 80%, #8c6a78 100%); }
+.pd-app .pd-lift-star { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff6e2; opacity: 0; animation: pd-lift-star 1.6s ease-in-out both; }
+.pd-app .pd-lift-field { position: absolute; left: 0; right: 0; bottom: 0; height: var(--lift-banner); }
+.pd-app .pd-lift-field > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; filter: var(--pd-banner-filter); }
+.pd-app .pd-lift-field::after { content: ""; position: absolute; inset: 0; background: var(--pd-banner-dusk); }
+.pd-app .pd-lift-clouds { position: absolute; top: -6%; width: 72%; height: 112%; transform: translateY(-130%); }
+.pd-app .pd-lift-clouds.is-left { left: -6%; }
+.pd-app .pd-lift-clouds.is-right { right: -6%; }
+.pd-app .pd-lift-puff { position: absolute; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fbf3f1, #e6dce6 55%, #c9bfd3); opacity: .97; }
+.pd-app .pd-lift-wisp { position: absolute; left: 10%; top: 30%; width: 80%; height: 40%; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(250, 244, 246, .8), rgba(250, 244, 246, 0) 70%); opacity: 0; }
+
+/* The balloon: it rides up in the frame, then rests in the map's corner (both at the same place and size). */
+.pd-app :is(.pd-lift-balloon, .pd-lift-corner) { position: absolute; left: 0; top: 0; width: 80px; height: 110px; transform-origin: 0 0; }
+.pd-app .pd-lift-corner { z-index: 4; pointer-events: none; transform: translate(calc(var(--lift-w, 1000px) - 150px), calc(var(--lift-top, 80px) + 70px)) scale(.42); animation: pd-lift-show .01s linear 2.42s backwards; }
+.pd-app .pd-lift-bob { animation: pd-lift-bob 3.4s ease-in-out infinite; }
+.pd-app .pd-lift-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: pd-lift-flame .35s ease-in-out infinite alternate; }
+
+/* ── Up ──────────────────────────────────────────────────── */
+.pd-app .pd-lift.is-up .pd-lift-frame { top: 0; height: var(--lift-banner); animation: pd-lift-grow .8s cubic-bezier(.65, 0, .3, 1) .1s forwards, pd-lift-hide .2s ease 2.45s forwards; }
+.pd-app .pd-lift.is-up .pd-lift-day { animation: pd-lift-out .55s ease 1.4s forwards; }
+.pd-app .pd-lift.is-up .pd-lift-night { animation: pd-lift-in 1.1s ease .35s forwards, pd-lift-out .55s ease 1.45s forwards; }
+.pd-app .pd-lift.is-up .pd-lift-field { animation: pd-lift-drop 1.15s cubic-bezier(.5, 0, .75, 0) .3s forwards; }
+.pd-app .pd-lift.is-up .pd-lift-clouds.is-left { animation: pd-lift-cloud-l 1.75s cubic-bezier(.45, 0, .25, 1) .7s both; }
+.pd-app .pd-lift.is-up .pd-lift-clouds.is-right { animation: pd-lift-cloud-r 1.75s cubic-bezier(.45, 0, .25, 1) .7s both; }
+.pd-app .pd-lift.is-up .pd-lift-wisp { animation: pd-lift-wisp 1.1s ease-in-out .55s both; }
+.pd-app .pd-lift.is-up .pd-lift-wisp.is-late { animation-delay: 1.55s; }
+.pd-app .pd-lift.is-up .pd-lift-balloon { animation: pd-lift-balloon 3.1s cubic-bezier(.45, 0, .3, 1) both; }
+
+/* The map assembles under the parting clouds. */
+.pd-app .pd-world.is-liftoff .pd-world-vp { animation: pd-lift-in .5s ease 1.3s backwards; }
+.pd-app .pd-world.is-liftoff .pd-world-scene { transform-origin: 50% 45%; animation: pd-lift-zoom 1.4s cubic-bezier(.2, .8, .25, 1) 1.3s backwards; }
+.pd-app .pd-world.is-liftoff .pd-world-plane > .pd-world-art { animation: pd-lift-isle .9s cubic-bezier(.2, .9, .25, 1) 1.55s backwards; }
+.pd-app .pd-world.is-liftoff .pd-world-ov-trails path { stroke-dasharray: 1; animation: pd-lift-draw 1s ease-out 2.15s backwards; }
+.pd-app .pd-world.is-liftoff .pd-world-ov-m { animation: pd-lift-pop-ov .55s cubic-bezier(.34, 1.6, .5, 1) backwards; animation-delay: calc(2.05s + var(--pd-pop, 0s)); }
+.pd-app .pd-world.is-liftoff .pd-world-detail .pd-world-sp { animation: pd-lift-pop-sp .55s cubic-bezier(.34, 1.6, .5, 1) backwards; animation-delay: calc(2.05s + var(--pd-pop, 0s)); }
+.pd-app .pd-world.is-liftoff :is(.pd-world-ov-city, .pd-world-label) { --pd-pop: .18s; }
+.pd-app .pd-world.is-liftoff :is(.pd-world-ov-store, .pd-world-store) { --pd-pop: .32s; }
+.pd-app .pd-world.is-liftoff :is(.pd-world-ov-store, .pd-world-store):nth-child(3n + 1) { --pd-pop: .4s; }
+.pd-app .pd-world.is-liftoff :is(.pd-world-ov-store, .pd-world-store):nth-child(3n + 2) { --pd-pop: .48s; }
+.pd-app .pd-world.is-liftoff :is(.pd-world-ov-van, .pd-world-van) { animation: pd-lift-in .4s ease 3s backwards; }
+.pd-app .pd-world.is-liftoff .pd-world-callout { animation: pd-lift-in .5s ease 2.05s backwards; }
+.pd-app .pd-world.is-liftoff .pd-world-callout-name { animation: pd-lift-track 1.1s cubic-bezier(.2, .9, .25, 1) 2.05s backwards; }
+.pd-app .pd-world.is-liftoff > .pd-world-stats .pd-world-stat { animation: pd-lift-chip .6s cubic-bezier(.34, 1.5, .5, 1) backwards; animation-delay: calc(2.1s + var(--pd-i, 0) * 60ms); }
+.pd-app .pd-world.is-liftoff > .pd-world-stats .pd-world-stat:nth-child(2) { --pd-i: 1; }
+.pd-app .pd-world.is-liftoff > .pd-world-stats .pd-world-stat:nth-child(3) { --pd-i: 2; }
+.pd-app .pd-world.is-liftoff > .pd-world-stats .pd-world-stat:nth-child(4) { --pd-i: 3; }
+.pd-app .pd-world.is-liftoff > .pd-world-stats .pd-world-stat:nth-child(5) { --pd-i: 4; }
+.pd-app .pd-world.is-liftoff > .pd-world-stats .pd-world-stat:nth-child(6) { --pd-i: 5; }
+.pd-app .pd-world.is-liftoff > .pd-world-stats .pd-world-stat:nth-child(7) { --pd-i: 6; }
+.pd-app .pd-world.is-liftoff > .pd-world-stats .pd-world-stat:nth-child(8) { --pd-i: 7; }
+.pd-app .pd-world.is-liftoff :is(.pd-world-zoom, .pd-world-live) { animation: pd-lift-from-left .7s cubic-bezier(.2, .9, .25, 1) 2.7s backwards; }
+.pd-app .pd-world.is-liftoff :is(.pd-world-layers, .pd-world-mini) { animation: pd-lift-from-right .7s cubic-bezier(.2, .9, .25, 1) 2.8s backwards; }
+.pd-app .pd-world.is-liftoff .pd-world-feed { animation: pd-lift-from-below .7s cubic-bezier(.2, .9, .25, 1) 2.9s backwards; }
+
+/* ── Down ────────────────────────────────────────────────── */
+.pd-app .pd-lift.is-down .pd-lift-frame { top: var(--lift-top); height: var(--lift-h); animation: pd-lift-shrink .62s cubic-bezier(.65, 0, .3, 1) .12s forwards; }
+.pd-app .pd-lift.is-down .pd-lift-day { display: none; }
+.pd-app .pd-lift.is-down .pd-lift-night { animation: pd-lift-in .3s ease forwards; }
+.pd-app .pd-lift.is-down .pd-lift-star { animation: none; opacity: .8; }
+.pd-app .pd-lift.is-down .pd-lift-clouds.is-left { animation: pd-lift-pass-l .72s cubic-bezier(.45, 0, .55, 1) .04s both; }
+.pd-app .pd-lift.is-down .pd-lift-clouds.is-right { animation: pd-lift-pass-r .72s cubic-bezier(.45, 0, .55, 1) .04s both; }
+.pd-app .pd-world.is-landing .pd-world-scene { animation: pd-lift-mapout .6s cubic-bezier(.5, 0, .75, 0) forwards; }
+.pd-app .pd-world.is-landing > .pd-world-stats, .pd-app .pd-world.is-landing :is(.pd-world-float, .pd-lift-corner) { animation: pd-lift-out .25s ease forwards; }
+
+@keyframes pd-lift-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pd-lift-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes pd-lift-hide { to { opacity: 0; visibility: hidden; } }
+@keyframes pd-lift-show { from { opacity: 0; } }
+@keyframes pd-lift-grow { to { top: var(--lift-top); height: var(--lift-h); } }
+@keyframes pd-lift-shrink { to { top: 0; height: var(--lift-banner); } }
+@keyframes pd-lift-star { 0% { opacity: 0; transform: translateY(-30px); } 40% { opacity: 1; } 100% { opacity: .8; transform: translateY(40px); } }
+@keyframes pd-lift-drop { to { transform: translateY(calc(var(--lift-h, 560px) * .85)); } }
+@keyframes pd-lift-cloud-l { 0% { transform: translate(-8%, -130%); } 38% { transform: translate(0, 0); } 52% { transform: translate(0, 2%); } 100% { transform: translate(-118%, 6%); } }
+@keyframes pd-lift-cloud-r { 0% { transform: translate(8%, -130%); } 38% { transform: translate(0, 0); } 52% { transform: translate(0, 2%); } 100% { transform: translate(118%, 6%); } }
+@keyframes pd-lift-pass-l { 0% { transform: translate(-4%, 130%); } 50% { transform: translate(0, 0); } 100% { transform: translate(-4%, -130%); } }
+@keyframes pd-lift-pass-r { 0% { transform: translate(4%, 130%); } 50% { transform: translate(0, 0); } 100% { transform: translate(4%, -130%); } }
+@keyframes pd-lift-wisp { 0% { opacity: 0; transform: translateY(-120%) scale(1.2); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateY(160%) scale(1.6); } }
+@keyframes pd-lift-balloon {
+  0% { opacity: 1; transform: translate(calc(var(--lift-w, 1000px) * .5 - 28px), calc(var(--lift-banner) + 4px)) scale(.7); }
+  30% { transform: translate(calc(var(--lift-w, 1000px) * .5 - 40px), calc(var(--lift-h, 560px) * .4)) scale(1); }
+  52% { transform: translate(calc(var(--lift-w, 1000px) * .5 - 43px), calc(var(--lift-h, 560px) * .37)) scale(1.08); }
+  78%, 100% { opacity: 1; transform: translate(calc(var(--lift-w, 1000px) - 150px), 70px) scale(.42); }
+}
+@keyframes pd-lift-bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(2deg); } }
+@keyframes pd-lift-flame { from { transform: scale(.8, .7); } to { transform: scale(1.1, 1.2); } }
+/* A gentle zoom: the plane is 8890 × 4799 px, and scaling it far makes the browser paint it all again, at length. */
+@keyframes pd-lift-zoom { from { scale: 1.12; } }
+@keyframes pd-lift-mapout { to { scale: 1.5; opacity: 0; } }
+@keyframes pd-lift-isle { from { opacity: 0; translate: 0 18px; } }
+@keyframes pd-lift-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes pd-lift-pop-ov { from { opacity: 0; transform: translate(-50%, -50%) scale(0); } 60% { opacity: 1; transform: translate(-50%, -50%) scale(calc(var(--pdw-k, 1) * 1.15)); } }
+@keyframes pd-lift-pop-sp { from { opacity: 0; transform: translate(-50%, -100%) scale(0); } 60% { opacity: 1; transform: translate(-50%, -100%) scale(1.15, .9); } }
+@keyframes pd-lift-track { from { opacity: 0; letter-spacing: .6em; filter: blur(5px); } }
+@keyframes pd-lift-chip { from { opacity: 0; translate: 0 -18px; scale: .9; } }
+@keyframes pd-lift-from-left { from { opacity: 0; translate: -16px 0; } }
+@keyframes pd-lift-from-right { from { opacity: 0; translate: 16px 0; } }
+@keyframes pd-lift-from-below { from { opacity: 0; translate: 0 20px; } }

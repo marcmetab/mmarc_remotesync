@@ -1,0 +1,32 @@
+/*
+ * The sheet a Live sales row becomes (SaleSheet.tsx), the scrim behind it, and the page sinking under it. Scoped to
+ * .pd-app, classes pd-salesheet-*. Stacking: scrim 40, sheet 41 (over the floating bars and the region menu).
+ * The steps are classes on the sheet: is-row (the row's box, no transition) → is-grown (the content column) →
+ * is-fading; on the way back is-covering → is-covered (it fades in over the store page) → is-shrunk (into the row).
+ */
+.pd-app .pd-salesheet-scrim { position: fixed; inset: 0; z-index: 40; background: var(--pd-scrim); opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+.pd-app .pd-salesheet-scrim.is-on { opacity: 1; }
+.pd-app .pd-salesheet {
+  position: fixed; z-index: 41; overflow: hidden; border: 1px solid var(--pd-hairline); border-radius: 0; background: var(--pd-page);
+  box-shadow: var(--pd-glass-lift); pointer-events: none;
+  transition: top .62s cubic-bezier(.2, .9, .25, 1), left .62s cubic-bezier(.2, .9, .25, 1), width .62s cubic-bezier(.2, .9, .25, 1), height .62s cubic-bezier(.2, .9, .25, 1), border-radius .5s ease, opacity .36s ease;
+}
+.pd-app .pd-salesheet.is-row { background: var(--pd-stone); transition: none; }
+.pd-app .pd-salesheet:is(.is-grown, .is-fading, .is-covering, .is-covered) { border-radius: 22px; }
+.pd-app .pd-salesheet.is-fading { opacity: 0; }
+.pd-app .pd-salesheet.is-covering { opacity: 0; transition: none; }
+.pd-app .pd-salesheet.is-covered { transition: opacity .18s ease; }
+.pd-app .pd-salesheet.is-shrunk { transition: top .54s cubic-bezier(.2, .9, .25, 1), left .54s cubic-bezier(.2, .9, .25, 1), width .54s cubic-bezier(.2, .9, .25, 1), height .54s cubic-bezier(.2, .9, .25, 1), border-radius .4s ease; }
+
+/* The row's cells: they fade as it grows, and back in as it lands on the row again. */
+.pd-app .pd-salesheet > .pd-salesheet-row { position: absolute; top: 0; left: 0; margin: 0; transition: opacity .18s ease .3s; }
+.pd-app .pd-salesheet:is(.is-grown, .is-fading) > .pd-salesheet-row { opacity: 0; }
+.pd-app .pd-salesheet:is(.is-covering, .is-covered) > .pd-salesheet-row { opacity: 0; transition: none; }
+.pd-app .pd-salesheet.is-shrunk > .pd-salesheet-row { opacity: 1; transition: opacity .24s ease .24s; }
+
+/* Behind the growing sheet the page sinks back a little. Only on the way in: it is upright again at once. */
+.pd-app .pd-main.is-sinking { transform: scale(.97); filter: brightness(.8); transform-origin: 50% var(--pd-sink-y, 50%); transition: transform .6s cubic-bezier(.2, .9, .25, 1), filter .6s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-app :is(.pd-salesheet, .pd-salesheet-scrim, .pd-main.is-sinking) { transition-duration: .01s !important; }
+}

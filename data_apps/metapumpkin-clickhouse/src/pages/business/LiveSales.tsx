@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import "./livesales.css";
 import { Define, elapsed } from "../../components/Define";
 import { Icon, Panel, PanelState, Tag } from "../../components/ui";
 import { dollars, int, plural, price, timeTz, yourTime } from "../../format";
+import { openSale, reducedMotion, type SaleInfo, setSalePhase, useSaleHandoff } from "../../motion";
 import { Link } from "../../nav";
 import { routes } from "../../routes";
 import { varietyColor } from "../../theme";
@@ -17,6 +18,9 @@ import type { BusinessChannel, BusinessPulse, BusinessSale } from "./model";
  * with its city and country (the row opens the store), the variety, how many, the channel and the amount. A
  * sale that arrives while the page is open slides in at the top with a soft olive wash that fades. The title's
  * olive dot pulses while the newest sale is under two minutes old; the aside counts the last hour.
+ * A plain click on a row lifts it out of the table and grows it into its store's page (motion.ts, SaleSheet.tsx);
+ * back from there, the row comes into view, the sheet shrinks into it and it glows once. A click for a new tab, or
+ * with reduced motion, is the plain link.
  * Data: vm.pulse (recent_sales, the newest 20 in scope; sales_pulse for the last hour), polled every 10 s.
  * Styles: livesales.css (a list of stacked rows when the panel is narrower than 660px).
  */
@@ -29,6 +33,8 @@ const FIRST = 8;
 const LIVE_SECONDS = 120;
 /** How long a new row keeps its arrival look (ms): the slide and the wash are done well before. */
 const FRESH_MS = 3200;
+/** How long the row back from its store keeps its glow (livesales.css plays it once the sheet has landed). */
+const FLASH_MS = 2200;
 
 const CHANNEL_LABEL: Record<BusinessChannel, string> = { in_store: "In store", online: "Online" };
 const TZ = Object.fromEntries(COUNTRIES.map(c => [c.code, c.tz])) as Record<string, string>;
@@ -93,6 +99,31 @@ export function LiveSales({ pulse, error, onRetry, scopeKey = "", initialMore = 
   const ageOf = (sale: BusinessSale) => sale.secondsAgo + Math.max(0, (now - (pulse?.receivedAt ?? now)) / 1000);
   const live = !!sales?.length && ageOf(sales[0]) < LIVE_SECONDS;
 
+  // Back from a sale's store page: its row comes into view (opening the rest of the list if it is down there), and
+  // the sheet shrinks into it. A row no longer listed is left alone: the sheet fades on its own.
+  const handoff = useSaleHandoff();
+  const tableRef = useRef<HTMLDivElement>(null);
+  const [flash, setFlash] = useState<string | null>(null);
+  const returning = handoff?.phase === "closing" ? handoff.sale.id : null;
+  useEffect(() => {
+    if (!returning || !sales) return;
+    const row = [...tableRef.current?.querySelectorAll<HTMLElement>("[data-sale]") ?? []].find(el => el.getAttribute("data-sale") === returning);
+    if (!row) {
+      if (!more && sales.findIndex(s => s.id === returning) >= FIRST) setMore(true);
+      return;
+    }
+    const at = row.getBoundingClientRect();
+    try { window.scrollTo(0, Math.max(0, window.scrollY + at.top + at.height / 2 - window.innerHeight / 2)); } catch { /* not scrollable here */ }
+    const box = row.getBoundingClientRect();
+    setSalePhase("return", { top: box.top, left: box.left, width: box.width, height: box.height });
+    setFlash(returning);
+  }, [returning, sales, more]);
+  useEffect(() => {
+    if (!flash) return;
+    const id = setTimeout(() => setFlash(null), FLASH_MS);
+    return () => clearTimeout(id);
+  }, [flash]);
+
   const title = <span className="pd-business-ls-title">
     <Define k="liveSales" part="pulse">Live sales</Define>
     {live && <i className="pd-business-live-dot" aria-hidden="true"/>}
@@ -113,7 +144,7 @@ export function LiveSales({ pulse, error, onRetry, scopeKey = "", initialMore = 
     const rest = sales.length - FIRST;
     body = <>
       <div className="pd-business-ls-wrap">
-        <div role="table" id="pd-business-ls-table" className="pd-business-ls-table" aria-label="Newest sales, newest first">
+        <div ref={tableRef} role="table" id="pd-business-ls-table" className="pd-business-ls-table" aria-label="Newest sales, newest first">
           <div role="row" className="pd-business-ls-head">
             <span role="columnheader">Time</span>
             <span role="columnheader">Store</span>
@@ -129,12 +160,23 @@ export function LiveSales({ pulse, error, onRetry, scopeKey = "", initialMore = 
             const local = `${timeTz(sale.soldAt, tz)}${yours ? ` · ${yours}` : ""}`;
             const country = countryName(sale.countryCode);
             const label = `${sale.storeName}, ${sale.cityName}, ${country}: ${sale.units} ${sale.variety}, ${CHANNEL_LABEL[sale.channel].toLowerCase()}, ${price(sale.amount)}, at ${local}. Open ${sale.storeName}`;
-            return <div role="row" key={sale.id} className={cx("pd-business-ls-row", arrived.has(sale.id) && "is-new")}>
+            // The row as it reads now, for the sheet it becomes (a plain click; one for a new tab is the plain link).
+            const lift = (e: MouseEvent<HTMLAnchorElement>) => {
+              if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || reducedMotion()) return;
+              const row = e.currentTarget.closest<HTMLElement>(".pd-business-ls-row");
+              if (!row) return;
+              e.preventDefault();
+              const box = row.getBoundingClientRect();
+              const info: SaleInfo = { id: sale.id, storeId: sale.storeId, storeName: sale.storeName, place: `${sale.cityName} · ${country}`, ago: elapsed(ageOf(sale)),
+                local, variety: sale.variety, color: varietyColor[sale.variety], units: sale.units, channel: CHANNEL_LABEL[sale.channel], amount: price(sale.amount) };
+              openSale(info, { top: box.top, left: box.left, width: box.width, height: box.height }, routes.store(sale.storeId));
+            };
+            return <div role="row" key={sale.id} data-sale={sale.id} className={cx("pd-business-ls-row", arrived.has(sale.id) && "is-new", flash === sale.id && "is-flash", handoff?.phase === "open" && handoff.sale.id === sale.id && "is-lifted")}>
               <div className="pd-business-ls-clip">
                 <div className="pd-business-ls-cells">
                   <span role="cell" className="pd-business-ls-time"><strong>{elapsed(ageOf(sale))}</strong><small>{local}</small></span>
                   <span role="rowheader" className="pd-business-ls-store">
-                    <Link to={routes.store(sale.storeId)} className="pd-business-ls-hit" aria-label={label}><strong>{sale.storeName}</strong></Link>
+                    <Link to={routes.store(sale.storeId)} className="pd-business-ls-hit" aria-label={label} onClick={lift}><strong>{sale.storeName}</strong></Link>
                     <small>{sale.cityName} · {country}</small>
                   </span>
                   <span role="cell" className="pd-business-ls-variety">

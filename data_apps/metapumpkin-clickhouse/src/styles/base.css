@@ -42,11 +42,14 @@
 .pd-app .pd-brand { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: var(--pd-r-control); color: var(--pd-ink); text-decoration: none; }
 .pd-app .pd-brand:hover { color: var(--pd-ink); }
 .pd-app .pd-brand > span { font-family: var(--pd-serif); font-size: 17px; line-height: 1.1; white-space: nowrap; }
-.pd-app .pd-nav { display: flex; flex-direction: column; gap: 2px; }
-.pd-app .pd-nav-row { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: var(--pd-r-control); color: var(--pd-ink-soft); font-weight: 500; text-decoration: none; }
+.pd-app .pd-nav { position: relative; display: flex; flex-direction: column; gap: 2px; }
+.pd-app .pd-nav-row { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: var(--pd-r-control); color: var(--pd-ink-soft); font-weight: 500; text-decoration: none; transition: color .2s ease; }
 .pd-app .pd-nav-row:hover { background: var(--pd-hover); color: var(--pd-ink); }
 .pd-app .pd-nav-row[aria-current="page"] { background: var(--pd-segment); color: var(--pd-ink); font-weight: 600; }
 .pd-app .pd-nav-row[aria-current="page"] > svg { color: var(--pd-pumpkin-icon); }
+/* The picked row's fill is a lens behind the rows that glides to the next tab (Shell.tsx measures it). */
+.pd-app .pd-nav-lens { position: absolute; top: 0; left: 0; right: 0; border-radius: var(--pd-r-control); background: var(--pd-segment); pointer-events: none; transition: transform .55s cubic-bezier(.34, 1.3, .5, 1), height .3s ease; }
+.pd-app .pd-nav.has-lens > .pd-nav-row[aria-current="page"] { background: transparent; }
 .pd-app .pd-nav-dot { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--pd-pumpkin-deep); }
 .pd-app .pd-nav-row > .pd-nav-dot { margin-left: auto; }
 .pd-app .pd-profile { margin-top: auto; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; font-size: 13.5px; font-weight: 600; line-height: 1.3; }
@@ -90,12 +93,46 @@
 /* ── Content column ──────────────────────────────────────── */
 /* Each top-level element a page returns is one row of this column. */
 .pd-app .pd-content { display: flex; flex-direction: column; gap: 24px; max-width: var(--pd-content); margin: 0 auto; padding: 0 var(--pd-gutter) 32px; }
-.pd-app .pd-content > * { min-width: 0; }
+.pd-app :is(.pd-content, .pd-page) > * { min-width: 0; }
+/* Each page sits in its own wrapper (App.tsx), which draws no box: its rows are the column's. The page being left
+   stays while it plays its way out (is-leaving); the next one waits unseen (is-waiting), mounted, its queries running. */
+.pd-app .pd-page { display: contents; }
+.pd-app .pd-page.is-waiting { display: none; }
 /* A page that opens fades in: its rows are new nodes then, while a poll updates the same nodes, which never fade
    again. The banner stays as it is (it belongs to the shell), and so does Data flow's tab strip (each tab is its own
    page). No specificity, so a row's own animation wins. */
-:where(.pd-app .pd-content) > :where(:not(.pd-banner, .pd-flow-tabs)) { animation: pd-page-in .2s ease-out; }
+:where(.pd-app .pd-page) > :where(:not(.pd-flow-tabs)) { animation: pd-page-in .2s ease-out; }
 @keyframes pd-page-in { from { opacity: 0; } }
+
+/* The changes that play their own way (motion.ts). Business ↔ Stores: the page slides the way the banner's camera
+   went. Business → World: the rows fall away (World rises from the banner: world/liftoff.css). World → Business:
+   the rows drop back in. A sale's store page: its rows rise as the sheet over them fades. Back to the sale's row:
+   nothing moves but the sheet. */
+:where(.pd-app .pd-page.is-right.is-leaving) > * { animation: pd-page-out-left .28s ease both; }
+:where(.pd-app .pd-page.is-left.is-leaving) > * { animation: pd-page-out-right .28s ease both; }
+:where(.pd-app .pd-page.is-right.is-shown) > * { animation: pd-page-from-right .7s cubic-bezier(.2, .9, .25, 1) .1s both; }
+:where(.pd-app .pd-page.is-left.is-shown) > * { animation: pd-page-from-left .7s cubic-bezier(.2, .9, .25, 1) .1s both; }
+:where(.pd-app .pd-page.is-liftoff.is-leaving) > * { transform-origin: 50% 0; animation: pd-page-fall .55s cubic-bezier(.5, 0, .75, 0) both; }
+:where(.pd-app .pd-page.is-liftoff.is-leaving) > :nth-child(2n) { --pd-fall-r: 2deg; }
+:where(.pd-app .pd-page.is-liftoff.is-leaving) > :nth-child(3n) { --pd-fall-r: 4deg; }
+:where(.pd-app .pd-page:is(.is-liftoff, .is-return).is-shown) > * { animation: none; }
+:where(.pd-app .pd-page.is-land.is-shown) > * { animation: pd-page-rise .7s cubic-bezier(.2, .9, .25, 1) .3s both; }
+:where(.pd-app .pd-page.is-sale.is-shown) > * { animation: pd-page-rise .7s cubic-bezier(.2, .9, .25, 1) .42s both; }
+:where(.pd-app .pd-page.is-liftoff.is-leaving) > :nth-child(2) { animation-delay: 55ms; }
+:where(.pd-app .pd-page.is-liftoff.is-leaving) > :nth-child(n + 3) { animation-delay: .11s; }
+:where(.pd-app .pd-page.is-liftoff.is-leaving) > :nth-child(n + 5) { animation-delay: .165s; }
+:where(.pd-app .pd-page.is-land.is-shown) > :nth-child(2) { animation-delay: .37s; }
+:where(.pd-app .pd-page.is-land.is-shown) > :nth-child(3) { animation-delay: .44s; }
+:where(.pd-app .pd-page.is-land.is-shown) > :nth-child(n + 4) { animation-delay: .51s; }
+:where(.pd-app .pd-page.is-sale.is-shown) > :nth-child(2) { animation-delay: .5s; }
+:where(.pd-app .pd-page.is-sale.is-shown) > :nth-child(3) { animation-delay: .58s; }
+:where(.pd-app .pd-page.is-sale.is-shown) > :nth-child(n + 4) { animation-delay: .66s; }
+@keyframes pd-page-out-left { to { opacity: 0; transform: translateX(-48px); } }
+@keyframes pd-page-out-right { to { opacity: 0; transform: translateX(48px); } }
+@keyframes pd-page-from-right { from { opacity: 0; transform: translateX(48px); } }
+@keyframes pd-page-from-left { from { opacity: 0; transform: translateX(-48px); } }
+@keyframes pd-page-fall { to { opacity: 0; transform: translateY(70px) rotate(var(--pd-fall-r, -3deg)); } }
+@keyframes pd-page-rise { from { opacity: 0; transform: translateY(26px); } }
 
 /* ── Banner: art only ────────────────────────────────────── */
 .pd-app .pd-banner { position: relative; flex: none; overflow: hidden; height: 148px; border-radius: var(--pd-r-banner); background: var(--pd-sky); }
