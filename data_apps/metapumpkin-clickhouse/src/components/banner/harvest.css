@@ -99,9 +99,8 @@
 .pd-app .is-scene .sc-tag { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
 .pd-app .is-scene .sc-tag-text { font: 700 12px var(--pd-sans); }
 
-/* ── A sale: the banner unrolls, the van drives in and parks, then the sale plays out ── */
-.pd-app .pd-banner.is-sale { animation: pd-sc-unroll .75s cubic-bezier(.65, 0, .25, 1) .15s backwards; }
-.pd-app .is-sale > .pd-scene { transform-origin: 50% 100%; animation: pd-sc-settle 1s cubic-bezier(.2, .9, .25, 1) .15s backwards; }
+/* ── A sale: the van drives in and parks, then the sale plays out (the page around it is already there: it opens out of
+   the sale's row, SaleSheet.tsx) ── */
 .pd-app .is-scene.at-stores.is-sale .sc-drive { animation: pd-sc-drive 1.9s cubic-bezier(.25, .55, .25, 1.04) .5s backwards; }
 .pd-app .is-scene.at-stores.is-sale .sc-wheel { animation: pd-sc-roll 1.9s cubic-bezier(.25, .55, .25, 1.04) .5s backwards; }
 .pd-app .is-scene.at-stores.is-sale .sc-puff { animation: pd-sc-puff .6s ease-out .5s 3; }
@@ -173,8 +172,6 @@
 @keyframes pd-sc-bulb { 0%, 100% { opacity: var(--sc-bulb); } 50% { opacity: calc(var(--sc-bulb) * .35); } }
 @keyframes pd-sc-hop { 0%, 84%, 100% { transform: translateY(0) scale(1, 1); } 88% { transform: translateY(0) scale(1.12, .86); } 93% { transform: translateY(-4px) scale(.94, 1.08); } 97% { transform: translateY(0) scale(1.06, .94); } }
 @keyframes pd-sc-pop { 0% { transform: translateY(-14px) scale(0); } 60% { transform: translateY(1px) scale(1.15, .9); } 100% { transform: translateY(0) scale(1); } }
-@keyframes pd-sc-unroll { from { clip-path: inset(0 0 100% 0 round var(--pd-r-banner)); } to { clip-path: inset(0 0 0 0 round var(--pd-r-banner)); } }
-@keyframes pd-sc-settle { from { transform: translateY(-30px) scale(1.06); } }
 @keyframes pd-sc-drive { from { transform: translateX(-1500px); } }
 @keyframes pd-sc-roll { from { transform: rotate(-6120deg); } to { transform: rotate(0deg); } }
 @keyframes pd-sc-brake { 0% { transform: rotate(0deg); } 35% { transform: rotate(2.2deg); } 100% { transform: rotate(0deg); } }

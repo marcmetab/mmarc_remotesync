@@ -12,7 +12,7 @@
  * button marked aria-current, not a pressed toggle as well (a screen reader would announce only one of the two).
  *
  * Two looks: `bar`, in the top bar; `glass`, the capsule that floats over the page once the top bar has scrolled
- * away (RegionFloat.tsx): a glass lens slides (and squashes a little as it lands), the picked region reads in
+ * away (FloatBar.tsx): a glass lens slides (and squashes a little as it lands), the picked region reads in
  * pumpkin, and the country menu is glass too, growing out of the highlight with its items following one by one.
  * `extra` is drawn inside the control's box after the options (the capsule's compact pill).
  *
@@ -24,6 +24,7 @@
 import { type CSSProperties, Fragment, type KeyboardEvent, type ReactNode, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import "./region.css";
 import { COUNTRIES, type CountryCode, REGIONS, type RegionCode, type RegionFilter, type Scope, regionName } from "../types";
+import { useSegmentLens } from "./lens";
 import { Icon } from "./ui";
 import { sees, seesRegion, useVisible } from "../visible";
 
@@ -60,16 +61,6 @@ function placeMenu(root: HTMLElement | null, pill: HTMLElement | null, menu: HTM
   return { x: Math.round(left - r.left), y: Math.round(below - r.top), w, ox: Math.round(p.left + p.width / 2 - left) };
 }
 
-/** The raised option's box in the group: where the lens sits. null until measured. */
-type Lens = { x: number; w: number } | null;
-function measureLens(group: HTMLElement | null): Lens {
-  const on = group?.querySelector<HTMLElement>(":scope > [aria-current='true'], :scope > [aria-pressed='true']");
-  const look = on?.firstElementChild as HTMLElement | null | undefined;
-  if (!group || !look || !look.offsetWidth) return null;
-  const g = group.getBoundingClientRect(), l = look.getBoundingClientRect();
-  return { x: Math.round(l.left - g.left - group.clientLeft), w: Math.round(l.width) };
-}
-
 export type RegionPickerProps = {
   scope: Scope;
   /** A region (country cleared), or a country inside the selected region (null: all of it). */
@@ -95,9 +86,6 @@ export function RegionPicker({ scope, onScope, onSheet, look = "bar", extra }: R
   // closes it rather than carrying it over to the next region.
   const [openFor, setOpenFor] = useState<RegionCode | null>(null);
   const [place, setPlace] = useState<Place>(null);
-  const [lens, setLens] = useState<Lens>(null);
-  // The lens glides once it has been placed; its first place it takes at once.
-  const [settled, setSettled] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<HTMLDivElement>(null);
@@ -145,35 +133,24 @@ export function RegionPicker({ scope, onScope, onSheet, look = "bar", extra }: R
   useEffect(() => { setOpenFor(null); setPlace(null); }, [region]);
   // Focus moves into the menu as it opens (a modal menu: the backdrop takes every click outside it).
   useEffect(() => { if (isOpen) focusItem(focusAt.current); }, [isOpen]);
-  // Placed before it paints, and again whenever it renders (a picked country changes the pill's width). The lens too.
+  // The raised option slides from one region to the next (lens.tsx).
+  const { lens, className: lensClass, style: lensStyle } = useSegmentLens(groupRef, options.findIndex(o => o.value === scope.region), glass);
+  // Placed before it paints, and again whenever it renders (a picked country changes the pill's width).
   useBrowserLayoutEffect(() => {
-    const next = measureLens(groupRef.current);
-    if (next?.x !== lens?.x || next?.w !== lens?.w) setLens(next);
     if (!isOpen) return;
     const at = placeMenu(rootRef.current, pillRef.current, menuRef.current, glass);
     if (!samePlace(at, place)) setPlace(at);
   });
-  useEffect(() => {
-    if (!lens || settled) return;
-    const id = requestAnimationFrame(() => setSettled(true));
-    return () => cancelAnimationFrame(id);
-  }, [lens, settled]);
-  // The pill moves when the window resizes or the box scrolls sideways: follow it (the lens with it).
+  // The pill moves when the window resizes or the box scrolls sideways: follow it.
   useEffect(() => {
     const root = rootRef.current, scroller = scrollRef.current;
-    if (!root) return;
-    const update = () => {
-      setLens(now => {
-        const next = measureLens(groupRef.current);
-        return next?.x === now?.x && next?.w === now?.w ? now : next;
-      });
-      if (isOpen) setPlace(now => {
-        const next = placeMenu(root, pillRef.current, menuRef.current, glass);
-        return samePlace(next, now) ? now : next;
-      });
-    };
+    if (!isOpen || !root) return;
+    const update = () => setPlace(now => {
+      const next = placeMenu(root, pillRef.current, menuRef.current, glass);
+      return samePlace(next, now) ? now : next;
+    });
     const watch = typeof ResizeObserver !== "undefined" ? new ResizeObserver(update) : null;
-    for (const el of [root.closest(".pd-app"), groupRef.current, pillRef.current, menuRef.current]) if (el) watch?.observe(el);
+    for (const el of [root.closest(".pd-app"), pillRef.current, menuRef.current]) if (el) watch?.observe(el);
     scroller?.addEventListener("scroll", update, { passive: true });
     return () => {
       watch?.disconnect();
@@ -202,14 +179,11 @@ export function RegionPicker({ scope, onScope, onSheet, look = "bar", extra }: R
     e.stopPropagation();
   };
 
-  // The glass lens squashes as it lands: a new region swaps between two copies of the keyframes, so it plays again.
-  const jelly = options.findIndex(o => o.value === scope.region) % 2 ? "is-jelly-b" : "is-jelly-a";
-  const lensStyle = lens ? { "--pd-lens-x": `${lens.x}px`, "--pd-lens-w": `${lens.w}px` } as CSSProperties : undefined;
   const style = place ? { "--pd-region-x": `${place.x}px`, "--pd-region-y": `${place.y}px`, "--pd-region-w": `${place.w}px`, "--pd-region-ox": `${place.ox}px` } as CSSProperties : undefined;
   return <div ref={rootRef} className={`pd-region${glass ? " is-glass" : ""}`}>
-    <div ref={scrollRef} className={`pd-region-scroll${glass ? " pd-glass" : ""}`}>
-      <div ref={groupRef} role="group" aria-label="Region" className={`pd-segmented${lens ? " has-lens" : ""}${settled ? " is-settled" : ""}`} style={lensStyle}>
-        {lens && <span className={`pd-region-lens${glass ? ` ${jelly}` : ""}`} aria-hidden="true"/>}
+    <div ref={scrollRef} className={`pd-region-scroll${glass ? " pd-glassbar pd-glass" : ""}`}>
+      <div ref={groupRef} role="group" aria-label="Region" className={`pd-segmented${lensClass}`} style={lensStyle}>
+        {lens}
         {options.map(o => {
           const on = o.value === scope.region;
           if (!on || o.value === "all") return <button type="button" key={o.value} aria-pressed={on} aria-label={o.short ? o.label : undefined}

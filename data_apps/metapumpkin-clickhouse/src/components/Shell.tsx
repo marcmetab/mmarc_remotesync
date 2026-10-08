@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import "../fonts.css";
 import "../styles/tokens.css";
 import "../styles/base.css";
@@ -15,7 +15,7 @@ import { Banner } from "./Banner";
 import { HalloweenCard, halloweenChip, untilHalloween } from "./HalloweenCard";
 import { MeSheet } from "./MeSheet";
 import "./period.css";
-import { RegionFloat } from "./RegionFloat";
+import { FloatBar } from "./FloatBar";
 import { RegionPicker } from "./RegionPicker";
 import { RegionSheet } from "./RegionSheet";
 import { SaleSheet } from "./SaleSheet";
@@ -102,9 +102,9 @@ function MeButton({ clock, onOpen }: { clock?: Clock; onOpen: () => void }) {
  * already one place. Data flow has neither: the pipeline is the same for every region. The van page's switch adds Season. The route comes from the nav context, so the static
  * preview shows the switch on those pages too.
  * Motion (motion.ts): the sidebar's picked row glides to the next tab; from 900px up, once the top bar has scrolled
- * away, the region control floats over the page as a glass capsule (RegionFloat.tsx) that shrinks to the picked
- * region as you scroll down; the Business and Stores banners are one world the camera pans across (Banner.tsx); and a
- * Live sales row grows into its store's page in a sheet drawn over everything (SaleSheet.tsx).
+ * away, the region control (or the time switch, on the City, Store and van pages) floats over the page as a glass
+ * capsule (FloatBar.tsx) that shrinks to the pick as you scroll down; every segmented control's pick slides (lens.tsx); the Business and Stores banners are one world the camera pans across (Banner.tsx); and a
+ * Live sales row opens its store's page out of the row (SaleSheet.tsx).
  */
 export function Shell({ active, scope, onScope, period = "today", onPeriod, clock, lateVans = 0, theme = "light", onTheme, children, motion = "fade", bannerRoute }: ShellProps) {
   const late = lateVans > 0;
@@ -112,6 +112,7 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
   const { pathname, route } = useNav();
   const truck = route.page === "Truck";
   const drill = route.page === "City" || route.page === "Store" || truck;
+  const periodOptions = truck ? TRUCK_OPTIONS : PERIOD_OPTIONS;
   // A viewer who may see one country only (src/visible.ts) has no region to choose: that country is the whole app.
   const visible = useVisible();
   const only = singleCountry(visible) && visible ? [...visible][0] : null;
@@ -123,11 +124,11 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
   const [pageLine, setPageLine] = useState<BarAccessory | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const { compact, past, expand } = useBarScroll(pathname, navRef);
-  // From 900px up the region control floats over the page once the top bar has gone (RegionFloat.tsx); focus in it
+  // From 900px up the top bar's control floats over the page once the top bar has gone (FloatBar.tsx); focus in it
   // (its open menu) keeps it full.
   const floatRef = useRef<HTMLDivElement>(null);
   const float = useBarScroll(pathname, floatRef);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
 
   // The sidebar's picked row is a lens that glides to the next tab (measured; until then, as in the static preview,
   // the row draws its own).
@@ -145,15 +146,12 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
   const bannerTab = tabOf(banner.page);
   const handoff = useSaleHandoff();
   const saleHere = handoff && handoff.phase !== "return" && banner.page === "Store" && handoff.path === pathname ? handoff : null;
-  const sinking = handoff?.phase === "open";
   const shifted = clock?.mode === "shifted";
   // A page's line keeps its own alert; otherwise its dot follows the clock, like the default line's.
   const accessory: BarAccessory = pageLine ? { ...pageLine, tone: pageLine.tone === "alert" ? "alert" : shifted ? "shifted" : "live" } : clockAccessory(clock, tz);
   const openMe = () => setSheet("me");
   const openRegion = () => setSheet("region");
   const closeSheet = () => setSheet(null);
-  // Behind the growing sale sheet the page sinks towards the middle of the window.
-  const sinkStyle = sinking && typeof window !== "undefined" ? { "--pd-sink-y": `${Math.round(window.scrollY + window.innerHeight / 2)}px` } as CSSProperties : undefined;
   return <ThemeContext.Provider value={theme}><div className="pd-app" data-theme={theme}>
     <aside className="pd-sidebar">
       {/* The brand art (src/assets/metapumpkin.svg), the same in both themes; the name beside it is the link's text. */}
@@ -173,10 +171,10 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
       <div className="pd-profile"><span className="pd-avatar" aria-hidden="true">RM</span><span>Regional manager<small>{only ? countryName(only) : scopeLabel(scope)}</small></span></div>
     </aside>
 
-    <main className={`pd-main${sinking ? " is-sinking" : ""}`} style={sinkStyle}>
+    <main ref={mainRef} className="pd-main">
       <header className="pd-topbar">
         {drill
-          ? <div className="pd-period"><Segmented label="Time" options={truck ? TRUCK_OPTIONS : PERIOD_OPTIONS} value={period} onChange={p => onPeriod?.(p)}/></div>
+          ? <div className="pd-period"><Segmented label="Time" options={periodOptions} value={period} onChange={p => onPeriod?.(p)}/></div>
           : !regionless && <RegionPicker scope={scope} onScope={onScope} onSheet={openRegion}/>}
         <div className="pd-topbar-end">
           <div className={`pd-clock${clock?.mode === "shifted" ? " is-shifted" : ""}`}>
@@ -189,7 +187,7 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
         </div>
         <MeButton clock={clock} onOpen={openMe}/>
       </header>
-      <AccessoryProvider value={setPageLine}><div ref={contentRef} className="pd-content">
+      <AccessoryProvider value={setPageLine}><div className="pd-content">
         {/* The Fleet overview has no banner: its stage card opens with its own scene (FleetPage). The Truck page keeps it.
             World has none either: the map is the page. */}
         {banner.page !== "Fleet" && bannerTab !== "world" && <Banner variant={bannerTab} chip={seasonChip(bannerTab, tz, clock)}
@@ -207,13 +205,18 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
       <MeButton clock={clock} onOpen={openMe}/>
     </div>
     {/* From 900px up: the region capsule floating over the page once the top bar has gone. */}
-    {!drill && !regionless && <RegionFloat scope={scope} onScope={onScope} on={float.past} compact={float.compact} onExpand={float.expand} rootRef={floatRef}/>}
+    {drill
+      ? <FloatBar on={float.past} compact={float.compact} onExpand={float.expand} rootRef={floatRef} what="Time" label={periodOptions.find(o => o.value === period)?.label ?? ""}
+        render={mini => <div className="pd-glassbar pd-glass"><Segmented label="Time" options={periodOptions} value={period} onChange={p => onPeriod?.(p)} glass/>{mini}</div>}/>
+      : !regionless && <FloatBar on={float.past} compact={float.compact} onExpand={float.expand} rootRef={floatRef} what="Region" label={scopeLabel(scope)}
+        // Remounted each time it lifts in: a menu left open as it went does not come back open.
+        render={mini => <RegionPicker key={float.past ? "on" : "off"} scope={scope} onScope={onScope} look="glass" extra={mini}/>}/>}
     <div className="pd-tabbar-fade" aria-hidden="true"/>
     <TabBar active={active} compact={compact} onExpand={expand} accessory={accessory} lateVans={lateVans} lateNote={LATE_NOTE} navRef={navRef}/>
 
     {sheet === "me" && <MeSheet scope={scope} clock={clock} theme={theme} onTheme={onTheme} onClose={closeSheet}/>}
     {sheet === "region" && <RegionSheet scope={scope} onScope={onScope} clock={clock} onClose={closeSheet}/>}
     {/* A Live sales row on its way to its store page and back (motion.ts). */}
-    <SaleSheet contentRef={contentRef}/>
+    <SaleSheet mainRef={mainRef}/>
   </div></ThemeContext.Provider>;
 }

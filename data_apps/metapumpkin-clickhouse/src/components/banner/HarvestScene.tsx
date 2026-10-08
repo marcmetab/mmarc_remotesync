@@ -15,9 +15,9 @@ import { DEFS, FAR, FIREFLIES, GROUND, MID, SKY, STALL, TRUCK } from "./harvestA
  * off the hill road to park by the stall (the crates fill and the sign rings when it gets there); going back it
  * turns round, drives left, and turns to face the road again. Pages share one mounted scene (Shell keeps it), so the
  * pan runs while the page under it changes.
- * `sale`: the store page opened from a Live sales row (motion.ts): the camera is already at the stall (no pan), the
- * banner unrolls from the top, the van drives in from the left and parks, then the sale plays out at the stall: one
- * pumpkin hops for each one sold (up to four) and the amount rises over it. `onBack` adds the "Live sales" button.
+ * `sale`: the store page opened from a Live sales row (motion.ts): the camera is already at the stall (no pan), the van
+ * drives in from the left and parks, then the sale plays out at the stall: one pumpkin hops for each one sold (up to
+ * four) and the amount rises over it. `onBack` adds the "Live sales" button.
  * `landing`: Business opening on the way down from World: the field rises into view as the night lifts.
  * The round button pauses it all (for the session); with reduced motion it starts paused and nothing plays on its
  * own: the camera jumps, the sale shows as it ends. Off screen, it rests. Styles: harvest.css.

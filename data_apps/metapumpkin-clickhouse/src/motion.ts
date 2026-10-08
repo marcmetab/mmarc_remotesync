@@ -14,8 +14,8 @@ import type { Route } from "./routes";
  * The page being left stays on screen for EXIT_MS, playing its way out, while the next one mounts unseen (its
  * queries start at once). Reduced motion: every change is the plain fade, with nothing held.
  *
- * The sale (SaleSheet.tsx): a click on a Live sales row lifts the row out of the table and grows it to fill the
- * view while the list sinks behind it, then the store page opens under it: its banner unrolls, the van drives in,
+ * The sale (SaleSheet.tsx): a click on a Live sales row opens its store's page out of the row: the page grows from
+ * the row's box to the whole window while the list sinks behind it; its banner unrolls, the van drives in,
  * the sale plays out at the stall (one pumpkin hops per pumpkin sold, the amount rises), and the page keeps the
  * sale ringed ("This sale"). The banner's "Live sales" button shrinks it back into its row, which glows once.
  * The hand-off lives here, outside React, so the row, the sheet, the store page and the banner all read one copy.
@@ -139,6 +139,13 @@ export function setSalePhase(phase: SaleHandoff["phase"], to?: Box | null) {
   if (handoff) emit({ ...handoff, phase, to: to === undefined ? handoff.to : to, at: Date.now() });
 }
 export function endSale() { if (handoff) emit(null); }
+
+/** App.tsx: the page now on screen. A sale's store page opens out of its row (SaleSheet.tsx); any other page ends the sale. */
+export function pageOnScreen(path: string, motion: PageMotion) {
+  const h = handoff;
+  if (h?.phase === "open" && h.path === path && motion === "sale") setSalePhase("shown");
+  else if (h?.phase === "shown" && h.path !== path) endSale();
+}
 
 /** The motion a sale's hand-off gives the page change to `path` (null: not the sale's). */
 export function saleMotion(path: string): PageMotion | null {

@@ -9,8 +9,7 @@
  *   compact    54px: the current tab's circle, the accessory (a dot and two lines) and Explore. It grows out of the
  *              bar's foot as the full bar shrinks into it.
  * Stacking: the fades and the floating top are 19, the bar 20 (the region menu is 30/31, sheets 40).
- * From 900px up its counterpart is the floating region capsule (RegionFloat.tsx, pd-regionfloat*, at the end): the
- * layer and its fade are here, the capsule itself is region.css's glass look.
+ * From 900px up its counterpart is the glass capsule over the page (FloatBar.tsx, float.css).
  */
 
 .pd-app .pd-tabbar, .pd-app .pd-tabbar-fade, .pd-app .pd-floattop { display: none; }
@@ -73,29 +72,3 @@
   .pd-app .pd-tabbar-pulse:not(.is-shifted) { animation: pd-pulse 2.4s ease-in-out infinite; }
 }
 @keyframes pd-pulse { 50% { box-shadow: 0 0 0 6px transparent; } }
-
-/* ── From 900px up: the floating region capsule (RegionFloat.tsx) ── */
-/* Centred over the main column, under a fade; it lifts in once the top bar has scrolled away. No transform once it is
-   in: a transformed layer would be the box its menu's full-window backdrop fills. */
-.pd-app .pd-regionfloat { display: none; }
-@media (min-width: 900px) {
-  .pd-app .pd-regionfloat { position: fixed; z-index: 19; top: 0; left: var(--pd-sidebar-w); right: 0; display: flex; justify-content: center; padding-top: 14px; pointer-events: none; opacity: 0; visibility: hidden; transform: translateY(-18px) scale(.94); transition: opacity .22s ease, transform .6s cubic-bezier(.2, .9, .25, 1), visibility 0s linear .6s; }
-  .pd-app .pd-regionfloat.is-on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
-  .pd-app .pd-regionfloat-fade { position: absolute; top: 0; left: 0; right: 0; height: 104px; background: linear-gradient(180deg, var(--pd-fade) 38%, var(--pd-page-clear)); }
-  .pd-app .pd-regionfloat > .pd-region { pointer-events: auto; }
-  /* Compact: the options blur away as the box shrinks to the pill, which grows in after them. */
-  .pd-app .pd-regionfloat.is-compact .pd-region-scroll { width: var(--pd-cap-mini, 214px); }
-  .pd-app .pd-regionfloat.is-compact .pd-segmented { opacity: 0; transform: scale(.9); filter: blur(3px); visibility: hidden; transition-delay: 0s, 0s, 0s, .5s; }
-  .pd-app .pd-regionfloat-mini { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 28px; background: transparent; color: var(--pd-ink); font-size: 15px; font-weight: 700; white-space: nowrap; opacity: 0; visibility: hidden; transform: scale(.82); transition: opacity .2s ease, transform .5s cubic-bezier(.34, 1.3, .5, 1), visibility 0s linear .5s; }
-  .pd-app .pd-regionfloat-mini > span { display: flex; align-items: center; gap: 10px; }
-  .pd-app .pd-regionfloat-mini svg { color: var(--pd-ink-soft); }
-  .pd-app .pd-regionfloat-mini:focus-visible { outline-offset: -3px; }
-  .pd-app .pd-regionfloat.is-compact .pd-regionfloat-mini { opacity: 1; visibility: visible; transform: none; transition-delay: .14s, .08s, 0s; }
-  .pd-app .pd-regionfloat-dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--pd-olive); box-shadow: 0 0 0 4px var(--pd-olive-wash); }
-}
-@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-  .pd-app .pd-regionfloat-dot { animation: pd-pulse 2.4s ease-in-out infinite; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pd-app :is(.pd-regionfloat, .pd-regionfloat-mini) { transition-duration: .01s !important; }
-}

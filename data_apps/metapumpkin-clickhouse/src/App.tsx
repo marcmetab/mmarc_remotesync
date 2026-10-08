@@ -9,7 +9,7 @@ import { useCityData, useStoreData, useStoresData } from "./data/useStoresData";
 import { useTruckData } from "./data/useTruckData";
 import { useWorldData } from "./data/useWorldData";
 import { warmIntent, Warmup } from "./data/warm";
-import { endSale, PageMotionContext, saleHandoff, usePageStage } from "./motion";
+import { pageOnScreen, PageMotionContext, usePageStage } from "./motion";
 import { DataAppNav, useNav } from "./nav";
 import { BusinessPage } from "./pages/BusinessPage";
 import { Explore } from "./pages/business/Explore";
@@ -196,9 +196,8 @@ function Root() {
   const onScreen = stage.from ?? stage.shown;
   useEffect(() => {
     if (stage.motion !== "return") try { window.scrollTo(0, 0); } catch { /* not scrollable here */ }
-    // A sale's store page left any other way than back to its row: the sale is done with.
-    const h = saleHandoff();
-    if (h?.phase === "shown" && h.path !== onScreen) endSale();
+    // A sale's store page opens out of its row; left any other way than back to its row, the sale is done with.
+    pageOnScreen(onScreen, stage.motion);
   }, [onScreen]);
 
   const live = useMemo(() => ({ scope, onScope: setScope, clock, period, truckPeriod, onPeriod: pickPeriod }), [scope, clock, period, truckPeriod, pickPeriod]);
