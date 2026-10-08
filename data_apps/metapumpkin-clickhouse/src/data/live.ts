@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 /*
  * What every live hook shares: polling, keeping the last good result on screen, and reading values.
@@ -58,10 +58,24 @@ const isHidden = () => {
  */
 const CACHE = new Map<string, { data: unknown; at: number }>();
 const CACHE_MAX = 120;
-function remember(id: string, data: unknown, at: number) {
+/**
+ * Who waits on a request with nothing to show yet. The same request can run under another mount (the warm-up,
+ * src/data/warm.tsx, runs a page's hook unseen): when its data lands first, the waiting page wakes and shows it.
+ */
+const WAITING = new Map<string, Set<() => void>>();
+function remember(id: string, data: unknown, at: number, self?: () => void) {
   CACHE.delete(id);
   CACHE.set(id, { data, at });
   if (CACHE.size > CACHE_MAX) CACHE.delete(CACHE.keys().next().value as string);
+  // Called while rendering: wake the waiting pages after this render, not inside it. Not the one that brought the
+  // data: it already shows it (its own wait may not have ended yet, effects run later).
+  const waiting = WAITING.get(id);
+  if (waiting) void Promise.resolve().then(() => waiting.forEach(wake => { if (wake !== self) wake(); }));
+}
+
+/** The session's last data for a request (`what` and `key` as in useLive), or null. */
+export function cachedData<D>(what: string, key: string): D | null {
+  return (CACHE.get(`${what}|${key}`)?.data as D | undefined) ?? null;
 }
 
 /**
@@ -71,6 +85,8 @@ function remember(id: string, data: unknown, at: number) {
  */
 export function useLive<D>(result: QueryResultLike<D>, key: string, everyMs: number, what: string): Live<D> {
   const id = `${what}|${key}`;
+  // Re-renders this mount when another one lands its data first (the cache wait below).
+  const [, wake] = useReducer((n: number) => n + 1, 0);
   // The SDK keeps the previous filter's result until the new filter's lands: a result object is this key's data only
   // if it arrived under this key (else a van's page could show the van asked about before it, and cache it as this one).
   const seen = useRef<{ key: string; data: D } | null>(null);
@@ -80,7 +96,7 @@ export function useLive<D>(result: QueryResultLike<D>, key: string, everyMs: num
   // A new result object is new data: note when it arrived (the same object on a re-render keeps its time).
   if (fresh != null && (last.current?.data !== fresh || last.current.key !== key)) {
     last.current = { key, data: fresh, at: Date.now() };
-    remember(id, fresh, last.current.at);
+    remember(id, fresh, last.current.at, wake);
   }
   // Nothing yet for this key on this mount: the session's last data for it, if any.
   if (!last.current || last.current.key !== key) {
@@ -89,6 +105,19 @@ export function useLive<D>(result: QueryResultLike<D>, key: string, everyMs: num
   }
   const kept = last.current && last.current.key === key ? last.current : null;
   const data = fresh ?? kept?.data ?? null;
+
+  // With nothing to show, wait on the cache too: the warm-up may land this request before the SDK here does.
+  const empty = data == null;
+  useEffect(() => {
+    if (!empty) return;
+    let waiting = WAITING.get(id);
+    if (!waiting) WAITING.set(id, waiting = new Set());
+    waiting.add(wake);
+    return () => {
+      waiting.delete(wake);
+      if (!waiting.size) WAITING.delete(id);
+    };
+  }, [id, empty]);
 
   // The interval reads the latest refetch through a ref, so it is set up once per key.
   const refetchRef = useRef(result.refetch);

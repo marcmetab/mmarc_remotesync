@@ -91,6 +91,11 @@
 /* Each top-level element a page returns is one row of this column. */
 .pd-app .pd-content { display: flex; flex-direction: column; gap: 24px; max-width: var(--pd-content); margin: 0 auto; padding: 0 var(--pd-gutter) 32px; }
 .pd-app .pd-content > * { min-width: 0; }
+/* A page that opens fades in: its rows are new nodes then, while a poll updates the same nodes, which never fade
+   again. The banner stays as it is (it belongs to the shell), and so does Data flow's tab strip (each tab is its own
+   page). No specificity, so a row's own animation wins. */
+:where(.pd-app .pd-content) > :where(:not(.pd-banner, .pd-flow-tabs)) { animation: pd-page-in .2s ease-out; }
+@keyframes pd-page-in { from { opacity: 0; } }
 
 /* ── Banner: art only ────────────────────────────────────── */
 .pd-app .pd-banner { position: relative; flex: none; overflow: hidden; height: 148px; border-radius: var(--pd-r-banner); background: var(--pd-sky); }
