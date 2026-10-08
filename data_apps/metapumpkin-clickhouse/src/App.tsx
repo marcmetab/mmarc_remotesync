@@ -8,6 +8,7 @@ import { useShellData } from "./data/useShellData";
 import { useCityData, useStoreData, useStoresData } from "./data/useStoresData";
 import { useTruckData } from "./data/useTruckData";
 import { useWorldData } from "./data/useWorldData";
+import { warmIntent, Warmup } from "./data/warm";
 import { DataAppNav, useNav } from "./nav";
 import { BusinessPage } from "./pages/BusinessPage";
 import { Explore } from "./pages/business/Explore";
@@ -38,11 +39,10 @@ class PageBoundary extends Component<{ children: ReactNode }, { failed: boolean 
   }
 }
 
-const FOOTNOTE = "Live data · simulated clock";
-
 /*
  * One live container per page: it runs the page's hook (src/data/) and hands the view model to the
- * presentational page. Only the open page's queries run and poll. The static preview
+ * presentational page. Only the open page's queries poll; the warm-up (src/data/warm.tsx) runs the others'
+ * once, unseen, so they open at once. The static preview
  * (scripts/preview.mjs) renders the same pages from src/fixtures/ instead and never loads this file.
  */
 type LiveProps = { scope: Scope; onScope: (scope: Scope) => void; clock?: Clock };
@@ -183,14 +183,17 @@ function Root() {
   const live = useMemo(() => ({ route: pageRoute, scope, onScope: setScope, clock, period, truckPeriod, onPeriod: pickPeriod }), [pageRoute, scope, clock, period, truckPeriod, pickPeriod]);
   // The countries this viewer may see reach the shell's region control and every page (src/visible.ts).
   return <VisibleContext.Provider value={visible}><Shell active={tabOf(route.page)} scope={scope} onScope={setScope} period={route.page === "Truck" ? truckPeriod : period} onPeriod={pickPeriod}
-    clock={clock} lateVans={lateVans} footnote={FOOTNOTE} theme={theme} onTheme={setTheme}>
+    clock={clock} lateVans={lateVans} theme={theme} onTheme={setTheme}>
     <LiveContext.Provider value={live}>
       <PageBoundary key={pagePath}><LivePage/></PageBoundary>
     </LiveContext.Provider>
-  </Shell></VisibleContext.Provider>;
+  </Shell>
+    {/* The pages not open yet, loaded unseen so they open at once (src/data/warm.tsx). */}
+    <Warmup route={pageRoute} scope={scope} clock={clock} period={period}/>
+  </VisibleContext.Provider>;
 }
 
 export default function App() {
   const zone = useMemo(detectViewerZone, []);
-  return <ViewerZoneContext.Provider value={zone}><DataAppNav><Root/></DataAppNav></ViewerZoneContext.Provider>;
+  return <ViewerZoneContext.Provider value={zone}><DataAppNav prefetch={warmIntent}><Root/></DataAppNav></ViewerZoneContext.Provider>;
 }

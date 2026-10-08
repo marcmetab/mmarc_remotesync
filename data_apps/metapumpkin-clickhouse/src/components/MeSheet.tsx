@@ -17,8 +17,8 @@ const THEMES: Option<ThemeName>[] = [{ value: "light", label: "Light" }, { value
  * the time and date matter, and the avatar's dot turns pumpkin. Last, the way to Data flow, which has no tab on a
  * phone (the sidebar lists it from 900px up). Styles: sheet.css.
  */
-export function MeSheet({ scope, clock, theme, onTheme, footnote, onClose }: {
-  scope: Scope; clock?: Clock; theme: ThemeName; onTheme?: (theme: ThemeName) => void; footnote: string; onClose: () => void;
+export function MeSheet({ scope, clock, theme, onTheme, onClose }: {
+  scope: Scope; clock?: Clock; theme: ThemeName; onTheme?: (theme: ThemeName) => void; onClose: () => void;
 }) {
   const tz = useViewerZone();
   const shifted = clock?.mode === "shifted";
@@ -46,6 +46,5 @@ export function MeSheet({ scope, clock, theme, onTheme, footnote, onClose }: {
         <Icon name="chevronRight" size={16} strokeWidth={2}/>
       </Link>
     </div>
-    <p className="pd-sheet-foot">{footnote}</p>
   </Sheet>;
 }

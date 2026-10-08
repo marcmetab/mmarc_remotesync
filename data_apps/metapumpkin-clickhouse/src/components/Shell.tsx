@@ -40,8 +40,6 @@ export type ShellProps = {
   clock?: Clock;
   /** Vans running late right now (hub_now.vans_late, summed). Above zero, Harvest & fleet shows the orange dot. */
   lateVans?: number;
-  /** The line under the content. */
-  footnote?: string;
   /** Light or dark (data-theme on the root). The app root holds it: the system preference, until the switch is pressed. */
   theme?: ThemeName;
   /** The top bar's dark mode switch. Without it the switch is still drawn (the static preview) but does nothing. */
@@ -92,7 +90,7 @@ function MeButton({ clock, onOpen }: { clock?: Clock; onOpen: () => void }) {
  * already one place. Data flow has neither: the pipeline is the same for every region. The van page's switch adds Season. The route comes from the nav context, so the static
  * preview shows the switch on those pages too.
  */
-export function Shell({ active, scope, onScope, period = "today", onPeriod, clock, lateVans = 0, footnote = "Mock data · simulated clock", theme = "light", onTheme, children }: ShellProps) {
+export function Shell({ active, scope, onScope, period = "today", onPeriod, clock, lateVans = 0, theme = "light", onTheme, children }: ShellProps) {
   const late = lateVans > 0;
   const dark = theme === "dark";
   const { pathname, route } = useNav();
@@ -154,7 +152,6 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
             World has none either: the map is the page. */}
         {route.page !== "Fleet" && active !== "world" && <Banner variant={active} chip={seasonChip(active, tz, clock)}/>}
         {children}
-        <footer className="pd-footer">{footnote}</footer>
       </div></AccessoryProvider>
     </main>
 
@@ -168,7 +165,7 @@ export function Shell({ active, scope, onScope, period = "today", onPeriod, cloc
     <div className="pd-tabbar-fade" aria-hidden="true"/>
     <TabBar active={active} compact={compact} onExpand={expand} accessory={accessory} lateVans={lateVans} lateNote={LATE_NOTE} navRef={navRef}/>
 
-    {sheet === "me" && <MeSheet scope={scope} clock={clock} theme={theme} onTheme={onTheme} footnote={footnote} onClose={closeSheet}/>}
+    {sheet === "me" && <MeSheet scope={scope} clock={clock} theme={theme} onTheme={onTheme} onClose={closeSheet}/>}
     {sheet === "region" && <RegionSheet scope={scope} onScope={onScope} clock={clock} onClose={closeSheet}/>}
   </div></ThemeContext.Provider>;
 }
