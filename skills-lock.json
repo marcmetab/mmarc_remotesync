@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "metabase-data-apps": {
+      "source": "metabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/metabase-data-apps/v1/SKILL.md",
+      "computedHash": "f449742029e0946e061757d064475ab7cbf52bed6458c7c8ebe28a6f9608c196"
+    }
+  }
+}

@@ -1,0 +1,89 @@
+name: Recent order list
+entity_id: lwngO6IO3OIEQ4UzHtitl
+creator_id: api-key-user-c8c1a011-683b-4281-ad03-3112a28b9a15@api-key.invalid
+display: table
+collection_id: a5p1tzrgPWdeJi0h_9SOh
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: neondb
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - id
+    - - field
+      - base-type: type/DateTimeWithLocalTZ
+        effective-type: type/DateTimeWithLocalTZ
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - created_at
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - region
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - product
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - quantity
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - total
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - status
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - notes
+    limit: 200
+    order-by:
+    - - desc
+      - {}
+      - - field
+        - base-type: type/DateTimeWithLocalTZ
+          effective-type: type/DateTimeWithLocalTZ
+        - - neondb
+          - dataapps_v65
+          - store_orders
+          - created_at
+    source-table:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

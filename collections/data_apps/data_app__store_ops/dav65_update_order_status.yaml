@@ -1,0 +1,62 @@
+collection_id: a5p1tzrgPWdeJi0h_9SOh
+creator_id: marc@metabase.com
+description: Set status and notes on one order
+entity_id: 6qxM8ySc2kQ-Qwl2n8bMd
+implicit: []
+name: DAv65 Update order status
+parameter_mappings: []
+parameters:
+- id: t-notes
+  position: 2
+  slug: notes
+  target:
+  - variable
+  - - template-tag
+    - notes
+  type: string/=
+- id: t-order
+  position: 0
+  required: true
+  slug: order_id
+  target:
+  - variable
+  - - template-tag
+    - order_id
+  type: number/=
+- id: t-status
+  position: 1
+  required: true
+  slug: status
+  target:
+  - variable
+  - - template-tag
+    - status
+  type: string/=
+query:
+- database_id: neondb
+  dataset_query:
+    database: neondb
+    stages:
+    - native: update dataapps_v65.store_orders set status = {{status}}, notes = {{notes}} where id = {{order_id}}
+      template-tags:
+      - display-name: Order ID
+        id: t-order
+        name: order_id
+        required: true
+        type: number
+      - display-name: Status
+        id: t-status
+        name: status
+        required: true
+        type: text
+      - display-name: Notes
+        id: t-notes
+        name: notes
+        required: false
+        type: text
+      lib/type: mbql.stage/native
+    lib/type: mbql/query
+type: query
+visualization_settings: {}
+serdes/meta:
+- model: Action

@@ -1,0 +1,53 @@
+name: Store directory
+entity_id: lAVIsOtvxoIN2RlhvAE2G
+creator_id: api-key-user-c8c1a011-683b-4281-ad03-3112a28b9a15@api-key.invalid
+display: table
+collection_id: a5p1tzrgPWdeJi0h_9SOh
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: neondb
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - neondb
+        - dataapps_v65
+        - stores
+        - name
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - neondb
+        - dataapps_v65
+        - stores
+        - region
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - neondb
+        - dataapps_v65
+        - stores
+        - manager
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Text
+          effective-type: type/Text
+        - - neondb
+          - dataapps_v65
+          - stores
+          - name
+    source-table:
+    - neondb
+    - dataapps_v65
+    - stores
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

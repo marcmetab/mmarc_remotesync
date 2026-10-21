@@ -1,0 +1,390 @@
+name: DAv65 Order count
+entity_id: pbTVuYmTkPvCWl3CYVVoH
+creator_id: marc@metabase.com
+display: scalar
+collection_id: a5p1tzrgPWdeJi0h_9SOh
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: neondb
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    source-table:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+dimension_mappings:
+- dimension-id: 52b5a657-3ef4-3d36-89d6-4d5a3d72c522
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Integer
+    effective-type: type/Integer
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - id
+  type: table
+- dimension-id: 47e9fe1c-2c33-3e8f-aa24-2e2780c9ea11
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Integer
+    effective-type: type/Integer
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - store_id
+  type: table
+- dimension-id: eff1cb5d-891a-3d98-8610-db73d18fac45
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Text
+    effective-type: type/Text
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - region
+  type: table
+- dimension-id: 883ef7c1-a793-33cb-ae2f-2e1d910ff200
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Text
+    effective-type: type/Text
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - product
+  type: table
+- dimension-id: 584177f5-c2f2-3b81-b925-45db0304e08c
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Integer
+    effective-type: type/Integer
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - quantity
+  type: table
+- dimension-id: f44d81c8-baa9-3209-b1be-c9ce876197a2
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Decimal
+    effective-type: type/Decimal
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - total
+  type: table
+- dimension-id: 5111b2ae-fe7c-37bf-94f2-73c592a0bb7d
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Decimal
+    effective-type: type/Decimal
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - margin
+  type: table
+- dimension-id: ea9bdf58-3be5-38af-8533-3872fc6199ef
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Text
+    effective-type: type/Text
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - status
+  type: table
+- dimension-id: 4fa4e6bc-5f6c-3ec1-8e54-689e2475c229
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Text
+    effective-type: type/Text
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - notes
+  type: table
+- dimension-id: 6b1a0209-617b-33af-b489-b35448be0b0f
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/DateTimeWithLocalTZ
+    effective-type: type/DateTimeWithLocalTZ
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - created_at
+  type: table
+- dimension-id: 78b13978-66b4-3f6b-96ff-64b64ac26fe1
+  table-id:
+  - neondb
+  - dataapps_v65
+  - store_orders
+  target:
+  - field
+  - base-type: type/Text
+    effective-type: type/Text
+  - - neondb
+    - dataapps_v65
+    - store_orders
+    - channel_mvi6198j
+  type: table
+dimensions:
+- display-name: ID
+  effective-type: type/Integer
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: none
+  id: 52b5a657-3ef4-3d36-89d6-4d5a3d72c522
+  name: id
+  semantic-type: type/PK
+  sources:
+  - field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - id
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Store ID
+  effective-type: type/Integer
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: none
+  id: 47e9fe1c-2c33-3e8f-aa24-2e2780c9ea11
+  name: store_id
+  semantic-type: type/FK
+  sources:
+  - field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - store_id
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Region
+  effective-type: type/Text
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: list
+  id: eff1cb5d-891a-3d98-8610-db73d18fac45
+  name: region
+  semantic-type: type/Category
+  sources:
+  - field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - region
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Product
+  effective-type: type/Text
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: list
+  id: 883ef7c1-a793-33cb-ae2f-2e1d910ff200
+  name: product
+  semantic-type: type/Category
+  sources:
+  - field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - product
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Quantity
+  effective-type: type/Integer
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: list
+  id: 584177f5-c2f2-3b81-b925-45db0304e08c
+  name: quantity
+  semantic-type: type/Quantity
+  sources:
+  - binning: true
+    field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - quantity
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Total
+  effective-type: type/Decimal
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: none
+  id: f44d81c8-baa9-3209-b1be-c9ce876197a2
+  name: total
+  sources:
+  - binning: true
+    field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - total
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Margin
+  effective-type: type/Decimal
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: none
+  id: 5111b2ae-fe7c-37bf-94f2-73c592a0bb7d
+  name: margin
+  semantic-type: type/GrossMargin
+  sources:
+  - binning: true
+    field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - margin
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Status
+  effective-type: type/Text
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: list
+  id: ea9bdf58-3be5-38af-8533-3872fc6199ef
+  name: status
+  semantic-type: type/Category
+  sources:
+  - field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - status
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Notes
+  effective-type: type/Text
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: list
+  id: 4fa4e6bc-5f6c-3ec1-8e54-689e2475c229
+  name: notes
+  sources:
+  - field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - notes
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Created At
+  effective-type: type/DateTimeWithLocalTZ
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: none
+  id: 6b1a0209-617b-33af-b489-b35448be0b0f
+  name: created_at
+  semantic-type: type/CreationTimestamp
+  sources:
+  - field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - created_at
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+- display-name: Channel Mvi6198j
+  effective-type: type/Text
+  group:
+    display-name: Store Orders
+    id: 59f5084d-feab-377a-a0ce-62b6c5624cf3
+    type: main
+  has-field-values: list
+  id: 78b13978-66b4-3f6b-96ff-64b64ac26fe1
+  name: channel_mvi6198j
+  semantic-type: type/Source
+  sources:
+  - field-id:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    - channel_mvi6198j
+    type: field
+  status: status/active
+  lib/source: source/table-defaults
+type: metric

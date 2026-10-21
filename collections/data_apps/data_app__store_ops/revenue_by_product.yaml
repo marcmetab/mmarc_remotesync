@@ -1,0 +1,43 @@
+name: Revenue by product
+entity_id: PwpMQ3jVo7EwvqY4sgw5R
+creator_id: api-key-user-c8c1a011-683b-4281-ad03-3112a28b9a15@api-key.invalid
+display: table
+collection_id: a5p1tzrgPWdeJi0h_9SOh
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: neondb
+  stages:
+  - aggregation:
+    - - measure
+      - display-name: DAv65 Total revenue
+        name: revenue
+        lib/uuid: 42052af2-6b07-4b06-b877-a0fb004ca6a8
+      - u4_4IzpaQYIB0AVfjYAfx
+    breakout:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - product
+    order-by:
+    - - desc
+      - {}
+      - - aggregation
+        - base-type: type/Number
+          effective-type: type/Number
+          lib/source-name: revenue
+        - 42052af2-6b07-4b06-b877-a0fb004ca6a8
+    source-table:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

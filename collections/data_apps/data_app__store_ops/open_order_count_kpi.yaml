@@ -1,0 +1,29 @@
+name: Open order count kpi
+entity_id: PSaXFPfPVtlMD53NTiaXM
+creator_id: api-key-user-c8c1a011-683b-4281-ad03-3112a28b9a15@api-key.invalid
+display: table
+collection_id: a5p1tzrgPWdeJi0h_9SOh
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: neondb
+  stages:
+  - aggregation:
+    - - metric
+      - effective-type: type/Integer
+      - pbTVuYmTkPvCWl3CYVVoH
+    filters:
+    - - segment
+      - {}
+      - 0QKYdCxTfwrN0w0kZbvvD
+    source-table:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

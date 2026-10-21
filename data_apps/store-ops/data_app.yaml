@@ -1,0 +1,9 @@
+collection: a5p1tzrgPWdeJi0h_9SOh
+description: 'Store operations dashboard for executives: orders, revenue, and open order management'
+entity_id: 8elEH_U51AKoXB_Z-Bp7v
+name: Store Ops
+path: dist/index.js
+slug: store-ops
+version: 1
+serdes/meta:
+- model: DataApp
