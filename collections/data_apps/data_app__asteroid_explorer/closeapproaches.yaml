@@ -1,0 +1,67 @@
+name: CloseApproaches
+entity_id: YeDAUE1euKqv19CV73fMz
+creator_id: api-key-user-fe334365-469a-4b59-a1c6-e6f7a83630ca@api-key.invalid
+display: table
+collection_id: 8e9bxol_E_eiwlk3k5XJf
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Data Apps Demo
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Data Apps Demo
+        - asteroid
+        - ast_close_approaches
+        - des
+    - - field
+      - base-type: type/DateTimeWithLocalTZ
+        effective-type: type/DateTimeWithLocalTZ
+      - - Data Apps Demo
+        - asteroid
+        - ast_close_approaches
+        - approach_at
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_close_approaches
+        - dist_lunar
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_close_approaches
+        - dist_km
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_close_approaches
+        - v_rel_kms
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/DateTimeWithLocalTZ
+          effective-type: type/DateTimeWithLocalTZ
+        - - Data Apps Demo
+          - asteroid
+          - ast_close_approaches
+          - approach_at
+    source-table:
+    - Data Apps Demo
+    - asteroid
+    - ast_close_approaches
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

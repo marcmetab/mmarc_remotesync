@@ -1,0 +1,78 @@
+name: SeasonPlan
+entity_id: 12byt4AK1G5-_gX7yKEV-
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - season_plan
+        - country_code
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - season_plan
+        - region_code
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - season_plan
+        - revenue_to_date_usd
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - season_plan
+        - plan_to_date_revenue_usd
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - season_plan
+        - season_plan_revenue_usd
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - season_plan
+        - days_left
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - season_plan
+        - ly_season_revenue_usd
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - season_plan
+        - ly_to_date_revenue_usd
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - season_plan
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

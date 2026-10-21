@@ -1,0 +1,82 @@
+name: DeliveriesByDay
+entity_id: My0PvXEs5YWozrqLzurNg
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - deliveries
+          - is_delivered
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - deliveries
+          - is_on_time
+    breakout:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - deliveries
+        - country_code
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - deliveries
+        - hub_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - deliveries
+        - days_ago
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - deliveries
+        - delay_cause
+    filters:
+    - - <=
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - deliveries
+          - days_ago
+      - 13
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - deliveries
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

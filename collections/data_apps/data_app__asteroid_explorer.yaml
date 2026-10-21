@@ -1,0 +1,6 @@
+name: 'Data App: asteroid-explorer'
+entity_id: 8e9bxol_E_eiwlk3k5XJf
+slug: data_app__asteroid_explorer
+namespace: data-apps
+serdes/meta:
+- model: Collection

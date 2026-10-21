@@ -1,14 +1,9 @@
-version: 1
-
-name: My App
-
+collection: dx9K9qEVHlwvnAQstgcU9
 description: Starter website with Home, About and Contact pages
-
-path: ./dist/index.js
-
-# Origins this app may call with fetch/XHR. Everything else is blocked — both in
-# `npm run dev` (via the dev server's CSP) and inside Metabase (the sandbox).
-# The Metabase instance itself is reached through the SDK, not listed here.
-# allowed_hosts:
-#   - https://api.example.com
-#   - https://*.internal.acme.com
+entity_id: 5b02edef3e7e45f4baa8e
+name: My App
+path: data_apps/my-app/dist/index.js
+slug: my-app
+version: 1
+serdes/meta:
+- model: DataApp

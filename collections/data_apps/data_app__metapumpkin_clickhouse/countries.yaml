@@ -1,0 +1,29 @@
+name: Countries
+entity_id: Kd9Rgty0-1P87XlyOpGs1
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - countries
+        - country_code
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - countries
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

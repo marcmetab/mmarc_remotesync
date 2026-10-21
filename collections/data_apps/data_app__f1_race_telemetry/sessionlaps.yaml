@@ -1,0 +1,197 @@
+name: SessionLaps
+entity_id: t2pHsaZJkeW2W62o_vlZI
+creator_id: api-key-user-fe334365-469a-4b59-a1c6-e6f7a83630ca@api-key.invalid
+display: table
+collection_id: 3Wp5Aheprh50ac2cfet6j
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Hack2026_Bob
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - session_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - driver_number
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - driver
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - team
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - lap_number
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - position
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - lap_time_ms
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - sector1_ms
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - sector2_ms
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - sector3_ms
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - speed_st
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - compound
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - tyre_life
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - fresh_tyre
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - stint
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - lap_start_ms
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - lap_end_ms
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - pit_in_ms
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - pit_out_ms
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - is_personal_best
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - laps
+        - track_status
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Hack2026_Bob
+          - f1
+          - laps
+          - session_id
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Hack2026_Bob
+          - f1
+          - laps
+          - lap_number
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Float
+          effective-type: type/Float
+        - - Hack2026_Bob
+          - f1
+          - laps
+          - position
+    source-table:
+    - Hack2026_Bob
+    - f1
+    - laps
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

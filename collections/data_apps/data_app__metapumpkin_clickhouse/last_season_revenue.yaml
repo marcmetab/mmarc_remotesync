@@ -1,0 +1,39 @@
+name: Last season revenue
+description: Revenue of the 2025 season on the matching days, paced like the plan.
+entity_id: vIPpPwk1wkKmaBfepdUAp
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: line
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - sum
+      - display-name: Last season revenue
+        name: Last season revenue
+      - - field
+        - {}
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - ly_revenue_usd
+    breakout:
+    - - field
+      - temporal-unit: day
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - local_date
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - daily_store_sales
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: metric

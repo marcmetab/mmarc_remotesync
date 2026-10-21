@@ -1,0 +1,6 @@
+name: 'Data App: f1-race-telemetry'
+entity_id: 3Wp5Aheprh50ac2cfet6j
+slug: data_app__f1_race_telemetry
+namespace: data-apps
+serdes/meta:
+- model: Collection

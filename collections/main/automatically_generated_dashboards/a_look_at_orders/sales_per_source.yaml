@@ -1,0 +1,53 @@
+name: Sales per source
+entity_id: VrDohaWs6-NjW2yYgmMaQ
+creator_id: marc@metabase.com
+display: area
+collection_id: jX4m2I64vZOXhYqkFjgcR
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    breakout:
+    - - field
+      - base-type: type/DateTime
+        effective-type: type/DateTime
+        temporal-unit: month
+      - - Sample Database
+        - null
+        - ORDERS
+        - CREATED_AT
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+        source-field:
+        - Sample Database
+        - null
+        - ORDERS
+        - USER_ID
+      - - Sample Database
+        - null
+        - PEOPLE
+        - SOURCE
+    source-table:
+    - Sample Database
+    - null
+    - ORDERS
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings:
+  graph.dimensions:
+  - CREATED_AT
+  - SOURCE
+  graph.metrics: []
+  graph.series_labels:
+  - null
+  stackable.stack_type: stacked
+card_schema: 24
+serdes/meta:
+- model: Card
+dashboard_id: aRFfcFotJcWHLrW6aYOU_
+type: question

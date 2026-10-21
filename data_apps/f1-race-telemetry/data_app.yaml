@@ -1,10 +1,9 @@
-version: 1
-
-name: F1 Race Telemetry
-
+collection: 3Wp5Aheprh50ac2cfet6j
 description: Lap-by-lap race replay with live timing, track map and per-driver telemetry — speed, RPM, gear, throttle, brake, DRS and g-force.
-
-path: ./dist/index.js
-
-# No `allowed_hosts`: the app reads Metabase through the SDK data hooks and
-# makes no external fetch/XHR calls of its own.
+entity_id: c5de655626da4b39b2cf7
+name: F1 Race Telemetry
+path: data_apps/f1-race-telemetry/dist/index.js
+slug: f1-race-telemetry
+version: 1
+serdes/meta:
+- model: DataApp

@@ -1,0 +1,135 @@
+name: SessionList
+entity_id: 2So7YJahmrv1pTcv7jnfD
+creator_id: api-key-user-fe334365-469a-4b59-a1c6-e6f7a83630ca@api-key.invalid
+display: table
+collection_id: 3Wp5Aheprh50ac2cfet6j
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Hack2026_Bob
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - session_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - year
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - round
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - event_name
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - official_name
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - session_name
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - location
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - country
+    - - field
+      - base-type: type/DateTimeWithLocalTZ
+        effective-type: type/DateTimeWithLocalTZ
+      - - Hack2026_Bob
+        - f1
+        - sessions
+        - start_utc
+    filters:
+    - - does-not-contain
+      - {}
+      - - field
+        - base-type: type/Text
+          effective-type: type/Text
+        - - Hack2026_Bob
+          - f1
+          - sessions
+          - session_name
+      - Practice
+    - - does-not-contain
+      - {}
+      - - field
+        - base-type: type/Text
+          effective-type: type/Text
+        - - Hack2026_Bob
+          - f1
+          - sessions
+          - session_name
+      - Qualifying
+    limit: 200
+    order-by:
+    - - desc
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Hack2026_Bob
+          - f1
+          - sessions
+          - year
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Hack2026_Bob
+          - f1
+          - sessions
+          - round
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Hack2026_Bob
+          - f1
+          - sessions
+          - session_number
+    source-table:
+    - Hack2026_Bob
+    - f1
+    - sessions
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

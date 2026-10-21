@@ -1,0 +1,46 @@
+name: Sales per product
+entity_id: MLXQVARCASRBH0KJHc3F1
+creator_id: marc@metabase.com
+display: table
+collection_id: jX4m2I64vZOXhYqkFjgcR
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    breakout:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+        source-field:
+        - Sample Database
+        - null
+        - ORDERS
+        - PRODUCT_ID
+      - - Sample Database
+        - null
+        - PRODUCTS
+        - TITLE
+    source-table:
+    - Sample Database
+    - null
+    - ORDERS
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings:
+  column_settings:
+    '["name","null"]':
+      show_mini_bar: true
+  graph.dimensions:
+  - TITLE
+  graph.metrics: []
+  graph.series_labels:
+  - null
+card_schema: 24
+serdes/meta:
+- model: Card
+dashboard_id: aRFfcFotJcWHLrW6aYOU_
+type: question

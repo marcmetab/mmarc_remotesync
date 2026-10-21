@@ -1,0 +1,31 @@
+name: StoreNow
+entity_id: ic4ZwC-sl8HFsJPOEttXF
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - store_now
+          - store_id
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - store_now
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

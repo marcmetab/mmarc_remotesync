@@ -1,0 +1,6 @@
+name: Automatically Generated Dashboards
+entity_id: jX4m2I64vZOXhYqkFjgcR
+slug: automatically_generated_dashboards
+serdes/meta:
+- model: Collection
+is_remote_synced: true

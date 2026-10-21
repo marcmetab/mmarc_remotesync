@@ -1,0 +1,81 @@
+name: DriverLapTrace
+entity_id: mNyDQr9jUyaYs0AYYSV37
+creator_id: api-key-user-fe334365-469a-4b59-a1c6-e6f7a83630ca@api-key.invalid
+display: table
+collection_id: 3Wp5Aheprh50ac2cfet6j
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Hack2026_Bob
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - session_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - driver_number
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - lap_number
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - distance_m
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - speed
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - throttle
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - brake
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Float
+          effective-type: type/Float
+        - - Hack2026_Bob
+          - f1
+          - lap_telemetry
+          - distance_m
+    source-table:
+    - Hack2026_Bob
+    - f1
+    - lap_telemetry
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

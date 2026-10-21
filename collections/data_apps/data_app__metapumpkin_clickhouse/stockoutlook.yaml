@@ -1,0 +1,145 @@
+name: StockOutlook
+entity_id: VCmz17gKrXN2ieaowh1Q9
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - store_units
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - hub_units
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - transit_units
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - harvest_plan_units
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - sold_expected_units
+    - - metric
+      - effective-type: type/Number
+      - TIOnz2pi7xzcWgIWVHE1b
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - leftover_nov1_low_units
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - leftover_nov1_high_units
+    - - metric
+      - effective-type: type/Number
+      - n7SEkrNE25OWO79JVbFiK
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - leftover_nov1_retail_usd
+    - - metric
+      - effective-type: type/Number
+      - 6O6EJTcFuxPecyRTxWEko
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - season_end_leftover_units
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - season_end_leftover_cost_usd
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - november_demand_units
+    breakout:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - stock_outlook
+        - country_code
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - stock_outlook
+        - variety_name
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - stock_outlook
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

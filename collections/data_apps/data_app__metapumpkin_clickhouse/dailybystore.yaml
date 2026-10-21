@@ -1,0 +1,84 @@
+name: DailyByStore
+entity_id: l9BLU-ZhKShWSpK3qKgoR
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - metric
+      - effective-type: type/Number
+      - YA7xF-h_lolPWon02xRB-
+    - - metric
+      - effective-type: type/Number
+      - hhf4mbYYyM1lOYzefI1u4
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - units_lost
+    - - metric
+      - effective-type: type/Number
+      - TYQDFQQW_xp6He9WlVLJG
+    - - metric
+      - effective-type: type/Number
+      - KRf0xX2B581IFshfJYh3_
+    breakout:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - city_key
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - store_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - days_ago
+    - - field
+      - base-type: type/Date
+        effective-type: type/Date
+        temporal-unit: day
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - local_date
+    filters:
+    - - <=
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - days_ago
+      - 29
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - daily_store_sales
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

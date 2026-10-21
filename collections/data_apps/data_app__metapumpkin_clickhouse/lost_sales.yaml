@@ -1,0 +1,39 @@
+name: Lost sales
+description: Revenue we could not take because a store ran out of a variety, in USD.
+entity_id: TYQDFQQW_xp6He9WlVLJG
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: line
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - sum
+      - display-name: Lost sales
+        name: Lost sales
+      - - field
+        - {}
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - lost_revenue_usd
+    breakout:
+    - - field
+      - temporal-unit: day
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - local_date
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - daily_store_sales
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: metric

@@ -1,0 +1,78 @@
+name: SalesPulse
+entity_id: NtHAkJKFoWF0LD-Y9CV0w
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - sales_pulse
+        - country_code
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - sales_pulse
+        - region_code
+    - - field
+      - base-type: type/Date
+        effective-type: type/Date
+      - - Pumpkin database
+        - pumpkin_live
+        - sales_pulse
+        - local_date
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - sales_pulse
+        - revenue_today_usd
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - sales_pulse
+        - sales_last_hour
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - sales_pulse
+        - seconds_since_last_sale
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - sales_pulse
+        - revenue_last_hour_usd
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - sales_pulse
+        - units_today
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - sales_pulse
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

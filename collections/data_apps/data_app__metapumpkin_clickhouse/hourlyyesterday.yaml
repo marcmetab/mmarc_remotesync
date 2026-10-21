@@ -1,0 +1,91 @@
+name: HourlyYesterday
+entity_id: Gi1fvZ7KKdcfhOND0lLPh
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - hourly_store_sales
+          - units_sold
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - hourly_store_sales
+          - units_lost
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - hourly_store_sales
+          - revenue_usd
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - hourly_store_sales
+          - lost_revenue_usd
+    breakout:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - hourly_store_sales
+        - city_key
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - hourly_store_sales
+        - store_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - hourly_store_sales
+        - local_hour
+    filters:
+    - - =
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - hourly_store_sales
+          - days_ago
+      - 1
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - hourly_store_sales
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

@@ -1,0 +1,60 @@
+name: TorinoHistory
+entity_id: oRMk3SWfGvr8Y1qoCmKYy
+creator_id: api-key-user-fe334365-469a-4b59-a1c6-e6f7a83630ca@api-key.invalid
+display: table
+collection_id: 8e9bxol_E_eiwlk3k5XJf
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Data Apps Demo
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Data Apps Demo
+        - asteroid
+        - ast_torino_history
+        - des
+    - - field
+      - base-type: type/Date
+        effective-type: type/Date
+      - - Data Apps Demo
+        - asteroid
+        - ast_torino_history
+        - event_date
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Data Apps Demo
+        - asteroid
+        - ast_torino_history
+        - torino
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Data Apps Demo
+        - asteroid
+        - ast_torino_history
+        - event
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Date
+          effective-type: type/Date
+        - - Data Apps Demo
+          - asteroid
+          - ast_torino_history
+          - event_date
+    source-table:
+    - Data Apps Demo
+    - asteroid
+    - ast_torino_history
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

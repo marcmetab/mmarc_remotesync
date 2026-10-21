@@ -1,0 +1,164 @@
+name: BusinessDaily
+entity_id: iQFK6WTrNZNOCKQVBZeLq
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - metric
+      - effective-type: type/Number
+      - hhf4mbYYyM1lOYzefI1u4
+    - - metric
+      - effective-type: type/Number
+      - KRf0xX2B581IFshfJYh3_
+    - - metric
+      - effective-type: type/Number
+      - vIPpPwk1wkKmaBfepdUAp
+    - - metric
+      - effective-type: type/Number
+      - WjhyAAfYroBrpN4X3POY5
+    - - metric
+      - effective-type: type/Number
+      - YA7xF-h_lolPWon02xRB-
+    - - metric
+      - effective-type: type/Number
+      - TYQDFQQW_xp6He9WlVLJG
+    - - metric
+      - effective-type: type/Number
+      - r2TSd_RnGSRyRvYr5nnmj
+    - - metric
+      - effective-type: type/Number
+      - f1VaRLC_KtuhPAjvlXzCE
+    - - metric
+      - effective-type: type/Number
+      - 7-PCe1Q3soz0u75beFblE
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - lost_shortage_usd
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - lost_demand_usd
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - shrink_transit_usd
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - markdown_usd
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - online_revenue_usd
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - units_requested
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - plan_units
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Decimal
+          effective-type: type/Decimal
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - ly_units
+    - - metric
+      - effective-type: type/Number
+      - nGEAr9RcEfCdXKvkzo-x_
+    - - metric
+      - effective-type: type/Number
+      - _5bmOVgEeaHl1sIrdFnNY
+    breakout:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - country_code
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - days_ago
+    - - field
+      - base-type: type/Date
+        effective-type: type/Date
+        temporal-unit: day
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - local_date
+    - - field
+      - base-type: type/Boolean
+        effective-type: type/Boolean
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - is_weekend
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - variety_name
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - daily_store_sales
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

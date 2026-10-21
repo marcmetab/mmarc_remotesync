@@ -1,0 +1,66 @@
+name: TelemetryLapIndex
+entity_id: _TeaKXbom1g6gttfdvJ6m
+creator_id: marc@metabase.com
+display: table
+collection_id: 3Wp5Aheprh50ac2cfet6j
+parameters:
+- id: 4e677587-8beb-4896-8155-b2e9e5bf2140
+  isMultiSelect: false
+  name: Order Date
+  position: 0
+  slug: order_date
+  target:
+  - variable
+  - - template-tag
+    - order_date
+  type: date/single
+parameter_mappings: []
+dataset_query:
+  database: Hack2026_Bob
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    breakout:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - session_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - driver_number
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - lap_telemetry
+        - lap_number
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Hack2026_Bob
+          - f1
+          - lap_telemetry
+          - driver_number
+    source-table:
+    - Hack2026_Bob
+    - f1
+    - lap_telemetry
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

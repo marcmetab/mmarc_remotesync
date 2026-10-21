@@ -1,0 +1,207 @@
+name: NeoDetails
+entity_id: RbWzuBRIoXIC7PH829osb
+creator_id: api-key-user-fe334365-469a-4b59-a1c6-e6f7a83630ca@api-key.invalid
+display: table
+collection_id: 8e9bxol_E_eiwlk3k5XJf
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Data Apps Demo
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - spkid
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - designation
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - full_name
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - a_au
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - e
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - i_deg
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - node_deg
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - peri_deg
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - mean_anomaly_deg
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - mean_motion_deg_day
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - epoch_jd
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - name
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - orbit_class
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - is_pha
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - discovery_year
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - period_years
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - moid_au
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - abs_magnitude_h
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - diameter_km
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - n_obs_used
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - on_risk_list
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - torino_max
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - palermo_cum
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - impact_probability
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Data Apps Demo
+        - asteroid
+        - ast_neo_orbits
+        - impact_year_range
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Float
+          effective-type: type/Float
+        - - Data Apps Demo
+          - asteroid
+          - ast_neo_orbits
+          - abs_magnitude_h
+    source-table:
+    - Data Apps Demo
+    - asteroid
+    - ast_neo_orbits
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

@@ -1,0 +1,6 @@
+name: 'Data App: metapumpkin-clickhouse'
+entity_id: IX6J4hGcl6uHH6EXFeE1A
+slug: data_app__metapumpkin_clickhouse
+namespace: data-apps
+serdes/meta:
+- model: Collection

@@ -1,0 +1,60 @@
+name: SessionTrackStatus
+entity_id: 8mNgALiDcmfgzUxfTs7Uj
+creator_id: api-key-user-fe334365-469a-4b59-a1c6-e6f7a83630ca@api-key.invalid
+display: table
+collection_id: 3Wp5Aheprh50ac2cfet6j
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Hack2026_Bob
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - track_status
+        - session_id
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - track_status
+        - session_time_ms
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - track_status
+        - status
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - track_status
+        - message
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/BigInteger
+          effective-type: type/BigInteger
+        - - Hack2026_Bob
+          - f1
+          - track_status
+          - session_time_ms
+    source-table:
+    - Hack2026_Bob
+    - f1
+    - track_status
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

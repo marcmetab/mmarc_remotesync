@@ -1,7 +1,9 @@
-version: 1
-
-name: Asteroid Explorer
-
+collection: 8e9bxol_E_eiwlk3k5XJf
 description: 3D orbits of near-Earth asteroids with impact risk, close approaches and per-object detail.
-
-path: ./dist/index.js
+entity_id: b1421f1eb421426096b20
+name: Asteroid Explorer
+path: data_apps/asteroid-explorer/dist/index.js
+slug: asteroid-explorer
+version: 1
+serdes/meta:
+- model: DataApp

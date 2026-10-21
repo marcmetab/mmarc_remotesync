@@ -1,0 +1,39 @@
+name: Revenue
+description: Money taken from pumpkins sold, in USD, after markdowns.
+entity_id: hhf4mbYYyM1lOYzefI1u4
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: line
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - sum
+      - display-name: Revenue
+        name: Revenue
+      - - field
+        - {}
+        - - Pumpkin database
+          - pumpkin_live
+          - daily_store_sales
+          - revenue_usd
+    breakout:
+    - - field
+      - temporal-unit: day
+      - - Pumpkin database
+        - pumpkin_live
+        - daily_store_sales
+        - local_date
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - daily_store_sales
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: metric

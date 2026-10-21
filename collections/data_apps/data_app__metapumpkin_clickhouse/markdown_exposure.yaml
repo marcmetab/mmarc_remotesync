@@ -1,0 +1,32 @@
+name: Markdown exposure
+description: What the November markdowns are expected to give away on the leftover pumpkins that still sell, in USD.
+entity_id: 6O6EJTcFuxPecyRTxWEko
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: scalar
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - sum
+      - display-name: Markdown exposure
+        name: Markdown exposure
+      - - field
+        - {}
+        - - Pumpkin database
+          - pumpkin_live
+          - stock_outlook
+          - markdown_exposure_usd
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - stock_outlook
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: metric

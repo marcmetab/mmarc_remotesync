@@ -1,0 +1,42 @@
+name: Transactions in the last 30 days
+entity_id: 0p6Au2xUxFS4la_6y3Hmh
+creator_id: marc@metabase.com
+display: scalar
+collection_id: jX4m2I64vZOXhYqkFjgcR
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    filters:
+    - - time-interval
+      - {}
+      - - field
+        - base-type: type/DateTime
+          effective-type: type/DateTime
+          temporal-unit: month
+        - - Sample Database
+          - null
+          - ORDERS
+          - CREATED_AT
+      - -30
+      - day
+    source-table:
+    - Sample Database
+    - null
+    - ORDERS
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings:
+  graph.dimensions: null
+  graph.metrics: []
+  graph.series_labels:
+  - null
+card_schema: 24
+serdes/meta:
+- model: Card
+dashboard_id: aRFfcFotJcWHLrW6aYOU_
+type: question

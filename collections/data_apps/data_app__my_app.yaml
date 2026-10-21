@@ -1,0 +1,6 @@
+name: 'Data App: my-app'
+entity_id: dx9K9qEVHlwvnAQstgcU9
+slug: data_app__my_app
+namespace: data-apps
+serdes/meta:
+- model: Collection

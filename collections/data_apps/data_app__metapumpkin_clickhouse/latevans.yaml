@@ -1,0 +1,35 @@
+name: LateVans
+entity_id: bD32p9UOOwNWAR8WHqpya
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    filters:
+    - - =
+      - {}
+      - - field
+        - base-type: type/Boolean
+          effective-type: type/Boolean
+        - - Pumpkin database
+          - pumpkin_live
+          - fleet_now
+          - is_late
+      - true
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - fleet_now
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

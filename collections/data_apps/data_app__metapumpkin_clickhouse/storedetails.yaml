@@ -1,0 +1,21 @@
+name: StoreDetails
+entity_id: 16GDbUM5nXK_piAgi9oMY
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - stores
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

@@ -1,0 +1,99 @@
+name: SessionCorners
+entity_id: SJuv7iv3idSVnQj0VkFdc
+creator_id: marc@metabase.com
+display: table
+collection_id: 3Wp5Aheprh50ac2cfet6j
+parameters:
+- id: 4e677587-8beb-4896-8155-b2e9e5bf2140
+  isMultiSelect: false
+  name: Country
+  position: 0
+  slug: country
+  target:
+  - variable
+  - - template-tag
+    - country
+  type: string/=
+  values_query_type: list
+parameter_mappings: []
+dataset_query:
+  database: Hack2026_Bob
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - circuit_corners
+        - session_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - circuit_corners
+        - corner_number
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - circuit_corners
+        - letter
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - circuit_corners
+        - x
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - circuit_corners
+        - y
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - circuit_corners
+        - distance_m
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - circuit_corners
+        - angle
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - circuit_corners
+        - rotation
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Integer
+          effective-type: type/Integer
+        - - Hack2026_Bob
+          - f1
+          - circuit_corners
+          - corner_number
+    source-table:
+    - Hack2026_Bob
+    - f1
+    - circuit_corners
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

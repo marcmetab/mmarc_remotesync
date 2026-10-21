@@ -1,0 +1,137 @@
+name: SessionResults
+entity_id: VeAlrty1Wh72YoeNNGsn0
+creator_id: api-key-user-fe334365-469a-4b59-a1c6-e6f7a83630ca@api-key.invalid
+display: table
+collection_id: 3Wp5Aheprh50ac2cfet6j
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Hack2026_Bob
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - results
+        - session_id
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Hack2026_Bob
+        - f1
+        - results
+        - driver_number
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - abbreviation
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - full_name
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - broadcast_name
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - country_code
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - team_name
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - team_color
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - headshot_url
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - results
+        - position
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - classified_position
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - results
+        - grid_position
+    - - field
+      - base-type: type/Float
+        effective-type: type/Float
+      - - Hack2026_Bob
+        - f1
+        - results
+        - points
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Hack2026_Bob
+        - f1
+        - results
+        - status
+    - - field
+      - base-type: type/BigInteger
+        effective-type: type/BigInteger
+      - - Hack2026_Bob
+        - f1
+        - results
+        - race_time_ms
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Float
+          effective-type: type/Float
+        - - Hack2026_Bob
+          - f1
+          - results
+          - position
+    source-table:
+    - Hack2026_Bob
+    - f1
+    - results
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

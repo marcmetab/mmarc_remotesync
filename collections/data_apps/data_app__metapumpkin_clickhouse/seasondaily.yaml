@@ -1,0 +1,81 @@
+name: SeasonDaily
+entity_id: kF-W7osleAWQSpBA5_uRs
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - fields:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+      - - Pumpkin database
+        - pumpkin_live
+        - season_daily
+        - country_code
+    - - field
+      - base-type: type/Date
+        effective-type: type/Date
+      - - Pumpkin database
+        - pumpkin_live
+        - season_daily
+        - local_date
+    - - field
+      - base-type: type/Boolean
+        effective-type: type/Boolean
+      - - Pumpkin database
+        - pumpkin_live
+        - season_daily
+        - is_today
+    - - field
+      - base-type: type/Integer
+        effective-type: type/Integer
+      - - Pumpkin database
+        - pumpkin_live
+        - season_daily
+        - days_to_halloween
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - season_daily
+        - cum_plan_revenue_usd
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - season_daily
+        - cum_ly_revenue_usd
+    - - field
+      - base-type: type/Decimal
+        effective-type: type/Decimal
+      - - Pumpkin database
+        - pumpkin_live
+        - season_daily
+        - cum_revenue_usd
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Date
+          effective-type: type/Date
+        - - Pumpkin database
+          - pumpkin_live
+          - season_daily
+          - local_date
+    source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - season_daily
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

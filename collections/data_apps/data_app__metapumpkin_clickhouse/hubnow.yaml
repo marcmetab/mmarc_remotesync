@@ -1,0 +1,21 @@
+name: HubNow
+entity_id: ZK9m4V2hAK6LZOXzs10ft
+creator_id: api-key-user-c1835c67-d323-4241-8fd4-611da01df342@api-key.invalid
+display: table
+collection_id: IX6J4hGcl6uHH6EXFeE1A
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Pumpkin database
+  stages:
+  - source-table:
+    - Pumpkin database
+    - pumpkin_live
+    - hub_now
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

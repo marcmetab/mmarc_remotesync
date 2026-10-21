@@ -1,0 +1,29 @@
+name: Total transactions
+entity_id: 3kB1Y8CP2HQDRV1sGr-YL
+creator_id: marc@metabase.com
+display: scalar
+collection_id: jX4m2I64vZOXhYqkFjgcR
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    source-table:
+    - Sample Database
+    - null
+    - ORDERS
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings:
+  graph.dimensions: null
+  graph.metrics: []
+  graph.series_labels:
+  - null
+card_schema: 24
+serdes/meta:
+- model: Card
+dashboard_id: aRFfcFotJcWHLrW6aYOU_
+type: question
