@@ -1,0 +1,66 @@
+name: Revenue by region and month
+entity_id: bVAflQqFIlDKyAaVAgo41
+creator_id: api-key-user-c8c1a011-683b-4281-ad03-3112a28b9a15@api-key.invalid
+display: table
+collection_id: a5p1tzrgPWdeJi0h_9SOh
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: neondb
+  stages:
+  - aggregation:
+    - - measure
+      - display-name: DAv65 Total revenue
+        name: revenue
+      - u4_4IzpaQYIB0AVfjYAfx
+    breakout:
+    - - field
+      - base-type: type/Text
+        effective-type: type/Text
+        name: region
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - region
+    - - field
+      - base-type: type/DateTimeWithLocalTZ
+        effective-type: type/DateTimeWithLocalTZ
+        name: created_month
+        temporal-unit: month
+      - - neondb
+        - dataapps_v65
+        - store_orders
+        - created_at
+    order-by:
+    - - asc
+      - {}
+      - - field
+        - base-type: type/Text
+          effective-type: type/Text
+          name: region
+        - - neondb
+          - dataapps_v65
+          - store_orders
+          - region
+    - - asc
+      - {}
+      - - field
+        - base-type: type/DateTimeWithLocalTZ
+          effective-type: type/DateTimeWithLocalTZ
+          name: created_month
+          temporal-unit: month
+        - - neondb
+          - dataapps_v65
+          - store_orders
+          - created_at
+    source-table:
+    - neondb
+    - dataapps_v65
+    - store_orders
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

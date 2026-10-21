@@ -15,6 +15,22 @@ function pickFields<TFields extends object, TKey extends keyof TFields>(
 }
 
 const actions = {
+  "dAv65DeleteOrder(unusedByApp)": {
+    kind: "action",
+    key: "dAv65DeleteOrder(unusedByApp)",
+    id: 3,
+    name: "DAv65 Delete order (unused by app)",
+    type: "query",
+    parameters: [
+      {
+        slug: "order_id",
+        displayName: "order_id",
+        jsType: "number",
+        required: true
+      }
+    ],
+    entityId: "pocpc0xXs2tm3rz1C7EMX"
+  },
   dAv65UpdateOrderStatus: {
     kind: "action",
     key: "dAv65UpdateOrderStatus",
@@ -4966,16 +4982,6 @@ const tables = {
     id: 590,
     name: "Store Orders",
     fields: {
-      channelMvi6198j: {
-        /* metadata: { "displayName": "Channel Mvi6198j", "semanticType": "type/Source" } */
-        type: "column",
-        name: "channel_mvi6198j",
-        sourceName: "store_orders",
-        jsType: "string",
-        fieldId: 6156,
-        tableId: 590,
-        baseType: "type/Text"
-      },
       createdAt: {
         /* metadata: { "displayName": "Created At", "semanticType": "type/CreationTimestamp" } */
         type: "column",
@@ -5101,6 +5107,44 @@ const tables = {
             jsType: "number"
           }
         ]
+      }
+    }
+  },
+  storeTargets: {
+    /* metadata: { "databaseName": "neondb", "schemaName": "dataapps_v65", "tableName": "store_targets" } */
+    type: "table",
+    id: 592,
+    name: "Store Targets",
+    fields: {
+      monthlyTarget: {
+        /* metadata: { "displayName": "Monthly Target" } */
+        type: "column",
+        name: "monthly_target",
+        sourceName: "store_targets",
+        jsType: "number",
+        fieldId: 6158,
+        tableId: 592,
+        baseType: "type/Decimal"
+      },
+      owner: {
+        /* metadata: { "displayName": "Owner", "semanticType": "type/Owner" } */
+        type: "column",
+        name: "owner",
+        sourceName: "store_targets",
+        jsType: "string",
+        fieldId: 6159,
+        tableId: 592,
+        baseType: "type/Text"
+      },
+      region: {
+        /* metadata: { "displayName": "Region", "semanticType": "type/PK" } */
+        type: "column",
+        name: "region",
+        sourceName: "store_targets",
+        jsType: "string",
+        fieldId: 6157,
+        tableId: 592,
+        baseType: "type/Text"
       }
     }
   },
@@ -6329,7 +6373,20 @@ const metrics = {
       }
     ],
     dimensions: {
-      storeOrders: pickFields(tables.storeOrders.fields, [ "channelMvi6198j", "createdAt", "id", "margin", "notes", "product", "quantity", "region", "status", "storeId", "total" ])
+      fields: {
+        channelMvi6198j: {
+          /* metadata: { "displayName": "Channel Mvi6198j", "semanticType": "type/Source" } */
+          type: "column",
+          id: "78b13978-66b4-3f6b-96ff-64b64ac26fe1",
+          fieldId: 6156,
+          tableId: 590,
+          sourceName: "store_orders",
+          name: "channel_mvi6198j",
+          jsType: "string",
+          baseType: "type/Text"
+        }
+      },
+      storeOrders: pickFields(tables.storeOrders.fields, [ "createdAt", "id", "margin", "notes", "product", "quantity", "region", "status", "storeId", "total" ])
     }
   },
   averageSellingPrice: {
@@ -6448,7 +6505,7 @@ const metrics = {
 
 const schema = {
   schemaVersion: 2,
-  generatedAt: "2026-10-21T13:49:57.098546452Z",
+  generatedAt: "2026-10-21T15:48:55.180549578Z",
   metabase: {
     instanceUrl: "https://olden-midship.hosted.staging.metabase.com"
   },

@@ -12,7 +12,7 @@ dataset_query:
     - - measure
       - display-name: DAv65 Total revenue
         name: revenue
-        lib/uuid: 42052af2-6b07-4b06-b877-a0fb004ca6a8
+        lib/uuid: dc6ef497-e3e4-4215-a64a-8badf07421d2
       - u4_4IzpaQYIB0AVfjYAfx
     breakout:
     - - field
@@ -29,7 +29,7 @@ dataset_query:
         - base-type: type/Number
           effective-type: type/Number
           lib/source-name: revenue
-        - 42052af2-6b07-4b06-b877-a0fb004ca6a8
+        - dc6ef497-e3e4-4215-a64a-8badf07421d2
     source-table:
     - neondb
     - dataapps_v65

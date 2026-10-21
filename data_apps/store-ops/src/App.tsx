@@ -15,6 +15,7 @@ import { StoreCountKpi, StoreDirectory } from "../queries/stores.query";
 import { OrderEditor } from "./components/OrderEditor";
 import { Panel, colors } from "./components/Panel";
 import { QuestionView } from "./components/QuestionPanel";
+import { TargetsByRegionPanel } from "./components/TargetsByRegion";
 
 const scalar = { visualization: "scalar" } satisfies Omit<MetabaseCard, "query">;
 
@@ -149,6 +150,8 @@ export default function App() {
           />
         </Panel>
       </div>
+
+      <TargetsByRegionPanel />
 
       <OrderEditor onSaved={refreshCharts} />
 

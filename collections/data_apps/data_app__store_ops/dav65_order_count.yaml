@@ -385,6 +385,7 @@ dimensions:
     - store_orders
     - channel_mvi6198j
     type: field
-  status: status/active
+  status: status/orphaned
+  status-message: Column 'channel_mvi6198j' no longer exists in the data source
   lib/source: source/table-defaults
 type: metric
