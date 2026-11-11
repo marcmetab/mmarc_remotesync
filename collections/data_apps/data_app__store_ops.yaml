@@ -1,0 +1,6 @@
+name: 'Data App: store-ops'
+entity_id: a5p1tzrgPWdeJi0h_9SOh
+slug: data_app__store_ops
+namespace: data-apps
+serdes/meta:
+- model: Collection
