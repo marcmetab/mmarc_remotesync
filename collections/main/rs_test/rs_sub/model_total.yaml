@@ -1,0 +1,24 @@
+name: Model total
+entity_id: gi7gc3VH_v5zy8hFqoJWv
+creator_id: marc@metabase.com
+display: scalar
+collection_id: mn_6XZPyIQ_4dAhI01DX1
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - aggregation:
+    - - sum
+      - {}
+      - - field
+        - base-type: type/Float
+        - TOTAL
+    source-card: CTBTs6fQEHfKNzOga0Imy
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

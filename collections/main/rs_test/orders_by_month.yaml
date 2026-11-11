@@ -1,0 +1,33 @@
+name: Orders by month
+entity_id: MCQ_tQhO7itO1HT_njBMs
+creator_id: marc@metabase.com
+display: line
+collection_id: pT8TEOencghcejM_hPqo-
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - aggregation:
+    - - count
+      - {}
+    breakout:
+    - - field
+      - base-type: type/DateTime
+        effective-type: type/DateTime
+        temporal-unit: month
+      - - Sample Database
+        - null
+        - ORDERS
+        - CREATED_AT
+    source-table:
+    - Sample Database
+    - null
+    - ORDERS
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

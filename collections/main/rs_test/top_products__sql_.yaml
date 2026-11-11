@@ -1,0 +1,36 @@
+name: Top products (SQL)
+entity_id: FCXS-gHAaJysiTuMlL5Hz
+creator_id: marc@metabase.com
+display: table
+collection_id: pT8TEOencghcejM_hPqo-
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - native: select title, price from products order by price desc limit 10
+    lib/type: mbql.stage/native
+  lib/type: mbql/query
+result_metadata:
+- base_type: type/Text
+  database_type: CHARACTER VARYING
+  display_name: TITLE
+  field_ref:
+  - field
+  - TITLE
+  - base-type: type/Text
+  name: TITLE
+  semantic_type: type/Title
+- base_type: type/Float
+  database_type: DOUBLE PRECISION
+  display_name: PRICE
+  field_ref:
+  - field
+  - PRICE
+  - base-type: type/Float
+  name: PRICE
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

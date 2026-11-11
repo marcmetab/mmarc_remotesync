@@ -1,0 +1,6 @@
+name: RS Test
+entity_id: pT8TEOencghcejM_hPqo-
+slug: rs_test
+serdes/meta:
+- model: Collection
+is_remote_synced: true

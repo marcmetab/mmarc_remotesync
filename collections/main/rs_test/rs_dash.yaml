@@ -1,0 +1,45 @@
+name: RS Dash
+entity_id: t7dQL28Yj4I6cEAILTuBF
+creator_id: marc@metabase.com
+collection_id: pT8TEOencghcejM_hPqo-
+parameters: []
+serdes/meta:
+- model: Dashboard
+dashcards:
+- entity_id: EFLX0VfIJ3CHp7r3LYHwo
+  card_id: MCQ_tQhO7itO1HT_njBMs
+  row: 0
+  col: 0
+  size_x: 12
+  size_y: 6
+  inline_parameters: []
+  parameter_mappings: []
+  series: []
+  visualization_settings: {}
+- entity_id: n3DPy9Sz0zZIO77Esp5OT
+  card_id: FCXS-gHAaJysiTuMlL5Hz
+  row: 0
+  col: 12
+  size_x: 12
+  size_y: 6
+  inline_parameters: []
+  parameter_mappings: []
+  series: []
+  visualization_settings: {}
+- entity_id: QcSSguZrqiuMVtQm2lxFr
+  row: 6
+  col: 0
+  size_x: 24
+  size_y: 2
+  inline_parameters: []
+  parameter_mappings: []
+  series: []
+  visualization_settings:
+    text: Remote sync test dashboard
+    virtual_card:
+      dataset_query: {}
+      display: text
+      name: null
+      visualization_settings: {}
+tabs: []
+width: fixed

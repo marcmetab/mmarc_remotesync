@@ -1,0 +1,7 @@
+name: RS Sub
+entity_id: mn_6XZPyIQ_4dAhI01DX1
+slug: rs_sub
+parent_id: pT8TEOencghcejM_hPqo-
+serdes/meta:
+- model: Collection
+is_remote_synced: true
