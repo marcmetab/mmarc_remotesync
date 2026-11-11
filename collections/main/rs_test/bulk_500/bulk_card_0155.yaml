@@ -1,0 +1,22 @@
+name: Bulk card 0155
+entity_id: 1z7PXhgQ9fv0dEFm6UPC4
+creator_id: marc@metabase.com
+display: table
+collection_id: O0v0Qn4KCDhvaZtZdq3v4
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - limit: 156
+    source-table:
+    - Sample Database
+    - null
+    - INVOICES
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question

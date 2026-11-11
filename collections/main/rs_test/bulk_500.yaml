@@ -1,0 +1,7 @@
+name: Bulk 500
+entity_id: O0v0Qn4KCDhvaZtZdq3v4
+slug: bulk_500
+parent_id: pT8TEOencghcejM_hPqo-
+serdes/meta:
+- model: Collection
+is_remote_synced: true

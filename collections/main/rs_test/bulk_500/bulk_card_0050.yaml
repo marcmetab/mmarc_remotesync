@@ -1,0 +1,22 @@
+name: Bulk card 0050
+entity_id: 3mORydpX4Oo2clrcB0Zde
+creator_id: marc@metabase.com
+display: table
+collection_id: O0v0Qn4KCDhvaZtZdq3v4
+parameters: []
+parameter_mappings: []
+dataset_query:
+  database: Sample Database
+  stages:
+  - limit: 51
+    source-table:
+    - Sample Database
+    - null
+    - FEEDBACK
+    lib/type: mbql.stage/mbql
+  lib/type: mbql/query
+visualization_settings: {}
+card_schema: 24
+serdes/meta:
+- model: Card
+type: question
