@@ -1,4 +1,5 @@
 name: Top products (SQL)
+description: local desc
 entity_id: FCXS-gHAaJysiTuMlL5Hz
 creator_id: marc@metabase.com
 display: table
